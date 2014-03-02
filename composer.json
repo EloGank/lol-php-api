@@ -1,0 +1,20 @@
+{
+   "name": "elogank/php-lol-api",
+   "description": "PHP League of Legends API",
+   "keywords": ["lol", "api", "league of legends", "lol api"],
+   "authors": [
+       {
+           "name": "Sylvain Lorinet",
+           "email": "sylvain.lorinet@gmail.com"
+       }
+    ],
+    "require": {
+        "sabre/amf": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {
+            "EloGank\\Api": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}
