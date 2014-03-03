@@ -2,6 +2,7 @@
    "name": "elogank/php-lol-api",
    "description": "PHP League of Legends API",
    "keywords": ["lol", "api", "league of legends", "lol api"],
+   "licence": "CC BY-SA 3.0",
    "authors": [
        {
            "name": "Sylvain Lorinet",
@@ -9,7 +10,9 @@
        }
     ],
     "require": {
-        "sabre/amf": "dev-master"
+        "sabre/amf": "dev-master",
+        "mustangostang/spyc": "0.5.*@dev",
+        "symfony/console": "2.5.*@dev"
     },
     "autoload": {
         "psr-0": {

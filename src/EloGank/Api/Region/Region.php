@@ -51,7 +51,7 @@ class Region
             $loginQueue = substr($loginQueue, 0, -1);
         }
 
-        $this->loginQueue = $loginQueue;
+        $this->loginQueue = 'https://' . $loginQueue;
     }
 
     /**
