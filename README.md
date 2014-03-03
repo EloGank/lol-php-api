@@ -4,7 +4,7 @@ A RTMP API fully PHP for League of Legends.
 
 Currently in development !
 
-# How to work
+# How it works
 
 * Get [Composer](https://getcomposer.org) by copy/paste this line on your shell (in the project root directory) `curl -sS https://getcomposer.org/installer | php`
 * Install all dependancies : `php composer.phar install`
@@ -19,4 +19,4 @@ Use a development account, and not your real live game account.
 
 [Creative Commons Attribution-ShareAlike 3.0](./LICENCE.md)
 
-*League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.*
+*League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends ï¿½ Riot Games, Inc.*
