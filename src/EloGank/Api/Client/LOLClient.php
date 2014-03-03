@@ -2,6 +2,9 @@
 
 namespace EloGank\Api\Client;
 
+use EloGank\Api\Client\Exception\AuthException;
+use EloGank\Api\Client\Exception\BadCredentialsException;
+use EloGank\Api\Client\Exception\ServerBusyException;
 use EloGank\Api\Client\RTMP\RTMPClient;
 use EloGank\Api\Region\Region;
 
@@ -124,12 +127,15 @@ class LOLClient extends RTMPClient
     /**
      * @return mixed
      *
-     * @throws \Exception
+     * @throws \RuntimeException                 When a configuration error occured
+     * @throws Exception\AuthException           When an unknown auth error occured
+     * @throws Exception\ServerBusyException     When server is too busy
+     * @throws Exception\BadCredentialsException When credentials are wrong
      */
     protected function getAuthToken()
     {
         if (!function_exists('curl_init')) {
-            throw new \Exception('cURL is needed, please install the php-curl extension');
+            throw new \RuntimeException('cURL is needed, please install the php-curl extension');
         }
 
         // Create the parameters query
@@ -140,15 +146,15 @@ class LOLClient extends RTMPClient
 
         if ('FAILED' == $response['status']) {
             if ('invalid_credentials' == $response['reason']) {
-                throw new \Exception('Bad credentials');
+                throw new BadCredentialsException('Bad credentials');
             }
 
-            throw new \Exception('Error when logging : ' . $response['reason']);
+            throw new AuthException('Error when logging : ' . $response['reason']);
         }
         elseif ('BUSY' == $response['status']) {
             // TODO implement a scheduled retry
 
-            throw new \Exception('The server is currently busy, please try again later');
+            throw new ServerBusyException('The server is currently busy, please try again later');
         }
 
         // FIXME need more tests
@@ -220,17 +226,18 @@ class LOLClient extends RTMPClient
 
     /**
      * @param string $url
-     * @param array $parameters
+     * @param array  $parameters
      *
-     * @return mixed
+     * @return array
      *
-     * @throws \Exception
+     * @throws \RuntimeException       When a configuration error occured
+     * @throws Exception\AuthException When an unknown auth error occured
      */
     protected function readURL($url, array $parameters = null)
     {
         $ch = curl_init();
         if (false === $ch) {
-            throw new \Exception('Failed to initialize cURL');
+            throw new \RuntimeException('Failed to initialize cURL');
         }
 
         // TODO implement other langs ?
@@ -251,7 +258,7 @@ class LOLClient extends RTMPClient
 
         $response = curl_exec($ch);
         if (false === $response) {
-            throw new \Exception('Fail to get the login response, error : ' . curl_error($ch));
+            throw new AuthException('Fail to get the login response, error : ' . curl_error($ch));
         }
 
         curl_close($ch);

@@ -2,6 +2,9 @@
 
 namespace EloGank\Api\Client\RTMP;
 
+use EloGank\Api\Client\Exception\AuthException;
+use EloGank\Api\Client\Exception\PacketException;
+
 /**
  * RTMP client class, based on the Gabriel Van Eyck's work (vaneyckster@gmail.com)
  * @see https://code.google.com/p/lolrtmpsclient/source/browse/trunk/src/com/gvaneyck/rtmp/RTMPSClient.java
@@ -113,12 +116,12 @@ class RTMPClient
 
         $this->socket = new RTMPSocket($protocol, $this->server, $this->port);
         if ($this->socket->hasError()) {
-            throw new \RuntimeException('Error when connecting to server: ' . $this->socket->getErrorMessage());
+            throw new AuthException('Error when connecting to server: ' . $this->socket->getErrorMessage());
         }
     }
 
     /**
-     * @throws \Exception
+     * @throws \EloGank\Api\Client\Exception\AuthException
      */
     protected function doHandshake()
     {
@@ -134,7 +137,7 @@ class RTMPClient
         // S0
         $version = $this->socket->readBytes();
         if (0x03 != $version) {
-            throw new \Exception('Wrong handshake version (' . $version . ')');
+            throw new AuthException('Wrong handshake version (' . $version . ')');
         }
 
         // S1
@@ -150,7 +153,7 @@ class RTMPClient
 
         for ($i=8; $i<1536; $i++) {
             if ($randC1[$i - 8] != $sign[$i]) {
-                throw new \Exception('Invalid handshake');
+                throw new AuthException('Invalid handshake');
             }
         }
     }
@@ -160,14 +163,14 @@ class RTMPClient
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws \EloGank\Api\Client\Exception\AuthException
      */
     protected function getResponse()
     {
         $response = $this->parsePacket();
 
         if ('NetConnection.Connect.Success' != $response['data']['code']) {
-            throw new \Exception('Connection failed');
+            throw new AuthException('Connection failed');
         }
 
         $this->DSId = $response['data']['id'];
@@ -247,7 +250,7 @@ class RTMPClient
     /**
      * @return array
      *
-     * @throws \Exception
+     * @throws \EloGank\Api\Client\Exception\PacketException
      */
     protected function parsePacket()
     {
@@ -330,7 +333,7 @@ class RTMPClient
                     try {
                         $input->readByte();
 
-                        throw new \Exception('id not consume entire buffer');
+                        throw new PacketException('id not consume entire buffer');
                     }
                     catch (\Exception $e) {
                         // good
@@ -352,7 +355,7 @@ class RTMPClient
                     try {
                         $input->readByte();
 
-                        throw new \Exception('id not consume entire buffer');
+                        throw new PacketException('id not consume entire buffer');
                     }
                     catch (\Exception $e) {
                         // good
@@ -363,17 +366,17 @@ class RTMPClient
                 case 0x06: // bandwidth
                     continue 2;
                 default:
-                    throw new \Exception('Unknown message type');
+                    throw new PacketException('Unknown message type');
             }
 
             if (!isset($result['invokeId'])) {
-                throw new \Exception("Error after decoding packet");
+                throw new PacketException("Error after decoding packet");
             }
 
             $invokeId = $result['invokeId'];
 
             if ($invokeId == null || $invokeId == 0) {
-                throw new \Exception('Unknown invokeId: ' . $invokeId);
+                throw new PacketException('Unknown invokeId: ' . $invokeId);
             }
             // TODO callbacks
             //elseif (isset($callbacks[$invokeId])) { }
