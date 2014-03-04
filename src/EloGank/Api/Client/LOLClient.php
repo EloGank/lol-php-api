@@ -6,7 +6,9 @@ use EloGank\Api\Client\Exception\AuthException;
 use EloGank\Api\Client\Exception\BadCredentialsException;
 use EloGank\Api\Client\Exception\ServerBusyException;
 use EloGank\Api\Client\RTMP\RTMPClient;
-use EloGank\Api\Region\Region;
+use EloGank\Api\Region\RegionInterface;
+use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
@@ -16,6 +18,16 @@ class LOLClient extends RTMPClient
     const URL_AUTHENTICATE = '/login-queue/rest/queue/authenticate';
     const URL_TOKEN        = '/login-queue/rest/queue/authToken';
     const URL_TICKER       = '/login-queue/rest/queue/ticker';
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
+     * @var int
+     */
+    protected $clientId;
 
     /**
      * @var string
@@ -28,7 +40,7 @@ class LOLClient extends RTMPClient
     protected $password;
 
     /**
-     * @var \EloGank\Api\Region\Region
+     * @var RegionInterface
      */
     protected $region;
 
@@ -49,21 +61,26 @@ class LOLClient extends RTMPClient
 
 
     /**
-     * @param Region $region
-     * @param string $username
-     * @param string $password
-     * @param string $clientVersion
-     * @param string $locale
+     * @param int             $clientId
+     * @param RegionInterface $region
+     * @param string          $username
+     * @param string          $password
+     * @param string          $clientVersion
+     * @param string          $locale
+     * @param array           $loggerHandlers
      */
-    public function __construct(Region $region, $username, $password, $clientVersion, $locale = 'en_US')
+    public function __construct($clientId, RegionInterface $region, $username, $password, $clientVersion, $locale, $loggerHandlers = array())
     {
+        $this->clientId      = $clientId;
+        $this->region        = $region;
         $this->username      = $username;
         $this->password      = $password;
-        $this->region        = $region;
         $this->clientVersion = $clientVersion;
         $this->locale        = $locale;
 
-        parent::__construct($region->getServer(), 2099, '', 'app:/mod_ser.dat', null);
+        $this->logger = new Logger('Client#' . $clientId, $loggerHandlers);
+
+        parent::__construct($this->region->getServer(), 2099, '', 'app:/mod_ser.dat', null);
     }
 
     /**
@@ -265,4 +282,16 @@ class LOLClient extends RTMPClient
 
         return json_decode($response, true);
     }
-} 
+
+    /**
+     * @throws \EloGank\Api\Client\Exception\AuthException
+     */
+    protected function doHandshake()
+    {
+        parent::doHandshake();
+
+        $this->logger->debug('Handshake success');
+    }
+
+
+}

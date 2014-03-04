@@ -5,7 +5,7 @@ namespace EloGank\Api\Region;
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
  */
-class Region
+class Region implements RegionInterface
 {
     /**
      * @var string
@@ -39,13 +39,13 @@ class Region
         $this->uniqueName = $uniqueName;
         $this->name       = $name;
         $this->server     = $server;
-        $this->loginQueue = $loginQueue;
+        $this->loginQueue = $this->setLoginQueue($loginQueue);
     }
 
     /**
      * @param string $loginQueue
      */
-    public function setLoginQueue($loginQueue)
+    protected function setLoginQueue($loginQueue)
     {
         if ('/' == $loginQueue[strlen($loginQueue) - 1]) {
             $loginQueue = substr($loginQueue, 0, -1);

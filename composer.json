@@ -1,7 +1,7 @@
 {
    "name": "elogank/php-lol-api",
    "description": "PHP League of Legends API",
-   "keywords": ["lol", "api", "league of legends", "lol api"],
+   "keywords": ["lol", "api", "league of legends", "lol api", "rtmp"],
    "licence": "CC BY-SA 3.0",
    "authors": [
        {
@@ -10,9 +10,13 @@
        }
     ],
     "require": {
+        "symfony/console": "2.5.*@dev",
+        "symfony/event-dispatcher": "2.5.*@dev",
+        "symfony/monolog-bridge": "2.5.*@dev",
+
         "sabre/amf": "dev-master",
         "mustangostang/spyc": "0.5.*@dev",
-        "symfony/console": "2.5.*@dev"
+        "monolog/monolog": "1.7.*@dev"
     },
     "autoload": {
         "psr-0": {

@@ -89,17 +89,10 @@ class RTMPClient
      */
     public function connect()
     {
-        // TODO implement a logger
-
         $this->createSocket();
 
-        echo 'Hanshake: ';
         $this->doHandshake();
-        echo 'OK' . PHP_EOL;
-
-        echo 'Connection: ';
         $this->encodeConnectionPacket();
-        echo 'OK' . PHP_EOL;
 
         return $this->getResponse();
     }
