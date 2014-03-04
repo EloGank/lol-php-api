@@ -19,4 +19,4 @@ Use a development account, and not your real live game account.
 
 [Creative Commons Attribution-ShareAlike 3.0](./LICENCE.md)
 
-*League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends � Riot Games, Inc.*
+*League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends (c) Riot Games, Inc.*
