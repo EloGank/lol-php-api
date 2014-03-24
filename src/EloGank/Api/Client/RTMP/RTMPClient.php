@@ -4,6 +4,8 @@ namespace EloGank\Api\Client\RTMP;
 
 use EloGank\Api\Client\Exception\AuthException;
 use EloGank\Api\Client\Exception\PacketException;
+use EloGank\Api\Logger\LoggerFactory;
+use Psr\Log\LoggerInterface;
 
 /**
  * RTMP client class, based on the Gabriel Van Eyck's work (vaneyckster@gmail.com)
@@ -11,7 +13,7 @@ use EloGank\Api\Client\Exception\PacketException;
  *
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
  */
-class RTMPClient
+class RTMPClient extends \Stackable
 {
     /**
      * @var string
@@ -65,12 +67,12 @@ class RTMPClient
 
 
     /**
-     * @param string $server
-     * @param string $port
-     * @param string $app
-     * @param string $swfUrl
-     * @param string $pageUrl
-     * @param bool   $isSecure
+     * @param string          $server
+     * @param string          $port
+     * @param string          $app
+     * @param string          $swfUrl
+     * @param string          $pageUrl
+     * @param bool            $isSecure
      */
     public function __construct($server, $port, $app, $swfUrl, $pageUrl, $isSecure = true)
     {
@@ -465,5 +467,13 @@ class RTMPClient
         $this->invoke($destionation, $operation, $parameters);
 
         return $this->parsePacket();
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    protected function getLogger()
+    {
+        return LoggerFactory::create('RTMPClient');
     }
 }

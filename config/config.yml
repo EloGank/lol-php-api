@@ -1,14 +1,15 @@
 log:
   path: logs/api.log
   verbosity: debug
+  max_file: 5
 
 client:
-  version: 4.3.x
+  version: 4.4.x
   locale: en_US
   accounts:
-    EUW:
-      username: username
-      password: password
+    - region:   ~
+      username: ~
+      password: ~
 
 region:
   class: EloGank\Api\Region\Region

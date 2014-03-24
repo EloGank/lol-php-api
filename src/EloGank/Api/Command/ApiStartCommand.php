@@ -5,10 +5,9 @@ namespace EloGank\Api\Command;
 use EloGank\Api\Configuration\Config;
 use EloGank\Api\Manager\ApiManager;
 use EloGank\Api\Region\RegionFactory;
-use Monolog\Logger;
-use Symfony\Bridge\Monolog\Handler\ConsoleHandler;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -37,21 +36,8 @@ class ApiStartCommand extends Command
     {
         $this->writeSection($output, 'EloGank - League of Legends API');
 
-        $apiManager = new ApiManager(array(
-            new ConsoleHandler($output, true, array(
-                OutputInterface::VERBOSITY_NORMAL => Logger::INFO,
-                OutputInterface::VERBOSITY_VERBOSE => Logger::NOTICE,
-                OutputInterface::VERBOSITY_VERY_VERBOSE => Logger::DEBUG,
-                OutputInterface::VERBOSITY_DEBUG => Logger::DEBUG
-            ))
-        ));
-
+        $apiManager = new ApiManager();
         $apiManager->connect();
-    }
-
-    protected function getConfigurationFilePath()
-    {
-        return __DIR__ . '/../../../../config/config.yml';
     }
 
     /**

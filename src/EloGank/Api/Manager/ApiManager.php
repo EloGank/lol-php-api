@@ -3,11 +3,14 @@
 namespace EloGank\Api\Manager;
 
 use EloGank\Api\Client\LOLClient;
+use EloGank\Api\Client\Thread\ClientAuthThread;
+use EloGank\Api\Configuration\ConfigurationLoader;
+use EloGank\Api\Configuration\Exception\ConfigurationKeyNotFoundException;
+use EloGank\Api\Logger\LoggerFactory;
 use EloGank\Api\Region\Exception\RegionNotFoundException;
 use EloGank\Api\Region\RegionInterface;
-use Monolog\Handler\RotatingFileHandler;
-use Monolog\Logger;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Yaml\Parser;
 
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
@@ -18,16 +21,6 @@ class ApiManager
      * @var LoggerInterface
      */
     protected $logger;
-
-    /**
-     * @var array
-     */
-    protected $loggerHandlers;
-
-    /**
-     * @var array
-     */
-    protected $configs = array();
 
     /**
      * @var
@@ -41,26 +34,55 @@ class ApiManager
 
 
     /**
-     * @param array $loggerHandlers
+     *
      */
-    public function __construct(array $loggerHandlers = array())
+    public function __construct()
     {
-        // Default configs
-        $this->setConfigs(\Spyc::YAMLLoad($this->getConfigFile()));
-
-        $this->loggerHandlers = $loggerHandlers;
-        $this->logger = new Logger('ApiManager', $this->getLoggerHandlers());
+        $this->logger = LoggerFactory::create('ApiManager');
     }
 
+    /**
+     *
+     */
     public function connect()
     {
-        foreach ($this->configs['client']['accounts'] as $region => $account) {
+        $threads = [];
+        foreach (ConfigurationLoader::get('client.accounts') as $account) {
             $clientId = $this->getClientId();
-            $client = new LOLClient($clientId, $this->createRegion($region), $account['username'], $account['password'], $this->configs['client']['version'], $this->configs['client']['locale'], $this->getLoggerHandlers());
-            $client->connect();
+            $thread = new ClientAuthThread(new LOLClient(
+                $clientId,
+                $this->createRegion(
+                    $account['region']),
+                    $account['username'],
+                    $account['password'],
+                    ConfigurationLoader::get('client.version'),
+                    ConfigurationLoader::get('client.locale')
+                )
+            );
 
-            $this->clients[] = $client;
-            $this->logger->info('Client #' . $clientId . ' (' . $region . ') is connected');
+            $thread->start(PTHREADS_INHERIT_NONE);
+
+            $threads[] = $thread;
+        }
+
+        $this->clients = [];
+        $threadsLength = count($threads);
+
+        while (count($this->clients) < $threadsLength) {
+            /** @var ClientAuthThread $thread */
+            foreach ($threads as $thread) {
+                if ($thread->join()) {
+                    $client = $thread->getClient();
+                    $this->clients[] = $client;
+
+                    if ($thread->isSuccess()) {
+                        $this->logger->info('Client #' . $client->getClientId() . ' (' . $client->getRegion() . ') is connected');
+                    }
+                    else {
+                        $this->logger->error('Client #' . $client->getClientId() . ' (' . $client->getRegion() . ') cannot be connected.');
+                    }
+                }
+            }
         }
     }
 
@@ -73,41 +95,23 @@ class ApiManager
      */
     protected function createRegion($regionUniqueName)
     {
-        if (!isset($this->configs['region']['servers'][$regionUniqueName])) {
+        try {
+            $region = ConfigurationLoader::get('region.servers.' . $regionUniqueName);
+        }
+        catch (ConfigurationKeyNotFoundException $e) {
             throw new RegionNotFoundException('The region with unique name "' . $regionUniqueName . '" is not found');
         }
 
-        $region = $this->configs['region']['servers'][$regionUniqueName];
-        $class = $this->configs['region']['class'];
+        $class = ConfigurationLoader::get('region.class');
 
         return new $class($regionUniqueName, $region['name'], $region['server'], $region['loginQueue']);
     }
 
+    /**
+     * @return int
+     */
     protected function getClientId()
     {
         return $this->clientId++;
-    }
-
-    /**
-     * @param array $configs
-     */
-    public function setConfigs(array $configs)
-    {
-        $this->configs = array_merge_recursive($this->configs, $configs);
-    }
-
-    protected function getLoggerHandlers()
-    {
-        return array_merge(array(
-            new RotatingFileHandler(__DIR__ . '/../../../../' . $this->configs['log']['path'], constant('Monolog\Logger::' . strtoupper($this->configs['log']['verbosity'])))
-        ), $this->loggerHandlers);
-    }
-
-    /**
-     * @return string
-     */
-    protected function getConfigFile()
-    {
-        return __DIR__ . '/../../../../config/config.yml';
     }
 }

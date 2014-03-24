@@ -44,6 +44,8 @@ class Region implements RegionInterface
 
     /**
      * @param string $loginQueue
+     *
+     * @return string
      */
     protected function setLoginQueue($loginQueue)
     {
@@ -51,7 +53,7 @@ class Region implements RegionInterface
             $loginQueue = substr($loginQueue, 0, -1);
         }
 
-        $this->loginQueue = 'https://' . $loginQueue;
+        return 'https://' . $loginQueue;
     }
 
     /**

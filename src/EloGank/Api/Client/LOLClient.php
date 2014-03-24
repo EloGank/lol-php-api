@@ -4,10 +4,11 @@ namespace EloGank\Api\Client;
 
 use EloGank\Api\Client\Exception\AuthException;
 use EloGank\Api\Client\Exception\BadCredentialsException;
+use EloGank\Api\Client\Exception\ClientException;
 use EloGank\Api\Client\Exception\ServerBusyException;
 use EloGank\Api\Client\RTMP\RTMPClient;
+use EloGank\Api\Logger\LoggerFactory;
 use EloGank\Api\Region\RegionInterface;
-use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -18,11 +19,6 @@ class LOLClient extends RTMPClient
     const URL_AUTHENTICATE = '/login-queue/rest/queue/authenticate';
     const URL_TOKEN        = '/login-queue/rest/queue/authToken';
     const URL_TICKER       = '/login-queue/rest/queue/ticker';
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
 
     /**
      * @var int
@@ -59,6 +55,11 @@ class LOLClient extends RTMPClient
      */
     protected $locale;
 
+    /**
+     * @var bool
+     */
+    protected $isAuthenticated = false;
+
 
     /**
      * @param int             $clientId
@@ -67,9 +68,8 @@ class LOLClient extends RTMPClient
      * @param string          $password
      * @param string          $clientVersion
      * @param string          $locale
-     * @param array           $loggerHandlers
      */
-    public function __construct($clientId, RegionInterface $region, $username, $password, $clientVersion, $locale, $loggerHandlers = array())
+    public function __construct($clientId, RegionInterface $region, $username, $password, $clientVersion, $locale)
     {
         $this->clientId      = $clientId;
         $this->region        = $region;
@@ -77,8 +77,6 @@ class LOLClient extends RTMPClient
         $this->password      = $password;
         $this->clientVersion = $clientVersion;
         $this->locale        = $locale;
-
-        $this->logger = new Logger('Client#' . $clientId, $loggerHandlers);
 
         parent::__construct($this->region->getServer(), 2099, '', 'app:/mod_ser.dat', null);
     }
@@ -88,8 +86,15 @@ class LOLClient extends RTMPClient
      */
     public function auth()
     {
-        $this->connect();
-        $this->login();
+        try {
+            $this->connect();
+            $this->login();
+
+            $this->isAuthenticated = true;
+        }
+        catch (ClientException $e) {
+            $this->getLogger()->critical('Cannot auth client : ' . $e->getMessage());
+        }
     }
 
     /**
@@ -289,9 +294,37 @@ class LOLClient extends RTMPClient
     protected function doHandshake()
     {
         parent::doHandshake();
-
-        $this->logger->debug('Handshake success');
     }
 
+    /**
+     * @return int
+     */
+    public function getClientId()
+    {
+        return $this->clientId;
+    }
 
+    /**
+     * @return string
+     */
+    public function getRegion()
+    {
+        return $this->region->getUniqueName();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAuthenticated()
+    {
+        return $this->isAuthenticated;
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    protected function getLogger()
+    {
+        return LoggerFactory::create('LOLClient #' . $this->clientId);
+    }
 }

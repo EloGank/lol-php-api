@@ -5,4 +5,4 @@ namespace EloGank\Api\Configuration\Exception;
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
  */
-class ConfigurationNotFoundException extends \InvalidArgumentException { }
+class ConfigurationKeyNotFoundException extends \InvalidArgumentException { }
