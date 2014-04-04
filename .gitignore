@@ -1,7 +1,15 @@
+# Composer
 composer.lock
 composer.phar
 vendor/
+
+# IDE
 .idea/
+
+# App
+config/config.yml
 logs/
 !logs/.gitkeep
+
+# VM
 .vagrant/*

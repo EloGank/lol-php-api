@@ -15,9 +15,24 @@
         "symfony/monolog-bridge": "2.5.*@dev",
 
         "sabre/amf": "dev-master",
-        "symfony/yaml": "2.4.*@dev",
-        "monolog/monolog": "1.7.*@dev",
-        "divi/pthreads-stub": "1.1"
+        "symfony/yaml": "v2.4.2",
+        "monolog/monolog": "1.8.0",
+        "divi/pthreads-stub": "1.1",
+        "incenteev/composer-parameter-handler": "v2.1.0"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters"
+        ],
+        "post-update-cmd": [
+            "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters"
+        ]
+    },
+    "extra": {
+        "incenteev-parameters": {
+            "file": "config/config.yml",
+            "parameter-key": "config"
+        }
     },
     "autoload": {
         "psr-0": {

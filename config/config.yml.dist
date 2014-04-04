@@ -1,0 +1,25 @@
+config:
+    log:
+      path: logs/api.log
+      verbosity: debug
+      max_file: 5
+
+    client:
+      version: 4.4.x
+      locale: en_US
+      accounts:
+        - region:   ~
+          username: ~
+          password: ~
+
+    region:
+      class: EloGank\Api\Region\Region
+      servers:
+        NA:
+          name:       North America
+          server:     prod.na1.lol.riotgames.com
+          loginQueue: lq.na1.lol.riotgames.com
+        EUW:
+          name:       Europe West
+          server:     prod.eu.lol.riotgames.com
+          loginQueue: lq.eu.lol.riotgames.com

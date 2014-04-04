@@ -60,25 +60,18 @@ class ConfigurationLoader
     {
         $configs = self::load();
 
-        if (false !== strpos($name, '.')) {
-            $parts = explode('.', $name);
-            $config = $configs;
+        $name = 'config.' . $name;
+        $parts = explode('.', $name);
+        $config = $configs;
 
-            foreach ($parts as $part) {
-                if (!isset($config[$part])) {
-                    throw new ConfigurationKeyNotFoundException('The configuration key "' . $name . '" is not found');
-                }
-
-                $config = $config[$part];
+        foreach ($parts as $part) {
+            if (!isset($config[$part])) {
+                throw new ConfigurationKeyNotFoundException('The configuration key "' . $name . '" is not found');
             }
 
-            return $config;
+            $config = $config[$part];
         }
 
-        if (!isset($configs[$name])) {
-            throw new ConfigurationKeyNotFoundException('The configuration key "' . $name . '" is not found');
-        }
-
-        return $configs[$name];
+        return $config;
     }
 }
