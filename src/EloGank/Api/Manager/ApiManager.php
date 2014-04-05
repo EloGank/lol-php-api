@@ -127,4 +127,12 @@ class ApiManager
     {
         return $this->clientId++;
     }
+
+    /**
+     * @return \EloGank\Api\Component\Routing\Router
+     */
+    public function getRouter()
+    {
+        return $this->router;
+    }
 }

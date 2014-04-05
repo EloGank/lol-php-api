@@ -11,6 +11,6 @@ class TestController extends Controller
 {
     public function testMethod($summonerId, $acctId)
     {
-
+        return $summonerId + $acctId;
     }
 } 

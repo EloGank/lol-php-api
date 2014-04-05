@@ -5,6 +5,8 @@ namespace EloGank\Api\Server;
 use EloGank\Api\Configuration\ConfigurationLoader;
 use EloGank\Api\Logger\LoggerFactory;
 use EloGank\Api\Manager\ApiManager;
+use EloGank\Api\Server\Exception\MalformedClientInputException;
+use EloGank\Api\Server\Exception\ServerException;
 use Psr\Log\LoggerInterface;
 use React\EventLoop\Factory;
 use React\EventLoop\LoopInterface;
@@ -53,7 +55,7 @@ class Server
     {
         // Init API
         $this->apiManager->init();
-        $this->apiManager->connect();
+        //$this->apiManager->connect();
 
         // Init server
         $this->loop   = Factory::create();
@@ -64,9 +66,26 @@ class Server
             /** @var Connection $conn */
             $this->logger->debug(sprintf('Client [%s] is connected to server', $conn->getRemoteAddress()));
 
-            $conn->on('data', function ($data) use ($conn) {
-                $this->logger->debug(sprintf('Client sent: %s', $data));
-                $conn->close();
+            $conn->on('data', function ($rawData) use ($conn) {
+                $this->logger->debug(sprintf('Client sent: %s', $rawData));
+                $data = json_decode($rawData, true);
+
+                try {
+                    if (!$this->isValidInput($data)) {
+                        throw new MalformedClientInputException('The input sent to the server is maformed');
+                    }
+
+                    $response = $this->apiManager->getRouter()->process($data);
+                    var_dump($response);
+                }
+                catch (ServerException $e) {
+                    $this->logger->error($e->getMessage());
+
+                    $conn->write($e->toJson());
+                }
+                finally {
+                    $conn->close();
+                }
 
                 $conn->getBuffer()->on('full-drain', function () use ($conn) {
                     $conn->close();
@@ -81,5 +100,19 @@ class Server
         $this->socket->listen($port, $bind);
 
         $this->loop->run();
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return bool
+     */
+    private function isValidInput(array $data)
+    {
+        if (!isset($data['route']) || !isset($data['parameters'])) {
+            return false;
+        }
+
+        return true;
     }
 } 
