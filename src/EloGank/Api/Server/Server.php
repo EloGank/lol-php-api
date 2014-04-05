@@ -55,7 +55,7 @@ class Server
     {
         // Init API
         $this->apiManager->init();
-        //$this->apiManager->connect();
+        $this->apiManager->connect();
 
         // Init server
         $this->loop   = Factory::create();
@@ -75,7 +75,7 @@ class Server
                         throw new MalformedClientInputException('The input sent to the server is maformed');
                     }
 
-                    $response = $this->apiManager->getRouter()->process($data);
+                    $response = $this->apiManager->getRouter()->process($this->apiManager, $data);
                     var_dump($response);
                 }
                 catch (ServerException $e) {

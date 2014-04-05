@@ -153,7 +153,7 @@ class LOLClient extends RTMPClient
         ));
 
         // TODO here, do some actions
-        //var_dump($response);
+        var_dump($response);
     }
 
     /**

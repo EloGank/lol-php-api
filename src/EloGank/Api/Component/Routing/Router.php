@@ -5,6 +5,7 @@ namespace EloGank\Api\Component\Routing;
 use EloGank\Api\Component\Controller\Exception\UnknownControllerException;
 use EloGank\Api\Component\Routing\Exception\MalformedRouteException;
 use EloGank\Api\Component\Routing\Exception\UnknownRouteException;
+use EloGank\Api\Manager\ApiManager;
 
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
@@ -72,14 +73,15 @@ class Router
     }
 
     /**
-     * @param array $data
+     * @param ApiManager $apiManager
+     * @param array      $data
      *
      * @return mixed
      *
      * @throws Exception\MalformedRouteException
      * @throws Exception\UnknownRouteException
      */
-    public function process(array $data)
+    public function process(ApiManager $apiManager, array $data)
     {
         $route = $data['route'];
         if (!preg_match('/^[a-zA-Z_]+\.[a-zA-Z_]+$/', $route)) {
@@ -92,7 +94,7 @@ class Router
         }
 
         $class = '\\EloGank\\Api\\Controller\\' . $this->routes[$controllerName]['class'];
-        $controller = new $class();
+        $controller = new $class($apiManager);
 
         return call_user_func_array(array($controller, $this->routes[$controllerName]['methods'][$methodName]['name']), $data['parameters']);
     }

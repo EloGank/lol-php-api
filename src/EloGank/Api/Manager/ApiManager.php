@@ -61,9 +61,25 @@ class ApiManager
      */
     public function connect()
     {
-        $threads = [];
+        $this->clients = [];
+        //$threads = [];
         foreach (ConfigurationLoader::get('client.accounts') as $account) {
             $clientId = $this->getClientId();
+            $client = new LOLClient(
+                $clientId,
+                $this->createRegion($account['region']),
+                $account['username'],
+                $account['password'],
+                ConfigurationLoader::get('client.version'),
+                ConfigurationLoader::get('client.locale')
+            );
+
+            $client->auth();
+            $this->clients[] = $client;
+
+
+            // FIXME search a solution to works with thread even if RTMPSocket is a shared resource
+            /*
             $thread = new ClientAuthThread(new LOLClient(
                 $clientId,
                 $this->createRegion($account['region']),
@@ -72,17 +88,17 @@ class ApiManager
                 ConfigurationLoader::get('client.version'),
                 ConfigurationLoader::get('client.locale')
             ));
-
             $thread->start(PTHREADS_INHERIT_NONE);
 
             $threads[] = $thread;
+            */
         }
 
+        /*
         $this->clients = [];
         $threadsLength = count($threads);
 
         while (count($this->clients) < $threadsLength) {
-            /** @var ClientAuthThread $thread */
             foreach ($threads as $thread) {
                 if ($thread->join()) {
                     $client = $thread->getClient();
@@ -96,7 +112,7 @@ class ApiManager
                     }
                 }
             }
-        }
+        }*/
     }
 
     /**
@@ -134,5 +150,15 @@ class ApiManager
     public function getRouter()
     {
         return $this->router;
+    }
+
+    /**
+     * @return LOLClient
+     */
+    public function getClient()
+    {
+        // TODO do the anti flood selection here
+
+        return $this->clients[0];
     }
 }
