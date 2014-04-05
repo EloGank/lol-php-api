@@ -8,7 +8,7 @@ use EloGank\Api\Client\Exception\ClientException;
 use EloGank\Api\Client\Exception\ServerBusyException;
 use EloGank\Api\Client\RTMP\RTMPClient;
 use EloGank\Api\Logger\LoggerFactory;
-use EloGank\Api\Region\RegionInterface;
+use EloGank\Api\Model\Region\RegionInterface;
 use Psr\Log\LoggerInterface;
 
 /**

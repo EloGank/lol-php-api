@@ -1,6 +1,6 @@
 <?php
 
-namespace EloGank\Api\Region;
+namespace EloGank\Api\Model\Region;
 
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>

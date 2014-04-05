@@ -4,11 +4,12 @@ namespace EloGank\Api\Manager;
 
 use EloGank\Api\Client\LOLClient;
 use EloGank\Api\Client\Thread\ClientAuthThread;
+use EloGank\Api\Component\Routing\Router;
 use EloGank\Api\Configuration\ConfigurationLoader;
 use EloGank\Api\Configuration\Exception\ConfigurationKeyNotFoundException;
 use EloGank\Api\Logger\LoggerFactory;
-use EloGank\Api\Region\Exception\RegionNotFoundException;
-use EloGank\Api\Region\RegionInterface;
+use EloGank\Api\Model\Region\Exception\RegionNotFoundException;
+use EloGank\Api\Model\Region\RegionInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Yaml\Parser;
 
@@ -32,13 +33,27 @@ class ApiManager
      */
     protected $clientId = 1;
 
+    /**
+     * @var Router
+     */
+    protected $router;
+
 
     /**
      *
      */
     public function __construct()
     {
-        $this->logger = LoggerFactory::create('ApiManager');
+        $this->logger = LoggerFactory::create();
+    }
+
+    /**
+     * Init the API components
+     */
+    public function init()
+    {
+        $this->router = new Router();
+        $this->router->dump();
     }
 
     /**
@@ -51,14 +66,12 @@ class ApiManager
             $clientId = $this->getClientId();
             $thread = new ClientAuthThread(new LOLClient(
                 $clientId,
-                $this->createRegion(
-                    $account['region']),
-                    $account['username'],
-                    $account['password'],
-                    ConfigurationLoader::get('client.version'),
-                    ConfigurationLoader::get('client.locale')
-                )
-            );
+                $this->createRegion($account['region']),
+                $account['username'],
+                $account['password'],
+                ConfigurationLoader::get('client.version'),
+                ConfigurationLoader::get('client.locale')
+            ));
 
             $thread->start(PTHREADS_INHERIT_NONE);
 
@@ -91,7 +104,7 @@ class ApiManager
      *
      * @return RegionInterface
      *
-     * @throws \EloGank\Api\Region\Exception\RegionNotFoundException
+     * @throws \EloGank\Api\Model\Region\Exception\RegionNotFoundException
      */
     protected function createRegion($regionUniqueName)
     {

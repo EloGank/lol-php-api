@@ -4,5 +4,21 @@
 require 'vendor/autoload.php';
 
 $application = new Symfony\Component\Console\Application();
-$application->add(new \EloGank\Api\Command\ApiStartCommand());
+
+// List all available commands
+$iterator = new \DirectoryIterator(__DIR__ . '/src/EloGank/Api/Command');
+/** @var \SplFileInfo $command */
+foreach ($iterator as $command) {
+    if ($command->isDir()) {
+        continue;
+    }
+
+    $name = substr($command->getFilename(), 0, -4);
+    $reflectionClass = new \ReflectionClass('\\EloGank\\Api\\Command\\' . $name);
+    if ($reflectionClass->isSubclassOf('\\EloGank\\Api\\Component\\Command\\Command') || $reflectionClass->isSubclassOf('Symfony\\Component\\Console\\Command\\Command')) {
+        $class = '\\EloGank\\Api\\Command\\' . $name;
+        $application->add(new $class());
+    }
+}
+
 $application->run();

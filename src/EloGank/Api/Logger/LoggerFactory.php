@@ -25,20 +25,21 @@ class LoggerFactory
      *
      * @return LoggerInterface
      */
-    public static function create($name)
+    public static function create($name = 'EloGankAPI')
     {
         if (!isset(self::$logger)) {
+            $verbosity = constant('Monolog\Logger::' . strtoupper(ConfigurationLoader::get('log.verbosity')));
             self::$logger = new Logger($name, array(
                     new ConsoleHandler(new ConsoleOutput(), true, array(
-                        OutputInterface::VERBOSITY_NORMAL => Logger::INFO,
-                        OutputInterface::VERBOSITY_VERBOSE => Logger::DEBUG,
+                        OutputInterface::VERBOSITY_NORMAL       => $verbosity,
+                        OutputInterface::VERBOSITY_VERBOSE      => Logger::DEBUG,
                         OutputInterface::VERBOSITY_VERY_VERBOSE => Logger::DEBUG,
-                        OutputInterface::VERBOSITY_DEBUG => Logger::DEBUG
+                        OutputInterface::VERBOSITY_DEBUG        => Logger::DEBUG
                     )),
                     new RotatingFileHandler(
                         ConfigurationLoader::get('log.path'),
                         ConfigurationLoader::get('log.max_file'),
-                        constant('Monolog\Logger::' . strtoupper(ConfigurationLoader::get('log.verbosity')))
+                        $verbosity
                     )
                 )
             );
