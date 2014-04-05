@@ -31,5 +31,7 @@ abstract class Command extends BaseCommand
                 $section
             ));
         }
+
+        $output->writeln('');
     }
 }

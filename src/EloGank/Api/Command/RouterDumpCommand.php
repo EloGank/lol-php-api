@@ -20,6 +20,16 @@ class RouterDumpCommand extends Command
         $this
             ->setName('elogank:router:dump')
             ->setDescription('Dump all available API routes')
+            ->setHelp(<<<EOF
+
+This command dump all available controllers and methods (routes) for the API.
+
+The output looks like :
+<info>controller_name :</info>
+\t<comment>method_name</comment> [parameter1, parameter2, ...]
+
+EOF
+            )
         ;
     }
 
@@ -38,10 +48,10 @@ class RouterDumpCommand extends Command
 
         $routes = $router->getRoutes();
         foreach ($routes as $controller => $methods) {
-            $output->writeln(sprintf('%s : ', $controller));
+            $output->writeln(sprintf('<info>%s</info> : ', $controller));
 
             foreach ($methods as $method => $params) {
-                $output->writeln(sprintf("\t- %s [%s]", $method, join(', ', $params)));
+                $output->writeln(sprintf("\t- <comment>%s</comment> [%s]", $method, join(', ', $params)));
             }
         }
     }

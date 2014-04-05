@@ -53,7 +53,7 @@ class ApiManager
     public function init()
     {
         $this->router = new Router();
-        $this->router->dump();
+        $this->router->init();
     }
 
     /**
