@@ -57,7 +57,13 @@ class Router
                     $paramsName[] = $param->getName();
                 }
 
-                $this->routes[$routeName]['methods'][$this->underscore($method->getName())] = [
+                $methodName = $this->underscore($method->getName());
+                // Delete useless get prefix
+                if (0 === strpos($methodName, 'get_')) {
+                    $methodName = substr($methodName, 4);
+                }
+
+                $this->routes[$routeName]['methods'][$methodName] = [
                     'name'       => $method->getName(),
                     'parameters' => $paramsName
                 ];

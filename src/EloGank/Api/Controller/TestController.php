@@ -9,7 +9,7 @@ use EloGank\Api\Component\Controller\Controller;
  */
 class TestController extends Controller
 {
-    public function testMethod($summonerId, $acctId)
+    public function getTestMethod($summonerId, $acctId)
     {
         return $summonerId + $acctId;
     }
