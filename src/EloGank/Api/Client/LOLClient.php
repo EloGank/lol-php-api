@@ -123,8 +123,37 @@ class LOLClient extends RTMPClient
             $body
         ));
 
+        $data = $response['data']->getData();
+        $body = $data->body->getAMFData();
+        $token = $body['token'];
+        $accountSummary = $body['accountSummary']->getAMFData();
+        $accountId = $accountSummary['accountId'];
+
+        $authToken = strtolower($this->username) . ':' . $token;
+        $authToken = base64_encode($authToken);
+
+        $this->syncInvoke('auth', 8, $authToken, 'flex.messaging.messages.CommandMessage');
+
+        $this->syncInvoke('messagingDestination', 0, null, 'flex.messaging.messages.CommandMessage', array(
+            'DSSubtopic' => 'bc'
+        ), array(
+            'clientId' => 'bc-' . $accountId
+        ));
+
+        $this->syncInvoke("messagingDestination", 0, null, "flex.messaging.messages.CommandMessage", array(
+            'DSSubtopic' => 'cn-' . $accountId
+        ), array(
+            'clientId' => 'cn-' . $accountId
+        ));
+
+        $this->syncInvoke("messagingDestination", 0, null, "flex.messaging.messages.CommandMessage", array(
+            'DSSubtopic' => 'gn-' . $accountId
+        ), array(
+            'clientId' => 'gn-' . $accountId
+        ));
+
         // TODO here, do some actions
-        var_dump($response);
+        //var_dump($response);
     }
 
     /**

@@ -425,15 +425,18 @@ class RTMPClient extends \Stackable
     }
 
     /**
-     * @param string $destination
-     * @param string $operation
-     * @param array  $parameters
+     * @param $destination
+     * @param $operation
+     * @param array $parameters
+     * @param string $packetClass
+     * @param array $headers
+     * @param array $body
      *
      * @return int
      */
-    protected function invoke($destination, $operation, $parameters = array())
+    protected function invoke($destination, $operation, $parameters = array(), $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
     {
-        $packet = new RTMPPacket($destination, $operation, $parameters);
+        $packet = new RTMPPacket($destination, $operation, $parameters, $packetClass, $headers, $body);
         $packet->build($this->DSId);
 
         $output = new \SabreAMF_OutputStream();
@@ -459,12 +462,15 @@ class RTMPClient extends \Stackable
      * @param string $destionation
      * @param string $operation
      * @param array  $parameters
+     * @param string $packetClass
+     * @param array  $headers
+     * @param array  $body
      *
      * @return array
      */
-    public function syncInvoke($destionation, $operation, $parameters = array())
+    public function syncInvoke($destionation, $operation, $parameters = array(), $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
     {
-        $this->invoke($destionation, $operation, $parameters);
+        $this->invoke($destionation, $operation, $parameters, $packetClass, $headers, $body);
 
         return $this->parsePacket();
     }
