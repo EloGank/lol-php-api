@@ -9,8 +9,15 @@ use EloGank\Api\Component\Controller\Controller;
  */
 class TestController extends Controller
 {
-    public function getTestMethod($summonerId, $acctId)
+    /**
+     * @param string $summonerName
+     *
+     * @return array
+     */
+    public function getTestMethod($summonerName)
     {
-        return $summonerId + $acctId;
+        return $this->getClient()->syncInvoke('summonerService', 'getSummonerByName', array(
+            $summonerName
+        ));
     }
 } 

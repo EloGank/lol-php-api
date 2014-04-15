@@ -50,6 +50,11 @@ class Router
             $methods = $reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC);
             /** @var \ReflectionMethod $method */
             foreach ($methods as $method) {
+                // Wrong method definition
+                if (!$method->isPublic() || !preg_match('/[a-zA-Z0-9_]+Action/', $method->getName())) {
+                    continue;
+                }
+
                 $params     = $method->getParameters();
                 $paramsName = [];
 
@@ -58,7 +63,7 @@ class Router
                     $paramsName[] = $param->getName();
                 }
 
-                $methodName = $this->underscore($method->getName());
+                $methodName = $this->underscore(substr($method->getName(), 0, -6));
                 // Delete useless get prefix
                 if (0 === strpos($methodName, 'get_')) {
                     $methodName = substr($methodName, 4);

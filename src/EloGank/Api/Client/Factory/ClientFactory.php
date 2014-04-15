@@ -4,6 +4,7 @@ namespace EloGank\Api\Client\Factory;
 
 use EloGank\Api\Client\LOLClient;
 use EloGank\Api\Configuration\ConfigurationLoader;
+use EloGank\Api\Model\Region\RegionInterface;
 
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
@@ -11,12 +12,12 @@ use EloGank\Api\Configuration\ConfigurationLoader;
 class ClientFactory
 {
     /**
-     * @param $clientId
-     * @param $region
-     * @param $username
-     * @param $password
-     * @param $clientVersion
-     * @param $locale
+     * @param string          $clientId
+     * @param RegionInterface $region
+     * @param string          $username
+     * @param string          $password
+     * @param string          $clientVersion
+     * @param string          $locale
      *
      * @return LOLClient
      *

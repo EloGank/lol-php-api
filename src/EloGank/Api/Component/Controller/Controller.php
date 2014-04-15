@@ -24,10 +24,10 @@ abstract class Controller
     }
 
     /**
-     * @return ApiManager
+     * @return \EloGank\Api\Client\LOLClient
      */
-    protected function getApiManager()
+    protected function getClient()
     {
-        return $this->apiManager;
+        return $this->apiManager->getClient();
     }
-} 
+}
