@@ -1,12 +1,13 @@
 config:
     log:
-      path: logs/api.log
+      path:      logs/api.log
       verbosity: debug
-      max_file: 5
+      max_file:  5
 
     client:
+      async:   false
       version: 4.4.x
-      locale: en_US
+      locale:  en_US
       accounts:
         - region:   ~
           username: ~

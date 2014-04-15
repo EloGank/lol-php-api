@@ -2,8 +2,9 @@
 
 namespace EloGank\Api\Manager;
 
+use EloGank\Api\Client\Factory\ClientFactory;
 use EloGank\Api\Client\LOLClient;
-use EloGank\Api\Client\Thread\ClientAuthThread;
+use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Routing\Router;
 use EloGank\Api\Configuration\ConfigurationLoader;
 use EloGank\Api\Configuration\Exception\ConfigurationKeyNotFoundException;
@@ -24,7 +25,7 @@ class ApiManager
     protected $logger;
 
     /**
-     * @var
+     * @var LOLClientInterface[]
      */
     protected $clients;
 
@@ -54,65 +55,51 @@ class ApiManager
     {
         $this->router = new Router();
         $this->router->init();
+
+        $this->clients = [];
     }
 
     /**
+     * Create client instances & auth
      *
+     * @return bool True if one or more clients are connected, false otherwise
      */
     public function connect()
     {
-        $this->clients = [];
-        //$threads = [];
+        $version = ConfigurationLoader::get('client.version');
+        $locale  = ConfigurationLoader::get('client.locale');
+
+        $tmpClients = [];
         foreach (ConfigurationLoader::get('client.accounts') as $account) {
-            $clientId = $this->getClientId();
-            $client = new LOLClient(
-                $clientId,
+            $client = ClientFactory::create(
+                $this->getClientId(),
                 $this->createRegion($account['region']),
                 $account['username'],
                 $account['password'],
-                ConfigurationLoader::get('client.version'),
-                ConfigurationLoader::get('client.locale')
+                $version,
+                $locale
             );
 
-            $client->auth();
-            $this->clients[] = $client;
-
-
-            // FIXME search a solution to works with thread even if RTMPSocket is a shared resource
-            /*
-            $thread = new ClientAuthThread(new LOLClient(
-                $clientId,
-                $this->createRegion($account['region']),
-                $account['username'],
-                $account['password'],
-                ConfigurationLoader::get('client.version'),
-                ConfigurationLoader::get('client.locale')
-            ));
-            $thread->start(PTHREADS_INHERIT_NONE);
-
-            $threads[] = $thread;
-            */
+            $client->authenticate();
+            $tmpClients[] = $client;
         }
 
-        /*
-        $this->clients = [];
-        $threadsLength = count($threads);
+        foreach ($tmpClients as $client) {
+            if ($client->isAuthenticated()) {
+                $this->clients[] = $client;
 
-        while (count($this->clients) < $threadsLength) {
-            foreach ($threads as $thread) {
-                if ($thread->join()) {
-                    $client = $thread->getClient();
-                    $this->clients[] = $client;
-
-                    if ($thread->isSuccess()) {
-                        $this->logger->info('Client #' . $client->getClientId() . ' (' . $client->getRegion() . ') is connected');
-                    }
-                    else {
-                        $this->logger->error('Client #' . $client->getClientId() . ' (' . $client->getRegion() . ') cannot be connected.');
-                    }
-                }
+                $this->logger->info('Client #' . $client->getId() . ' (' . $client->getRegion() . ') is connected');
             }
-        }*/
+            else {
+                $this->logger->error('Client #' . $client->getId() . ' (' . $client->getRegion() . ') cannot be connected : ' . $client->getError());
+            }
+        }
+
+        if (!isset($this->clients[0])) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

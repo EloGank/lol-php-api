@@ -55,7 +55,11 @@ class Server
     {
         // Init API
         $this->apiManager->init();
-        $this->apiManager->connect();
+        if (!$this->apiManager->connect()) {
+            $this->logger->critical('There is no ready client, aborted');
+
+            return;
+        }
 
         // Init server
         $this->loop   = Factory::create();

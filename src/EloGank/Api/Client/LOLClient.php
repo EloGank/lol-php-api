@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
  */
-class LOLClient extends RTMPClient
+class LOLClient extends RTMPClient implements LOLClientInterface
 {
     const URL_AUTHENTICATE = '/login-queue/rest/queue/authenticate';
     const URL_TOKEN        = '/login-queue/rest/queue/authToken';
@@ -56,6 +56,11 @@ class LOLClient extends RTMPClient
     protected $locale;
 
     /**
+     * @var string
+     */
+    protected $error;
+
+    /**
      * @var bool
      */
     protected $isAuthenticated = false;
@@ -84,7 +89,7 @@ class LOLClient extends RTMPClient
     /**
      * Connect & auth to the login server
      */
-    public function auth()
+    public function authenticate()
     {
         try {
             $this->connect();
@@ -93,7 +98,7 @@ class LOLClient extends RTMPClient
             $this->isAuthenticated = true;
         }
         catch (ClientException $e) {
-            $this->getLogger()->critical('Cannot auth client : ' . $e->getMessage());
+            $this->error = $e->getMessage();
         }
     }
 
@@ -318,19 +323,19 @@ class LOLClient extends RTMPClient
     }
 
     /**
-     * @throws \EloGank\Api\Client\Exception\AuthException
+     * @return int
      */
-    protected function doHandshake()
+    public function getId()
     {
-        parent::doHandshake();
+        return $this->clientId;
     }
 
     /**
-     * @return int
+     * @return string
      */
-    public function getClientId()
+    public function getError()
     {
-        return $this->clientId;
+        return $this->error;
     }
 
     /**
