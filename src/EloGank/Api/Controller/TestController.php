@@ -14,8 +14,10 @@ class TestController extends Controller
      *
      * @return array
      */
-    public function getTestMethod($summonerName)
+    public function getTestMethodAction($summonerName)
     {
+        var_dump($this->call('other_test.other_test_method', array(123456)));
+
         return $this->getClient()->syncInvoke('summonerService', 'getSummonerByName', array(
             $summonerName
         ));

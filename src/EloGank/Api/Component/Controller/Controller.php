@@ -30,4 +30,18 @@ abstract class Controller
     {
         return $this->apiManager->getClient();
     }
+
+    /**
+     * @param string $route
+     * @param array  $parameters
+     *
+     * @return mixed
+     */
+    protected function call($route, array $parameters = array())
+    {
+        return $this->apiManager->getRouter()->process($this->apiManager, array(
+            'route'      => $route,
+            'parameters' => $parameters
+        ));
+    }
 }

@@ -51,7 +51,7 @@ EOF
             $output->writeln(sprintf('<info>%s</info> : ', $controller));
 
             foreach ($methods as $method => $params) {
-                $output->writeln(sprintf("\t- <comment>%s</comment> [%s]", $method, join(', ', $params)));
+                $output->writeln(sprintf("\t- <comment>%s</comment> : [%s]", $method, join(', ', $params)));
             }
         }
     }
