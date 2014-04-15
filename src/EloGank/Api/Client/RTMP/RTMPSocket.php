@@ -5,7 +5,7 @@ namespace EloGank\Api\Client\RTMP;
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
  */
-class RTMPSocket extends \Stackable
+class RTMPSocket
 {
     /**
      * @var resource

@@ -13,7 +13,7 @@ use Psr\Log\LoggerInterface;
  *
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
  */
-class RTMPClient extends \Stackable
+class RTMPClient
 {
     /**
      * @var string
