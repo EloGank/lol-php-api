@@ -19,50 +19,29 @@ apt-get update
 apt-get install -y build-essential git-core vim curl
 
 
-# PHP with Thread Safe build
-# --------------------------
-echo "################################################################"
-echo "#                                                              #"
-echo "#            CLONING PHP REPOSITORY, PLEASE WAIT               #"
-echo "#            ===================================               #"
-echo "#                                                              #"
-echo "################################################################"
-git clone https://github.com/php/php-src.git /home/php-src
-cd /home/php-src
-git checkout tags/php-5.5.10
-apt-get install -y make autoconf re2c bison
-# If you add some configuration command, add the dependancies here
-apt-get install -y libicu-dev libmcrypt-dev libssl-dev libcurl4-openssl-dev libbz2-dev libxml2-dev libpng-dev libjpeg-dev libedit-dev
-./buildconf --force
-./configure --prefix=$PHP_DIRECTORY --with-config-file-path=$PHP_DIRECTORY --with-config-file-scan-dir=$PHP_DIRECTORY/conf.d --enable-maintainer-zts --with-curl --with-openssl --with-gd --enable-gd-native-ttf --enable-intl --enable-mbstring --with-mcrypt --with-mysqli=mysqlnd --with-zlib --with-bz2 --enable-exif --with-pdo-mysql=mysqlnd --with-libedit --enable-zip --enable-pdo --enable-pcntl --enable-sockets --enable-mbregex --with-tsrm-pthreads --enable-sysvshm --enable-sysvmsg
-# If you need FPM mode, add : --enable-fpm --with-fpm-group=www-data --with-fpm-user=www-data
-make
-make install
-cp php.ini-production /etc/php5ts/php.ini
-echo "alias phpts=\"/etc/php5ts/bin/php\"" > /home/vagrant/.bash_profile
+# PHP 5.x (last official release)
+# See: https://launchpad.net/~ondrej/+archive/php5
+# ------------------------------------------------
+apt-get install -y libcli-mod-php5
+# Install "add-apt-repository" binaries
+apt-get install -y python-software-properties
+# Install PHP 5.x
+# Use "ppa:ondrej/php5-oldstable" for old and stable release
+add-apt-repository ppa:ondrej/php5
+# Update repositories
+apt-get update
 
-
-# pthreads Extension build
-# ------------------------
-git clone https://github.com/krakjoe/pthreads.git /home/pthreads
-cd /home/pthreads
-apt-get install -y php5-dev
-phpize
-./configure --with-php-config=$PHP_DIRECTORY/bin/php-config
-make
-make install
-mkdir $PHP_DIRECTORY/conf.d
-echo "extension=pthreads.so" > /etc/php5ts/conf.d/pthreads.ini
-
-# Setting PHP configurations
-# --------------------------
-# Date timezone
-sed 's#;date.timezone\([[:space:]]*\)=\([[:space:]]*\)*#date.timezone\1=\2\"'"$PHP_TIMEZONE"'\"#g' $PHP_DIRECTORY/php.ini > $PHP_DIRECTORY/php.ini.tmp
-mv $PHP_DIRECTORY/php.ini.tmp $PHP_DIRECTORY/php.ini
-# Error messages
-sed 's#display_errors = Off#display_errors = On#g' $PHP_DIRECTORY/php.ini > $PHP_DIRECTORY/php.ini.tmp
-mv $PHP_DIRECTORY/php.ini.tmp $PHP_DIRECTORY/php.ini
-sed 's#display_startup_errors = Off#display_startup_errors = On#g' $PHP_DIRECTORY/php.ini > $PHP_DIRECTORY/php.ini.tmp
-mv $PHP_DIRECTORY/php.ini.tmp $PHP_DIRECTORY/php.ini
-sed 's#error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT#error_reporting = E_ALL#g' $PHP_DIRECTORY/php.ini > $PHP_DIRECTORY/php.ini.tmp
-mv $PHP_DIRECTORY/php.ini.tmp $PHP_DIRECTORY/php.ini
+# PHP tools
+apt-get install -y php5-cli php5-curl php5-mcrypt
+# APC (only with PHP < 5.5.0, use the "opcache" if >= 5.5.0)
+# apt-get install -y php-apc
+# Setting the timezone
+sed 's#;date.timezone\([[:space:]]*\)=\([[:space:]]*\)*#date.timezone\1=\2\"'"$PHP_TIMEZONE"'\"#g' /etc/php5/cli/php.ini > /etc/php5/cli/php.ini.tmp
+mv /etc/php5/cli/php.ini.tmp /etc/php5/cli/php.ini
+# Showing error messages
+sed 's#display_errors = Off#display_errors = On#g' /etc/php5/cli/php.ini > /etc/php5/cli/php.ini.tmp
+mv /etc/php5/cli/php.ini.tmp /etc/php5/cli/php.ini
+sed 's#display_startup_errors = Off#display_startup_errors = On#g' /etc/php5/cli/php.ini > /etc/php5/cli/php.ini.tmp
+mv /etc/php5/cli/php.ini.tmp /etc/php5/cli/php.ini
+sed 's#error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT#error_reporting = E_ALL#g' /etc/php5/cli/php.ini > /etc/php5/cli/php.ini.tmp
+mv /etc/php5/cli/php.ini.tmp /etc/php5/cli/php.ini

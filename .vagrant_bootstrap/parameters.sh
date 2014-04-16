@@ -11,4 +11,3 @@
 # PHP
 # ---
 PHP_TIMEZONE="UTC"
-PHP_DIRECTORY="/etc/php5ts"
