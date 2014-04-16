@@ -5,7 +5,9 @@ config:
       max_file:  5
 
     client:
-      async:   false
+      async:
+        enabled: false
+        logKey:  elogank.api.logs.clients
       version: 4.5.x
       locale:  en_US
       accounts:

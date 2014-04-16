@@ -103,6 +103,13 @@ class Server
         $this->logger->info(sprintf('Listening on %s:%d', $bind == '0.0.0.0' ? '*' : $bind, $port));
         $this->socket->listen($port, $bind);
 
+        // Clients logging
+        if (true === ConfigurationLoader::get('client.async.enabled')) {
+            $this->loop->addPeriodicTimer(0.1, function () {
+                LoggerFactory::subscribe();
+            });
+        }
+
         $this->loop->run();
     }
 

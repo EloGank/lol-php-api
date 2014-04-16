@@ -25,7 +25,7 @@ class ClientFactory
      */
     public static function create($clientId, $region, $username, $password, $clientVersion, $locale)
     {
-        if (true === ConfigurationLoader::get('client.async')) {
+        if (true === ConfigurationLoader::get('client.async.enabled')) {
             throw new \RuntimeException('Not implemented yet !');
         }
 
