@@ -45,3 +45,24 @@ sed 's#display_startup_errors = Off#display_startup_errors = On#g' /etc/php5/cli
 mv /etc/php5/cli/php.ini.tmp /etc/php5/cli/php.ini
 sed 's#error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT#error_reporting = E_ALL#g' /etc/php5/cli/php.ini > /etc/php5/cli/php.ini.tmp
 mv /etc/php5/cli/php.ini.tmp /etc/php5/cli/php.ini
+
+
+# Redis
+# -----
+add-apt-repository -y ppa:rwky/redis
+apt-get update
+apt-get install -y redis-server
+
+# Installing hiredis lib
+cd /tmp
+git clone https://github.com/redis/hiredis.git
+cd hiredis
+make && make install
+cd ../
+
+# Installing phpiredis PHP lib (make Redis faster for un/serialization process)
+git clone https://github.com/nrk/phpiredis.git
+cd phpiredis
+phpize && ./configure --enable-phpiredis
+make && make install
+echo "extension=phpiredis.so" > /etc/php5/cli/conf.d/20-phpiredis.ini

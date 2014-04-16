@@ -18,7 +18,8 @@
         "symfony/yaml": "v2.4.2",
         "monolog/monolog": "1.8.0",
         "incenteev/composer-parameter-handler": "v2.1.0",
-        "react/socket": "0.4.*@dev"
+        "react/socket": "0.4.*@dev",
+        "predis/predis": "0.8.*@dev"
     },
     "scripts": {
         "post-install-cmd": [
