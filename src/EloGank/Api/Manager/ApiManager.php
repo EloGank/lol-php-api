@@ -70,8 +70,9 @@ class ApiManager
         $locale  = ConfigurationLoader::get('client.locale');
 
         $tmpClients = [];
-        foreach (ConfigurationLoader::get('client.accounts') as $account) {
+        foreach (ConfigurationLoader::get('client.accounts') as $key => $account) {
             $client = ClientFactory::create(
+                $key,
                 $this->getClientId(),
                 $this->createRegion($account['region']),
                 $account['username'],

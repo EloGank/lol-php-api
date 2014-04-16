@@ -26,10 +26,9 @@ class ConfigurationLoader
      */
     private static function load()
     {
-        // FIXME need to be overrided, but for now, threads need to get this static value, maybe create a temporary file from the config.dist
-        $path =  __DIR__ . '/../../../../config/config.yml';
-
         if (!isset(self::$configs)) {
+            $path =  __DIR__ . '/../../../../config/config.yml';
+
             if (!is_file($path)) {
                 throw new ConfigurationFileNotFoundException('The configuration file (' . $path . ') is not found');
             }
@@ -39,14 +38,6 @@ class ConfigurationLoader
         }
 
         return self::$configs;
-    }
-
-    /**
-     * @param string $path
-     */
-    public static function setPath($path)
-    {
-        self::$path = $path;
     }
 
     /**
