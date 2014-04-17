@@ -7,10 +7,7 @@ use EloGank\Api\Client\LOLClient;
 use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Routing\Router;
 use EloGank\Api\Configuration\ConfigurationLoader;
-use EloGank\Api\Configuration\Exception\ConfigurationKeyNotFoundException;
 use EloGank\Api\Logger\LoggerFactory;
-use EloGank\Api\Model\Region\Exception\RegionNotFoundException;
-use EloGank\Api\Model\Region\RegionInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Yaml\Parser;
 
@@ -66,25 +63,15 @@ class ApiManager
      */
     public function connect()
     {
-        $version = ConfigurationLoader::get('client.version');
-        $locale  = ConfigurationLoader::get('client.locale');
-
         $tmpClients = [];
-        foreach (ConfigurationLoader::get('client.accounts') as $key => $account) {
-            $client = ClientFactory::create(
-                $key,
-                $this->getClientId(),
-                $this->createRegion($account['region']),
-                $account['username'],
-                $account['password'],
-                $version,
-                $locale
-            );
-
+        foreach (ConfigurationLoader::get('client.accounts') as $accountKey => $account) {
+            $client = ClientFactory::create($accountKey, $this->getClientId());
             $client->authenticate();
+
             $tmpClients[] = $client;
         }
 
+        /** @var LOLClientInterface $client */
         foreach ($tmpClients as $client) {
             if ($client->isAuthenticated()) {
                 $this->clients[] = $client;
@@ -101,27 +88,6 @@ class ApiManager
         }
 
         return true;
-    }
-
-    /**
-     * @param $regionUniqueName
-     *
-     * @return RegionInterface
-     *
-     * @throws \EloGank\Api\Model\Region\Exception\RegionNotFoundException
-     */
-    protected function createRegion($regionUniqueName)
-    {
-        try {
-            $region = ConfigurationLoader::get('region.servers.' . $regionUniqueName);
-        }
-        catch (ConfigurationKeyNotFoundException $e) {
-            throw new RegionNotFoundException('The region with unique name "' . $regionUniqueName . '" is not found');
-        }
-
-        $class = ConfigurationLoader::get('region.class');
-
-        return new $class($regionUniqueName, $region['name'], $region['server'], $region['loginQueue']);
     }
 
     /**
