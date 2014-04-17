@@ -11,3 +11,8 @@
 # PHP
 # ---
 PHP_TIMEZONE="UTC"
+
+# ZERO MQ
+# -------
+# See: http://zeromq.org/intro:get-the-software
+ZMQ_VERSION="4.0.4"

@@ -16,7 +16,7 @@ apt-get update
 
 # Essential Packages
 # ------------------
-apt-get install -y build-essential git-core vim curl
+apt-get install -y build-essential git-core vim curl php5-dev pkg-config
 
 
 # PHP 5.x (last official release)
@@ -58,11 +58,26 @@ cd /tmp
 git clone https://github.com/redis/hiredis.git
 cd hiredis
 make && make install
-cd ../
 
 # Installing phpiredis PHP lib (make Redis faster for un/serialization process)
+cd /tmp
 git clone https://github.com/nrk/phpiredis.git
 cd phpiredis
 phpize && ./configure --enable-phpiredis
 make && make install
 echo "extension=phpiredis.so" > /etc/php5/cli/conf.d/20-phpiredis.ini
+
+# ZERO MQ
+# -------
+cd /tmp
+wget http://download.zeromq.org/zeromq-$ZMQ_VERSION.tar.gz
+tar -zxvf zeromq-4.0.4.tar.gz
+cd zeromq-4.0.4/
+./configure
+make
+make install
+
+# PHP ZMQ Extension
+# -----------------
+yes '' | pecl install zmq-beta
+echo "extension=zmq.so" > /etc/php5/cli/conf.d/20-zmq.ini
