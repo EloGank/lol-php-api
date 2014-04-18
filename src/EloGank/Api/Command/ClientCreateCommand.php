@@ -2,8 +2,9 @@
 
 namespace EloGank\Api\Command;
 
+use EloGank\Api\Client\Async\ClientConnector;
+use EloGank\Api\Client\Factory\ClientFactory;
 use EloGank\Api\Component\Command\Command;
-use EloGank\Api\Configuration\ConfigurationLoader;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -35,7 +36,9 @@ class ClientCreateCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $accountConfiguration = ConfigurationLoader::get('client.accounts')[$input->getArgument('account_key')];
+        $client = ClientFactory::create($input->getArgument('account_key'), $input->getArgument('client_id'), true);
 
+        $connector = new ClientConnector($client);
+        $connector->worker();
     }
 }

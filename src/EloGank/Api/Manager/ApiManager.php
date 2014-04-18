@@ -54,6 +54,32 @@ class ApiManager
         $this->router->init();
 
         $this->clients = [];
+
+        // TODO check if all async clients has been deleted
+
+        if (true === ConfigurationLoader::get('client.async.enabled')) {
+            $this->catchSignals();
+        }
+    }
+
+    /**
+     * Catch signals before the API server is killed and kill all the asynchronous clients
+     */
+    protected function catchSignals()
+    {
+        $killClients = function () {
+            $this->logger->info('Killing all clients...');
+
+            foreach ($this->clients as $client) {
+                $client->kill();
+            }
+
+            exit(0);
+        };
+
+        declare(ticks = 1);
+        pcntl_signal(SIGTERM, $killClients);
+        pcntl_signal(SIGINT, $killClients);
     }
 
     /**

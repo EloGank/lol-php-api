@@ -16,4 +16,6 @@ interface LOLClientInterface
     public function getRegion();
 
     public function getError();
+
+    public function kill();
 }

@@ -361,4 +361,12 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     {
         return LoggerFactory::create('LOLClient #' . $this->clientId);
     }
+
+    /**
+     *
+     */
+    public function kill()
+    {
+        // Nothing to kill
+    }
 }
