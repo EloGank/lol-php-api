@@ -2,7 +2,7 @@
 
 namespace EloGank\Api\Logger;
 
-use EloGank\Api\Configuration\ConfigurationLoader;
+use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Logger\Handler\RedisHandler;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;

@@ -2,7 +2,7 @@
 
 namespace EloGank\Api\Server;
 
-use EloGank\Api\Configuration\ConfigurationLoader;
+use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Logger\LoggerFactory;
 use EloGank\Api\Manager\ApiManager;
 use EloGank\Api\Server\Exception\MalformedClientInputException;

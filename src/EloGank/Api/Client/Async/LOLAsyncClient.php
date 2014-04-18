@@ -3,7 +3,7 @@
 namespace EloGank\Api\Client\Async;
 
 use EloGank\Api\Client\LOLClientInterface;
-use EloGank\Api\Configuration\ConfigurationLoader;
+use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Logger\LoggerFactory;
 use Predis\Client;
 use Psr\Log\LoggerInterface;

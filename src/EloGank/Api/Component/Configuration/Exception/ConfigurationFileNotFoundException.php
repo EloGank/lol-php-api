@@ -1,6 +1,6 @@
 <?php
 
-namespace EloGank\Api\Configuration\Exception;
+namespace EloGank\Api\Component\Configuration\Exception;
 
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>

@@ -4,8 +4,8 @@ namespace EloGank\Api\Client\Factory;
 
 use EloGank\Api\Client\Async\LOLAsyncClient;
 use EloGank\Api\Client\LOLClient;
-use EloGank\Api\Configuration\ConfigurationLoader;
-use EloGank\Api\Configuration\Exception\ConfigurationKeyNotFoundException;
+use EloGank\Api\Component\Configuration\ConfigurationLoader;
+use EloGank\Api\Component\Configuration\Exception\ConfigurationKeyNotFoundException;
 use EloGank\Api\Model\Region\Exception\RegionNotFoundException;
 use EloGank\Api\Model\Region\RegionInterface;
 

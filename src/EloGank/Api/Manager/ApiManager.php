@@ -6,7 +6,7 @@ use EloGank\Api\Client\Factory\ClientFactory;
 use EloGank\Api\Client\LOLClient;
 use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Routing\Router;
-use EloGank\Api\Configuration\ConfigurationLoader;
+use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Logger\LoggerFactory;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Yaml\Parser;

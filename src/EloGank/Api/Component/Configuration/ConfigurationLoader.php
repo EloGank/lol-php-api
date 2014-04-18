@@ -1,9 +1,9 @@
 <?php
 
-namespace EloGank\Api\Configuration;
+namespace EloGank\Api\Component\Configuration;
 
-use EloGank\Api\Configuration\Exception\ConfigurationFileNotFoundException;
-use EloGank\Api\Configuration\Exception\ConfigurationKeyNotFoundException;
+use EloGank\Api\Component\Configuration\Exception\ConfigurationFileNotFoundException;
+use EloGank\Api\Component\Configuration\Exception\ConfigurationKeyNotFoundException;
 use Symfony\Component\Yaml\Parser;
 
 /**
@@ -27,7 +27,7 @@ class ConfigurationLoader
     private static function load()
     {
         if (!isset(self::$configs)) {
-            $path =  __DIR__ . '/../../../../config/config.yml';
+            $path =  __DIR__ . '/../../../../../config/config.yml';
 
             if (!is_file($path)) {
                 throw new ConfigurationFileNotFoundException('The configuration file (' . $path . ') is not found');
