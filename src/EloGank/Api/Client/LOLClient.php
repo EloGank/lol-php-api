@@ -72,6 +72,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
 
 
     /**
+     * @param LoggerInterface $logger
      * @param int             $clientId
      * @param RegionInterface $region
      * @param string          $username
@@ -80,7 +81,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
      * @param string          $locale
      * @param int             $port
      */
-    public function __construct($clientId, RegionInterface $region, $username, $password, $clientVersion, $locale, $port)
+    public function __construct(LoggerInterface $logger, $clientId, RegionInterface $region, $username, $password, $clientVersion, $locale, $port)
     {
         $this->clientId      = $clientId;
         $this->region        = $region;
@@ -90,7 +91,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
         $this->locale        = $locale;
         $this->port          = $port;
 
-        parent::__construct($this->region->getServer(), 2099, '', 'app:/mod_ser.dat', null);
+        parent::__construct($logger, $this->region->getServer(), 2099, '', 'app:/mod_ser.dat', null);
     }
 
     /**
@@ -105,8 +106,12 @@ class LOLClient extends RTMPClient implements LOLClientInterface
             $this->isAuthenticated = true;
         }
         catch (ClientException $e) {
-            $this->error = $e->getMessage();
+            $this->logger->error('Client ' . $this . ' cannot authenticate : ' . $e->getMessage());
+
+            return false;
         }
+
+        return true;
     }
 
     /**
@@ -243,9 +248,8 @@ class LOLClient extends RTMPClient implements LOLClientInterface
         $delay = $response['delay'];
         $tickers = $response['tickers'];
 
-        // TODO implement Logger
         $log = function ($regionName, $position) {
-            echo 'In login queue (' . $regionName . '), #' . $position . PHP_EOL;
+            $this->logger->info('Client ' . $this . ': in login queue (' . $regionName . '), #' . $position);
         };
 
         foreach ($tickers as $ticker) {
@@ -378,10 +382,10 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     }
 
     /**
-     *
+     * @return string
      */
-    public function kill()
+    public function __toString()
     {
-        // Nothing to kill
+        return sprintf('#%d (%s)', $this->clientId, $this->getRegion());
     }
 }

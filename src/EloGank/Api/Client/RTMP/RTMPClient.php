@@ -4,7 +4,6 @@ namespace EloGank\Api\Client\RTMP;
 
 use EloGank\Api\Client\Exception\AuthException;
 use EloGank\Api\Client\Exception\PacketException;
-use EloGank\Api\Logger\LoggerFactory;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -15,6 +14,11 @@ use Psr\Log\LoggerInterface;
  */
 class RTMPClient
 {
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
     /**
      * @var string
      */
@@ -67,6 +71,7 @@ class RTMPClient
 
 
     /**
+     * @param LoggerInterface $logger
      * @param string          $server
      * @param string          $port
      * @param string          $app
@@ -74,8 +79,9 @@ class RTMPClient
      * @param string          $pageUrl
      * @param bool            $isSecure
      */
-    public function __construct($server, $port, $app, $swfUrl, $pageUrl, $isSecure = true)
+    public function __construct(LoggerInterface $logger, $server, $port, $app, $swfUrl, $pageUrl, $isSecure = true)
     {
+        $this->logger   = $logger;
         $this->server   = $server;
         $this->port     = $port;
         $this->app      = $app;
@@ -473,13 +479,5 @@ class RTMPClient
         $this->invoke($destionation, $operation, $parameters, $packetClass, $headers, $body);
 
         return $this->parsePacket();
-    }
-
-    /**
-     * @return LoggerInterface
-     */
-    protected function getLogger()
-    {
-        return LoggerFactory::create('RTMPClient');
     }
 }

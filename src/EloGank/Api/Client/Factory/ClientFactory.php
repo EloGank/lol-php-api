@@ -4,11 +4,13 @@ namespace EloGank\Api\Client\Factory;
 
 use EloGank\Api\Client\Async\LOLAsyncClient;
 use EloGank\Api\Client\LOLClient;
+use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Component\Configuration\Exception\ConfigurationKeyNotFoundException;
 use EloGank\Api\Model\Region\Exception\RegionNotFoundException;
 use EloGank\Api\Model\Region\RegionInterface;
 use Predis\Client;
+use Psr\Log\LoggerInterface;
 
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
@@ -16,30 +18,44 @@ use Predis\Client;
 class ClientFactory
 {
     /**
-     * @param Client $redis
-     * @param int    $accountKey
-     * @param string $clientId
-     * @param bool   $forceSynchronous
+     * @param LoggerInterface $logger
+     * @param Client          $redis
+     * @param int             $accountKey
+     * @param string          $clientId
+     * @param bool            $forceSynchronous
      *
-     * @return LOLClient
+     * @return LOLClientInterface
      *
      * @throws \RuntimeException
      */
-    public static function create(Client $redis, $accountKey, $clientId, $forceSynchronous = false)
+    public static function create(LoggerInterface $logger, Client $redis, $accountKey, $clientId, $forceSynchronous = false)
     {
         $configs = ConfigurationLoader::get('client.accounts')[$accountKey];
-        $port = ConfigurationLoader::get('client.async.startPort');
+        $port = ConfigurationLoader::get('client.async.startPort') + $clientId - 1;
         if (isset($configs['async']['port'])) {
             $port = $configs['async']['port'];
         }
 
         if (!$forceSynchronous && true === ConfigurationLoader::get('client.async.enabled')) {
-            return new LOLAsyncClient($redis, $accountKey, $clientId, self::createRegion($configs['region']), $port);
+            return new LOLAsyncClient(
+                $logger,
+                $redis,
+                $accountKey,
+                $clientId,
+                self::createRegion($configs['region']),
+                $port
+            );
         }
 
         return new LOLClient(
-            $clientId, self::createRegion($configs['region']), $configs['username'], $configs['password'],
-            ConfigurationLoader::get('client.version'), ConfigurationLoader::get('client.locale'), $port
+            $logger,
+            $clientId,
+            self::createRegion($configs['region']),
+            $configs['username'],
+            $configs['password'],
+            ConfigurationLoader::get('client.version'),
+            ConfigurationLoader::get('client.locale'),
+            $port
         );
     }
 

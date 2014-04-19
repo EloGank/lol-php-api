@@ -45,9 +45,7 @@ class Server
         // Init API
         $this->apiManager->init();
         if (!$this->apiManager->connect()) {
-            $this->logger->critical('There is no ready client, aborted');
-
-            die;
+            throw new \RuntimeException('There is no ready client, aborted');
         }
 
         // Init server

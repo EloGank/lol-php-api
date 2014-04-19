@@ -29,13 +29,22 @@ class ApiStartCommand extends Command
      * @param InputInterface $input
      * @param OutputInterface $output
      *
-     * @return int|null|void
+     * @throws \Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->writeSection($output, 'EloGank - League of Legends API');
 
-        $server = new Server(new ApiManager());
-        $server->listen();
+        $apiManager = new ApiManager();
+        try {
+            $server = new Server($apiManager);
+            $server->listen();
+        }
+        catch (\Exception $e) {
+            $apiManager->clean();
+            $this->getApplication()->renderException($e, $output);
+
+            posix_kill(getmypid(), SIGKILL);
+        }
     }
 }

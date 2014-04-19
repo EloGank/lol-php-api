@@ -4,14 +4,19 @@ namespace EloGank\Api\Client\Async;
 
 use EloGank\Api\Client\LOLClient;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
-use EloGank\Api\Logger\LoggerFactory;
 use Predis\Client;
+use Psr\Log\LoggerInterface;
 
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
  */
 class ClientWorker
 {
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
     /**
      * @var LOLClient
      */
@@ -24,11 +29,13 @@ class ClientWorker
 
 
     /**
-     * @param LOLClient $client
-     * @param Client    $redis
+     * @param LoggerInterface $logger
+     * @param LOLClient       $client
+     * @param Client          $redis
      */
-    public function __construct(LOLClient $client, $redis)
+    public function __construct(LoggerInterface $logger, LOLClient $client, $redis)
     {
+        $this->logger = $logger;
         $this->client = $client;
         $this->redis  = $redis;
     }
@@ -42,18 +49,35 @@ class ClientWorker
         $server = new \ZMQSocket($context, \ZMQ::SOCKET_PULL);
         $server->bind('tcp://127.0.0.1:' . (ConfigurationLoader::get('client.async.startPort') + $this->client->getId() - 1));
 
-        $logger = LoggerFactory::create('Client #' . $this->client->getId(), true);
-        $logger->debug('Client worker #' . $this->client->getId() . ' is ready');
+        $this->logger->info('Client worker ' . $this->client . ' is ready');
 
         while (true) {
             $request = $server->recv();
+            $this->logger->debug('Client worker ' . $this->client . ' receiving request : ' . $request);
 
-            $logger->info($request);
+            $request = json_decode($request, true);
+            if (!$this->isValidInput($request)) {
+                continue;
+            }
 
-            $this->client->authenticate();
-            $this->redis->rpush('elogank.api.client.authentication', json_encode([
-                'is_authenticated' => $this->client->isAuthenticated()
+            $result = call_user_func_array(array($this->client, $request['command']), $request['parameters']);
+            $this->redis->rpush('elogank.api.clients.' . $this->client->getId() . '.' . $request['command'], json_encode([
+                'result' => $result
             ]));
         }
+    }
+
+    /**
+     * @param array $input
+     *
+     * @return bool
+     */
+    protected function isValidInput(array $input)
+    {
+        if (!isset($input['command']) || !isset($input['parameters'])) {
+            return false;
+        }
+
+        return true;
     }
 }

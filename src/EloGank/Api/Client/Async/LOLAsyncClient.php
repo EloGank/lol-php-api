@@ -4,7 +4,6 @@ namespace EloGank\Api\Client\Async;
 
 use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
-use EloGank\Api\Logger\LoggerFactory;
 use EloGank\Api\Model\Region\RegionInterface;
 use Predis\Client;
 use Psr\Log\LoggerInterface;
@@ -14,6 +13,11 @@ use Psr\Log\LoggerInterface;
  */
 class LOLAsyncClient implements LOLClientInterface
 {
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
     /**
      * @var string
      */
@@ -49,23 +53,20 @@ class LOLAsyncClient implements LOLClientInterface
      */
     protected $redis;
 
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
 
     /**
+     * @param LoggerInterface $logger
      * @param Client          $redis
      * @param int             $accountKey
      * @param int             $clientId
      * @param RegionInterface $region
      * @param int             $port
      */
-    public function __construct(Client $redis, $accountKey, $clientId, RegionInterface $region, $port)
+    public function __construct(LoggerInterface $logger, Client $redis, $accountKey, $clientId, RegionInterface $region, $port)
     {
-        $rootFolder = __DIR__ . '/../../../../..';
+        $rootFolder     = __DIR__ . '/../../../../..';
 
+        $this->logger   = $logger;
         $this->pidPath  = $rootFolder . '/' . ConfigurationLoader::get('cache.path') . '/clientpids/client_' . $clientId . '.pid';
         $this->redis    = $redis;
         $this->clientId = $clientId;
@@ -73,7 +74,6 @@ class LOLAsyncClient implements LOLClientInterface
         $this->port     = $port;
 
         $this->con      = new \ZMQSocket(new \ZMQContext(), \ZMQ::SOCKET_PUSH);
-        $this->logger   = LoggerFactory::create();
 
         // Create process
         popen(sprintf('php %s/console elogank:client:create %d %d > /dev/null 2>&1 & echo $! > %s', $rootFolder, $accountKey, $clientId, $this->pidPath), 'r');
@@ -90,18 +90,16 @@ class LOLAsyncClient implements LOLClientInterface
     }
 
     /**
-     * @return bool
+     * @return null|bool
      */
     public function isAuthenticated()
     {
-        $message = $this->redis->brpop('elogank.api.client.authentication', 20);
-        if (isset($message[0])) {
-            return json_decode($message[1], true)['is_authenticated'];
+        $message = $this->redis->rpop('elogank.api.clients.' . $this->clientId . '.authenticate');
+        if (null == $message) {
+            return null;
         }
 
-        $this->error = 'Asynchronous client did not respond';
-
-        return false;
+        return json_decode($message, true)['result'];
     }
 
     /**
@@ -137,27 +135,6 @@ class LOLAsyncClient implements LOLClientInterface
     }
 
     /**
-     * Kill the client pid
-     */
-    public function kill()
-    {
-        // Client doesn't exist
-        if (!is_file($this->pidPath)) {
-            return;
-        }
-
-        $pid = (int) file_get_contents($this->pidPath);
-        unlink($this->pidPath);
-
-        if (posix_kill($pid, SIGKILL)) {
-            $this->logger->debug('Client #' . $this->clientId . ' (pid: #' . $pid . ') has been killed');
-        }
-        else {
-            $this->logger->error('Cannot kill the client #' . $this->clientId . ' (pid: #' . $pid . '), please kill this client manually');
-        }
-    }
-
-    /**
      * @param string $commandName
      * @param array  $parameters
      */
@@ -167,5 +144,13 @@ class LOLAsyncClient implements LOLClientInterface
             'command'    => $commandName,
             'parameters' => $parameters
         ]));
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return sprintf('async #%d (%s)', $this->clientId, $this->getRegion());
     }
 }

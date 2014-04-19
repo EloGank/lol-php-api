@@ -19,5 +19,5 @@ interface LOLClientInterface
 
     public function getPort();
 
-    public function kill();
+    public function __toString();
 }
