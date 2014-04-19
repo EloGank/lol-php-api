@@ -84,9 +84,8 @@ class ApiManager
 
         $this->redis = new Client(sprintf('tcp://%s:%d', ConfigurationLoader::get('client.async.redis.host'), ConfigurationLoader::get('client.async.redis.port')));
 
-        // TODO check if all async clients has been deleted
-
         if (true === ConfigurationLoader::get('client.async.enabled')) {
+            $this->cleanAsyncClients();
             $this->catchSignals();
         }
     }
@@ -105,11 +104,43 @@ class ApiManager
                 }
             }
 
-            die;
+            exit(0);
         };
 
         pcntl_signal(SIGINT, $killClients);
         pcntl_signal(SIGTERM, $killClients);
+    }
+
+    /**
+     * Cleaning all old asynchronous client processes
+     */
+    protected function cleanAsyncClients()
+    {
+        $this->logger->info('Cleaning async clients...');
+
+        $cachePath = __DIR__ . '/../../../../' . ConfigurationLoader::get('cache.path') . '/' . 'clientpids';
+        if (!is_dir($cachePath)) {
+            if (!mkdir($cachePath, 0777, true)) {
+                throw new \RuntimeException('Cannot write in the cache folder');
+            }
+        }
+
+        $iterator = new \DirectoryIterator($cachePath);
+        foreach ($iterator as $pidFile) {
+            if ($pidFile->isDir()) {
+                continue;
+            }
+
+            $pid = (int) file_get_contents($pidFile->getRealPath());
+            unlink($pidFile->getRealPath());
+
+            if (posix_kill($pid, SIGKILL)) {
+                $this->logger->debug('Process #' . $pid . ' has been killed');
+            }
+            else {
+                throw new \RuntimeException('Cannot kill the process #' . $pid . ', please kill this process manually');
+            }
+        }
     }
 
     /**

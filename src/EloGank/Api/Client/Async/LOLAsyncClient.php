@@ -66,7 +66,7 @@ class LOLAsyncClient implements LOLClientInterface
     {
         $rootFolder = __DIR__ . '/../../../../..';
 
-        $this->pidPath  = $rootFolder . '/' . ConfigurationLoader::get('cache.path') . '/client_' . $clientId . '.pid';
+        $this->pidPath  = $rootFolder . '/' . ConfigurationLoader::get('cache.path') . '/clientpids/client_' . $clientId . '.pid';
         $this->redis    = $redis;
         $this->clientId = $clientId;
         $this->region   = $region;
@@ -146,14 +146,14 @@ class LOLAsyncClient implements LOLClientInterface
             return;
         }
 
-        $pid = file_get_contents($this->pidPath);
+        $pid = (int) file_get_contents($this->pidPath);
         unlink($this->pidPath);
 
-        if (posix_kill((int) $pid, SIGTERM)) {
-            $this->logger->debug('Client #' . $this->clientId . ' has been killed');
+        if (posix_kill($pid, SIGKILL)) {
+            $this->logger->debug('Client #' . $this->clientId . ' (pid: #' . $pid . ') has been killed');
         }
         else {
-            $this->logger->error('Cannot kill the client #' . $this->clientId . ', please kill this client manually');
+            $this->logger->error('Cannot kill the client #' . $this->clientId . ' (pid: #' . $pid . '), please kill this client manually');
         }
     }
 
