@@ -56,6 +56,11 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     protected $locale;
 
     /**
+     * @var int
+     */
+    protected $port;
+
+    /**
      * @var string
      */
     protected $error;
@@ -73,8 +78,9 @@ class LOLClient extends RTMPClient implements LOLClientInterface
      * @param string          $password
      * @param string          $clientVersion
      * @param string          $locale
+     * @param int             $port
      */
-    public function __construct($clientId, RegionInterface $region, $username, $password, $clientVersion, $locale)
+    public function __construct($clientId, RegionInterface $region, $username, $password, $clientVersion, $locale, $port)
     {
         $this->clientId      = $clientId;
         $this->region        = $region;
@@ -82,6 +88,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
         $this->password      = $password;
         $this->clientVersion = $clientVersion;
         $this->locale        = $locale;
+        $this->port          = $port;
 
         parent::__construct($this->region->getServer(), 2099, '', 'app:/mod_ser.dat', null);
     }
@@ -360,6 +367,14 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     protected function getLogger()
     {
         return LoggerFactory::create('LOLClient #' . $this->clientId);
+    }
+
+    /**
+     * @return int
+     */
+    public function getPort()
+    {
+        return $this->port;
     }
 
     /**

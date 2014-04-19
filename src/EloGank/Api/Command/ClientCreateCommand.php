@@ -2,9 +2,11 @@
 
 namespace EloGank\Api\Command;
 
-use EloGank\Api\Client\Async\ClientConnector;
+use EloGank\Api\Client\Async\ClientWorker;
 use EloGank\Api\Client\Factory\ClientFactory;
 use EloGank\Api\Component\Command\Command;
+use EloGank\Api\Component\Configuration\ConfigurationLoader;
+use Predis\Client;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -36,9 +38,10 @@ class ClientCreateCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $client = ClientFactory::create($input->getArgument('account_key'), $input->getArgument('client_id'), true);
+        $redis = new Client(sprintf('tcp://%s:%d', ConfigurationLoader::get('client.async.redis.host'), ConfigurationLoader::get('client.async.redis.port')));
+        $client = ClientFactory::create($redis, $input->getArgument('account_key'), $input->getArgument('client_id'), true);
 
-        $connector = new ClientConnector($client);
+        $connector = new ClientWorker($client, $redis);
         $connector->worker();
     }
 }

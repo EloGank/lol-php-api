@@ -76,18 +76,13 @@ class LoggerFactory
             throw new \RuntimeException('Redis client has not been initialised');
         }
 
-        // FIXME improve configuration loader lazy loading
         if (!isset(self::$logKey)) {
             self::$logKey = ConfigurationLoader::get('client.async.logKey');
         }
 
-        $log = self::$redisClient->rpop(self::$logKey);
-        if (null == $log) {
-            return;
+        while (null != ($log = self::$redisClient->lpop(self::$logKey))) {
+            list ($level, $message) = explode('|', $log);
+            self::$logger->addRecord($level, $message);
         }
-
-        list ($level, $message) = explode('|', $log);
-
-        self::$logger->addRecord($level, $message);
     }
 }

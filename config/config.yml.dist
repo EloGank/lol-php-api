@@ -1,25 +1,31 @@
 config:
     cache:
-      path: cache
+      path:           cache
 
     log:
-      path:      logs/api.log
-      verbosity: debug
-      max_file:  5
+      path:           logs/api.log
+      verbosity:      debug
+      max_file:       5
 
     client:
       async:
-        enabled: false
-        logKey:  elogank.api.logs.clients
-      version: 4.5.x
-      locale:  en_US
+        enabled:      false
+        logKey:       elogank.api.logs.clients
+        startPort:    5000
+        redis:
+          host:       127.0.0.1
+          port:       6379
+      version:        4.5.x
+      locale:         en_US
       accounts:
-        - region:   ~
-          username: ~
-          password: ~
+        - region:     ~
+          username:   ~
+          password:   ~
+          async:
+            port:     ~
 
     region:
-      class: EloGank\Api\Model\Region\Region
+      class:          EloGank\Api\Model\Region\Region
       servers:
         NA:
           name:       North America
@@ -31,5 +37,5 @@ config:
           loginQueue: lq.eu.lol.riotgames.com
 
     server:
-        port: 8080
-        bind: 127.0.0.1
+        port:         8080
+        bind:         127.0.0.1

@@ -8,7 +8,10 @@ use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Routing\Router;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Logger\LoggerFactory;
+use Predis\Client;
 use Psr\Log\LoggerInterface;
+use React\EventLoop\Factory;
+use React\EventLoop\LoopInterface;
 use Symfony\Component\Yaml\Parser;
 
 /**
@@ -32,9 +35,19 @@ class ApiManager
     protected $clientId = 1;
 
     /**
+     * @var LoopInterface
+     */
+    protected $loop;
+
+    /**
      * @var Router
      */
     protected $router;
+
+    /**
+     * @var Client
+     */
+    protected $redis;
 
 
     /**
@@ -50,10 +63,26 @@ class ApiManager
      */
     public function init()
     {
+        $this->clients = [];
+
+        $this->loop = Factory::create();
+
+        // Catch signals
+        $this->loop->addPeriodicTimer(1, function () {
+            pcntl_signal_dispatch();
+        });
+
+        // Clients logging
+        if (true === ConfigurationLoader::get('client.async.enabled')) {
+            $this->loop->addPeriodicTimer(0.5, function () {
+                LoggerFactory::subscribe();
+            });
+        }
+
         $this->router = new Router();
         $this->router->init();
 
-        $this->clients = [];
+        $this->redis = new Client(sprintf('tcp://%s:%d', ConfigurationLoader::get('client.async.redis.host'), ConfigurationLoader::get('client.async.redis.port')));
 
         // TODO check if all async clients has been deleted
 
@@ -68,18 +97,19 @@ class ApiManager
     protected function catchSignals()
     {
         $killClients = function () {
-            $this->logger->info('Killing all clients...');
+            if (isset($this->clients[0])) {
+                $this->logger->info('Killing all clients...');
 
-            foreach ($this->clients as $client) {
-                $client->kill();
+                foreach ($this->clients as $client) {
+                    $client->kill();
+                }
             }
 
-            exit(0);
+            die;
         };
 
-        declare(ticks = 1);
-        pcntl_signal(SIGTERM, $killClients);
         pcntl_signal(SIGINT, $killClients);
+        pcntl_signal(SIGTERM, $killClients);
     }
 
     /**
@@ -89,9 +119,11 @@ class ApiManager
      */
     public function connect()
     {
+        $this->logger->info('Starting clients...');
+
         $tmpClients = [];
         foreach (ConfigurationLoader::get('client.accounts') as $accountKey => $account) {
-            $client = ClientFactory::create($accountKey, $this->getClientId());
+            $client = ClientFactory::create($this->redis, $accountKey, $this->getClientId());
             $client->authenticate();
 
             $tmpClients[] = $client;
@@ -122,6 +154,14 @@ class ApiManager
     protected function getClientId()
     {
         return $this->clientId++;
+    }
+
+    /**
+     * @return LoopInterface
+     */
+    public function getLoop()
+    {
+        return $this->loop;
     }
 
     /**

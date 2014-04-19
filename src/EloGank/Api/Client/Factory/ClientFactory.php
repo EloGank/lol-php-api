@@ -8,6 +8,7 @@ use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Component\Configuration\Exception\ConfigurationKeyNotFoundException;
 use EloGank\Api\Model\Region\Exception\RegionNotFoundException;
 use EloGank\Api\Model\Region\RegionInterface;
+use Predis\Client;
 
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
@@ -15,6 +16,7 @@ use EloGank\Api\Model\Region\RegionInterface;
 class ClientFactory
 {
     /**
+     * @param Client $redis
      * @param int    $accountKey
      * @param string $clientId
      * @param bool   $forceSynchronous
@@ -23,17 +25,21 @@ class ClientFactory
      *
      * @throws \RuntimeException
      */
-    public static function create($accountKey, $clientId, $forceSynchronous = false)
+    public static function create(Client $redis, $accountKey, $clientId, $forceSynchronous = false)
     {
-        if (!$forceSynchronous && true === ConfigurationLoader::get('client.async.enabled')) {
-            return new LOLAsyncClient($accountKey, $clientId);
+        $configs = ConfigurationLoader::get('client.accounts')[$accountKey];
+        $port = ConfigurationLoader::get('client.async.startPort');
+        if (isset($configs['async']['port'])) {
+            $port = $configs['async']['port'];
         }
 
-        $configs = ConfigurationLoader::get('client.accounts')[$accountKey];
+        if (!$forceSynchronous && true === ConfigurationLoader::get('client.async.enabled')) {
+            return new LOLAsyncClient($redis, $accountKey, $clientId, self::createRegion($configs['region']), $port);
+        }
 
-        return new LOLClient($clientId, self::createRegion(
-            $configs['region']), $configs['username'], $configs['password'],
-            ConfigurationLoader::get('client.version'), ConfigurationLoader::get('client.locale')
+        return new LOLClient(
+            $clientId, self::createRegion($configs['region']), $configs['username'], $configs['password'],
+            ConfigurationLoader::get('client.version'), ConfigurationLoader::get('client.locale'), $port
         );
     }
 

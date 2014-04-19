@@ -3,13 +3,14 @@
 namespace EloGank\Api\Client\Async;
 
 use EloGank\Api\Client\LOLClient;
+use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Logger\LoggerFactory;
 use Predis\Client;
 
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
  */
-class ClientConnector
+class ClientWorker
 {
     /**
      * @var LOLClient
@@ -24,11 +25,12 @@ class ClientConnector
 
     /**
      * @param LOLClient $client
+     * @param Client    $redis
      */
-    public function __construct(LOLClient $client)
+    public function __construct(LOLClient $client, $redis)
     {
         $this->client = $client;
-        $this->redis = new Client('tcp://127.0.0.1:6379');
+        $this->redis  = $redis;
     }
 
     /**
@@ -38,9 +40,10 @@ class ClientConnector
     {
         $context = new \ZMQContext();
         $server = new \ZMQSocket($context, \ZMQ::SOCKET_PULL);
-        $server->bind('tcp://127.0.0.1:5555');
+        $server->bind('tcp://127.0.0.1:' . (ConfigurationLoader::get('client.async.startPort') + $this->client->getId() - 1));
 
-        $logger = LoggerFactory::create('Client #' . $this->client->getId());
+        $logger = LoggerFactory::create('Client #' . $this->client->getId(), true);
+        $logger->debug('Client worker #' . $this->client->getId() . ' is ready');
 
         while (true) {
             $request = $server->recv();

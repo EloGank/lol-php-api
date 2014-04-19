@@ -9,7 +9,6 @@ use EloGank\Api\Server\Exception\MalformedClientInputException;
 use EloGank\Api\Server\Exception\ServerException;
 use Psr\Log\LoggerInterface;
 use React\EventLoop\Factory;
-use React\EventLoop\LoopInterface;
 use React\Socket\Connection;
 use React\Socket\Server as SocketServer;
 
@@ -28,16 +27,6 @@ class Server
      */
     protected $apiManager;
 
-    /**
-     * @var LoopInterface
-     */
-    protected $loop;
-
-    /**
-     * @var \React\Socket\Server
-     */
-    protected $socket;
-
 
     /**
      * @param ApiManager $apiManager
@@ -45,7 +34,7 @@ class Server
     public function __construct(ApiManager $apiManager)
     {
         $this->apiManager = $apiManager;
-        $this->logger = LoggerFactory::create('Server');
+        $this->logger     = LoggerFactory::create('Server');
     }
 
     /**
@@ -58,15 +47,14 @@ class Server
         if (!$this->apiManager->connect()) {
             $this->logger->critical('There is no ready client, aborted');
 
-            return;
+            die;
         }
 
         // Init server
-        $this->loop   = Factory::create();
-        $this->socket = new SocketServer($this->loop);
+        $loop   = $this->apiManager->getLoop();
+        $socket = new SocketServer($loop);
 
-        // TODO dev part
-        $this->socket->on('connection', function ($conn) {
+        $socket->on('connection', function ($conn) {
             /** @var Connection $conn */
             $this->logger->debug(sprintf('Client [%s] is connected to server', $conn->getRemoteAddress()));
 
@@ -101,16 +89,9 @@ class Server
         $bind = ConfigurationLoader::get('server.bind');
 
         $this->logger->info(sprintf('Listening on %s:%d', $bind == '0.0.0.0' ? '*' : $bind, $port));
-        $this->socket->listen($port, $bind);
+        $socket->listen($port, $bind);
 
-        // Clients logging
-        if (true === ConfigurationLoader::get('client.async.enabled')) {
-            $this->loop->addPeriodicTimer(0.1, function () {
-                LoggerFactory::subscribe();
-            });
-        }
-
-        $this->loop->run();
+        $loop->run();
     }
 
     /**
