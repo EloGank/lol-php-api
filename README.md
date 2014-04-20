@@ -10,6 +10,8 @@ RTMP API fully PHP for League of Legends.
 * Install all dependancies :  
 `php composer.phar install`
 
+If you want to use Vagrant : use `vagrant up` in the root folder.
+
 ## Configuration
 
 Open the `config/config.yml` file and edit the `client.accounts` part :
