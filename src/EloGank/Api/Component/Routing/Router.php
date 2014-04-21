@@ -101,6 +101,8 @@ class Router
         $class = '\\EloGank\\Api\\Controller\\' . $this->routes[$controllerName]['class'];
         $controller = new $class($apiManager);
 
+        // TODO check if all parameters are available from the client
+
         return call_user_func_array(array($controller, $this->routes[$controllerName]['methods'][$methodName]['name']), $data['parameters']);
     }
 

@@ -53,6 +53,11 @@ class LOLAsyncClient implements LOLClientInterface
      */
     protected $redis;
 
+    /**
+     * @var int
+     */
+    protected $lastCall = 0;
+
 
     /**
      * @param LoggerInterface $logger
@@ -90,6 +95,39 @@ class LOLAsyncClient implements LOLClientInterface
     }
 
     /**
+     * @param $destination
+     * @param $operation
+     * @param array|string $parameters
+     * @param string $packetClass
+     * @param array $headers
+     * @param array $body
+     *
+     * @return $this
+     */
+    public function invoke($destination, $operation, $parameters = array(), $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
+    {
+        $this->send('syncInvoke', [
+            $destination,
+            $operation,
+            $parameters
+        ]);
+
+        return $this;
+    }
+
+    /**
+     * @param int $timeout
+     *
+     * @return array
+     */
+    public function getResults($timeout = 10)
+    {
+        $message = $this->redis->brpop('elogank.api.clients.' . $this->clientId . '.syncInvoke', $timeout);
+
+        return unserialize($message[1]);
+    }
+
+    /**
      * @return null|bool
      */
     public function isAuthenticated()
@@ -99,7 +137,7 @@ class LOLAsyncClient implements LOLClientInterface
             return null;
         }
 
-        return json_decode($message, true)['result'];
+        return unserialize($message)['result'];
     }
 
     /**
@@ -135,11 +173,20 @@ class LOLAsyncClient implements LOLClientInterface
     }
 
     /**
+     * @return bool
+     */
+    public function isAvailable()
+    {
+        return $this->lastCall <= microtime(true);
+    }
+
+    /**
      * @param string $commandName
      * @param array  $parameters
      */
     protected function send($commandName, array $parameters = array())
     {
+        $this->lastCall = microtime(true) + 0.03;
         $this->con->send(json_encode([
             'command'    => $commandName,
             'parameters' => $parameters

@@ -258,7 +258,7 @@ class ApiManager
 
         if (posix_kill($pid, SIGKILL)) {
             if (null != $client) {
-                $this->logger->debug('Client ' . $this . ' (pid: #' . $pid . ') has been killed');
+                $this->logger->debug('Client ' . $client . ' (pid: #' . $pid . ') has been killed');
             }
             else {
                 $this->logger->debug('Process #' . $pid . ' has been killed');
@@ -304,8 +304,14 @@ class ApiManager
      */
     public function getClient()
     {
-        // TODO do the anti flood selection here
+        while (true) {
+            foreach ($this->clients as $client) {
+                if ($client->isAvailable()) {
+                    return $client;
+                }
+            }
 
-        return $this->clients[0];
+            sleep(0.05);
+        }
     }
 }

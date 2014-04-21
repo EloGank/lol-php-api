@@ -61,7 +61,7 @@ class ClientWorker
             }
 
             $result = call_user_func_array(array($this->client, $request['command']), $request['parameters']);
-            $this->redis->rpush('elogank.api.clients.' . $this->client->getId() . '.' . $request['command'], json_encode([
+            $this->redis->rpush('elogank.api.clients.' . $this->client->getId() . '.' . $request['command'], serialize([
                 'result' => $result
             ]));
         }

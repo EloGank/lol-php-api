@@ -2,6 +2,7 @@
 
 namespace EloGank\Api\Controller;
 
+use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Component\Controller\Controller;
 
 /**
@@ -10,16 +11,32 @@ use EloGank\Api\Component\Controller\Controller;
 class TestController extends Controller
 {
     /**
-     * @param string $summonerName
+     * @param $summonerName
+     * @param $accountId
+     * @param $summonerId
      *
-     * @return array
+     * @return mixed
      */
-    public function getTestMethodAction($summonerName)
+    public function getTestMethodAction($summonerName, $accountId, $summonerId)
     {
-        var_dump($this->call('other_test.other_test_method', array(123456)));
+        $time = microtime(true);
+        $clients = [
+            $this->getClient()->invoke('summonerService', 'getSummonerByName', array($summonerName)),
+            $this->getClient()->invoke('summonerService', 'getAllPublicSummonerDataByAccount', array($accountId)),
+            $this->getClient()->invoke('masteryBookService', 'getMasteryBook', array($summonerId)),
+            $this->getClient()->invoke('playerStatsService', 'getRecentGames', array($accountId)),
+            $this->getClient()->invoke('leaguesServiceProxy', 'getAllLeaguesForPlayer', array($summonerId)),
+            $this->getClient()->invoke('playerStatsService', 'retrieveTopPlayedChampions', array($accountId, 'CLASSIC')),
+            $this->getClient()->invoke('playerStatsService', 'getAggregatedStats', array($accountId, 'CLASSIC', 4)),
+        ];
 
-        return $this->getClient()->syncInvoke('summonerService', 'getSummonerByName', array(
-            $summonerName
-        ));
+        $results = [];
+        foreach ($clients as $client) {
+            $results[] = $client->getResults();
+        }
+
+        file_put_contents(ConfigurationLoader::get('cache.path') . '/test.log', serialize($results));
+
+        return microtime(true) - $time;
     }
 } 

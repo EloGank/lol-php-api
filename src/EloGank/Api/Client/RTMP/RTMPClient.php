@@ -440,7 +440,7 @@ class RTMPClient
      *
      * @return int
      */
-    protected function invoke($destination, $operation, $parameters = array(), $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
+    public function invoke($destination, $operation, $parameters = array(), $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
     {
         $packet = new RTMPPacket($destination, $operation, $parameters, $packetClass, $headers, $body);
         $packet->build($this->DSId);

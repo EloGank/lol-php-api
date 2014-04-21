@@ -11,8 +11,12 @@ class OtherTestController extends Controller
 {
     public function otherTestMethodAction($accountId)
     {
+        /*
         return $this->getClient()->syncInvoke('summonerService', 'getAllPublicSummonerDataByAccount', array(
             $accountId
         ));
+        */
+
+        return $accountId;
     }
 } 
