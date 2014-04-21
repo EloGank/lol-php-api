@@ -20,19 +20,28 @@ class TestController extends Controller
     public function getTestMethodAction($summonerName, $accountId, $summonerId)
     {
         $time = microtime(true);
-        $clients = [
-            $this->getClient()->invoke('summonerService', 'getSummonerByName', array($summonerName)),
-            $this->getClient()->invoke('summonerService', 'getAllPublicSummonerDataByAccount', array($accountId)),
+        $invokeIds = [
+            $this->getClient()->invoke('summonerService', 'getSummonerByName', array($summonerName), function ($result) {
+                var_dump('callback 1');
+
+                return $result;
+            }),
+            $this->getClient()->invoke('summonerService', 'getAllPublicSummonerDataByAccount', array($accountId), function ($result) {
+                var_dump('callback 2');
+
+                return $result;
+            }),
             $this->getClient()->invoke('masteryBookService', 'getMasteryBook', array($summonerId)),
             $this->getClient()->invoke('playerStatsService', 'getRecentGames', array($accountId)),
             $this->getClient()->invoke('leaguesServiceProxy', 'getAllLeaguesForPlayer', array($summonerId)),
             $this->getClient()->invoke('playerStatsService', 'retrieveTopPlayedChampions', array($accountId, 'CLASSIC')),
-            $this->getClient()->invoke('playerStatsService', 'getAggregatedStats', array($accountId, 'CLASSIC', 4)),
+            $this->getClient()->invoke('playerStatsService', 'getAggregatedStats', array($accountId, 'CLASSIC', 4))
         ];
 
         $results = [];
-        foreach ($clients as $client) {
-            $results[] = $client->getResults();
+        $client = $this->getClient();
+        foreach ($invokeIds as $invokeId) {
+            $results[] = $client->getResults($invokeId);
         }
 
         file_put_contents(ConfigurationLoader::get('cache.path') . '/test.log', serialize($results));

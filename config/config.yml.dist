@@ -10,11 +10,11 @@ config:
     client:
       async:
         enabled:      false
-        logKey:       elogank.api.logs.clients
         startPort:    5000
         redis:
           host:       127.0.0.1
           port:       6379
+          key:        elogank.api
       version:        4.5.x
       locale:         en_US
       accounts:

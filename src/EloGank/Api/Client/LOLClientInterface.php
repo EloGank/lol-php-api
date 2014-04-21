@@ -21,9 +21,9 @@ interface LOLClientInterface
 
     public function isAvailable();
 
-    public function invoke($destination, $operation, $parameters = array(), $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array());
+    public function invoke($destination, $operation, $parameters = array(), \Closure $callback = null, $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array());
 
-    public function getResults($timeout = 10);
+    public function getResults($invokeId, $timeout = 10);
 
     public function __toString();
 }

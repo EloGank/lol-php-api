@@ -41,7 +41,7 @@ class ClientWorker
     }
 
     /**
-     *
+     * Start the worker and wait for requests
      */
     public function worker()
     {
@@ -57,13 +57,13 @@ class ClientWorker
 
             $request = json_decode($request, true);
             if (!$this->isValidInput($request)) {
+                $this->logger->error('Client worker ' . $this->client . ' received an invalid input');
+
                 continue;
             }
 
             $result = call_user_func_array(array($this->client, $request['command']), $request['parameters']);
-            $this->redis->rpush('elogank.api.clients.' . $this->client->getId() . '.' . $request['command'], serialize([
-                'result' => $result
-            ]));
+            $this->redis->rpush(ConfigurationLoader::get('client.async.redis.key') . '.client.commands.' . $request['invokeId'], serialize($result));
         }
     }
 
@@ -74,7 +74,7 @@ class ClientWorker
      */
     protected function isValidInput(array $input)
     {
-        if (!isset($input['command']) || !isset($input['parameters'])) {
+        if (!isset($input['invokeId']) || !isset($input['command']) || !isset($input['parameters'])) {
             return false;
         }
 

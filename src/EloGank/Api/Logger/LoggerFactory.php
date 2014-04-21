@@ -27,11 +27,6 @@ class LoggerFactory
      */
     private static $redisClient;
 
-    /**
-     * @var string
-     */
-    private static $logKey;
-
 
     /**
      * @param string $name
@@ -58,7 +53,7 @@ class LoggerFactory
 
             // Allow the server to retrieve clients logs
             if ($saveOnRedis && true === ConfigurationLoader::get('client.async.enabled')) {
-                self::$logger->pushHandler(new RedisHandler(self::$redisClient, ConfigurationLoader::get('client.async.logKey'), $verbosity));
+                self::$logger->pushHandler(new RedisHandler(self::$redisClient, ConfigurationLoader::get('client.async.redis.key') . '.client.logs', $verbosity));
             }
         }
 
@@ -76,11 +71,7 @@ class LoggerFactory
             throw new \RuntimeException('Redis client has not been initialised');
         }
 
-        if (!isset(self::$logKey)) {
-            self::$logKey = ConfigurationLoader::get('client.async.logKey');
-        }
-
-        while (null != ($log = self::$redisClient->lpop(self::$logKey))) {
+        while (null != ($log = self::$redisClient->lpop(ConfigurationLoader::get('client.async.redis.key') . '.client.logs'))) {
             list ($level, $message) = explode('|', $log);
             self::$logger->addRecord($level, $message);
         }

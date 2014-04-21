@@ -58,6 +58,11 @@ class LOLAsyncClient implements LOLClientInterface
      */
     protected $lastCall = 0;
 
+    /**
+     * @var array
+     */
+    protected static $callbacks = [];
+
 
     /**
      * @param LoggerInterface $logger
@@ -85,44 +90,63 @@ class LOLAsyncClient implements LOLClientInterface
     }
 
     /**
-     * Authenticate the client
+     * Connect the client to the worker and authenticate the client
      */
     public function authenticate()
     {
         $this->con->connect('tcp://127.0.0.1:' . $this->port);
 
-        $this->send('authenticate');
+        $this->send('authenticate', array(), 'authenticate');
     }
 
     /**
      * @param $destination
      * @param $operation
-     * @param array|string $parameters
+     * @param array $parameters
+     * @param callable $callback
      * @param string $packetClass
      * @param array $headers
      * @param array $body
      *
-     * @return $this
+     * @return int|string
      */
-    public function invoke($destination, $operation, $parameters = array(), $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
+    public function invoke($destination, $operation, $parameters = array(), \Closure $callback = null, $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
     {
-        $this->send('syncInvoke', [
+        $invokeId = $this->send('syncInvoke', [
             $destination,
             $operation,
             $parameters
         ]);
 
-        return $this;
+        if (null !== $callback) {
+            self::$callbacks[$invokeId] = $callback;
+        }
+
+        return $invokeId;
     }
 
     /**
+     * @param int $invokeId
      * @param int $timeout
      *
      * @return array
      */
-    public function getResults($timeout = 10)
+    public function getResults($invokeId, $timeout = 10)
     {
-        $message = $this->redis->brpop('elogank.api.clients.' . $this->clientId . '.syncInvoke', $timeout);
+        $message = $this->redis->brpop($this->getKey('client.commands.' . $invokeId), $timeout);
+        if (null == $message) {
+            // TODO handle exception when timeout is reached
+
+            return null;
+        }
+
+        // Callback process
+        if (isset(self::$callbacks[$invokeId])) {
+            $callback = self::$callbacks[$invokeId];
+            unset(self::$callbacks[$invokeId]);
+
+            return $callback(unserialize($message[1]));
+        }
 
         return unserialize($message[1]);
     }
@@ -132,12 +156,12 @@ class LOLAsyncClient implements LOLClientInterface
      */
     public function isAuthenticated()
     {
-        $message = $this->redis->rpop('elogank.api.clients.' . $this->clientId . '.authenticate');
+        $message = $this->redis->rpop($this->getKey('client.commands.authenticate'));
         if (null == $message) {
             return null;
         }
 
-        return unserialize($message)['result'];
+        return unserialize($message);
     }
 
     /**
@@ -181,16 +205,36 @@ class LOLAsyncClient implements LOLClientInterface
     }
 
     /**
-     * @param string $commandName
-     * @param array  $parameters
+     * @param string          $commandName
+     * @param array           $parameters
+     * @param int|string|null $invokeId
+     *
+     * @return int|string
      */
-    protected function send($commandName, array $parameters = array())
+    protected function send($commandName, array $parameters = array(), $invokeId = null)
     {
+        if (null == $invokeId) {
+            $invokeId = $this->redis->incr($this->getKey('invokeId'));
+        }
+
         $this->lastCall = microtime(true) + 0.03;
         $this->con->send(json_encode([
+            'invokeId'   => $invokeId,
             'command'    => $commandName,
             'parameters' => $parameters
         ]));
+
+        return $invokeId;
+    }
+
+    /**
+     * @param string $key
+     *
+     * @return string
+     */
+    protected function getKey($key)
+    {
+        return ConfigurationLoader::get('client.async.redis.key') . '.' . $key;
     }
 
     /**

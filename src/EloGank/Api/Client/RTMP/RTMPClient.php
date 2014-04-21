@@ -434,13 +434,14 @@ class RTMPClient
      * @param $destination
      * @param $operation
      * @param array $parameters
+     * @param callable $callback
      * @param string $packetClass
      * @param array $headers
      * @param array $body
      *
      * @return int
      */
-    public function invoke($destination, $operation, $parameters = array(), $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
+    public function invoke($destination, $operation, $parameters = array(), \Closure $callback = null, $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
     {
         $packet = new RTMPPacket($destination, $operation, $parameters, $packetClass, $headers, $body);
         $packet->build($this->DSId);
@@ -476,7 +477,7 @@ class RTMPClient
      */
     public function syncInvoke($destionation, $operation, $parameters = array(), $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
     {
-        $this->invoke($destionation, $operation, $parameters, $packetClass, $headers, $body);
+        $this->invoke($destionation, $operation, $parameters, null, $packetClass, $headers, $body);
 
         return $this->parsePacket();
     }

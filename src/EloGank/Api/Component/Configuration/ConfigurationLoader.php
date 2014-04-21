@@ -18,6 +18,11 @@ class ConfigurationLoader
      */
     private static $configs;
 
+    /**
+     * @var array
+     */
+    private static $configsAsString;
+
 
     /**
      * @return array
@@ -49,9 +54,12 @@ class ConfigurationLoader
      */
     public static function get($name)
     {
-        $configs = self::load();
-
         $name = 'config.' . $name;
+        if (isset(self::$configsAsString[$name])) {
+            return self::$configsAsString[$name];
+        }
+
+        $configs = self::load();
         $parts = explode('.', $name);
         $config = $configs;
 
@@ -62,6 +70,9 @@ class ConfigurationLoader
 
             $config = $config[$part];
         }
+
+        // Save to avoid later iteration
+        self::$configsAsString[$name] = $config;
 
         return $config;
     }
