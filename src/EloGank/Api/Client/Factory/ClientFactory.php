@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the "EloGank League of Legends API" package.
+ *
+ * https://github.com/EloGank/lol-php-api
+ *
+ * For the full license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace EloGank\Api\Client\Factory;
 
 use EloGank\Api\Client\Async\LOLAsyncClient;
@@ -31,11 +40,15 @@ class ClientFactory
     public static function create(LoggerInterface $logger, Client $redis, $accountKey, $clientId, $forceSynchronous = false)
     {
         $configs = ConfigurationLoader::get('client.accounts')[$accountKey];
-        $port = ConfigurationLoader::get('client.async.startPort') + $clientId - 1;
+        $port = (int) ConfigurationLoader::get('client.async.startPort');
+        $port += $clientId - 1;
+
+        // Custom client port
         if (isset($configs['async']['port'])) {
             $port = $configs['async']['port'];
         }
 
+        // Async process
         if (!$forceSynchronous && true === ConfigurationLoader::get('client.async.enabled')) {
             return new LOLAsyncClient(
                 $logger,
@@ -47,6 +60,7 @@ class ClientFactory
             );
         }
 
+        // Sync process
         return new LOLClient(
             $logger,
             $clientId,
@@ -60,11 +74,11 @@ class ClientFactory
     }
 
     /**
-     * @param $regionUniqueName
+     * @param string $regionUniqueName
      *
      * @return RegionInterface
      *
-     * @throws \EloGank\Api\Model\Region\Exception\RegionNotFoundException
+     * @throws RegionNotFoundException
      */
     private static function createRegion($regionUniqueName)
     {

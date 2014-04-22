@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the "EloGank League of Legends API" package.
+ *
+ * https://github.com/EloGank/lol-php-api
+ *
+ * For the full license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace EloGank\Api\Client\Async;
 
 use EloGank\Api\Client\LOLClientInterface;
@@ -90,7 +99,7 @@ class LOLAsyncClient implements LOLClientInterface
     }
 
     /**
-     * Connect the client to the worker and authenticate the client
+     * {@inheritdoc}
      */
     public function authenticate()
     {
@@ -100,15 +109,7 @@ class LOLAsyncClient implements LOLClientInterface
     }
 
     /**
-     * @param $destination
-     * @param $operation
-     * @param array $parameters
-     * @param callable $callback
-     * @param string $packetClass
-     * @param array $headers
-     * @param array $body
-     *
-     * @return int|string
+     * {@inheritdoc}
      */
     public function invoke($destination, $operation, $parameters = array(), \Closure $callback = null, $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
     {
@@ -126,10 +127,7 @@ class LOLAsyncClient implements LOLClientInterface
     }
 
     /**
-     * @param int $invokeId
-     * @param int $timeout
-     *
-     * @return array
+     * {@inheritdoc}
      */
     public function getResults($invokeId, $timeout = 10)
     {
@@ -152,7 +150,7 @@ class LOLAsyncClient implements LOLClientInterface
     }
 
     /**
-     * @return null|bool
+     * {@inheritdoc}
      */
     public function isAuthenticated()
     {
@@ -165,7 +163,7 @@ class LOLAsyncClient implements LOLClientInterface
     }
 
     /**
-     * @return int
+     * {@inheritdoc}
      */
     public function getId()
     {
@@ -173,7 +171,7 @@ class LOLAsyncClient implements LOLClientInterface
     }
 
     /**
-     * @return RegionInterface
+     * {@inheritdoc}
      */
     public function getRegion()
     {
@@ -181,7 +179,7 @@ class LOLAsyncClient implements LOLClientInterface
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
     public function getError()
     {
@@ -189,7 +187,7 @@ class LOLAsyncClient implements LOLClientInterface
     }
 
     /**
-     * @return int
+     * {@inheritdoc}
      */
     public function getPort()
     {
@@ -197,11 +195,21 @@ class LOLAsyncClient implements LOLClientInterface
     }
 
     /**
-     * @return bool
+     * {@inheritdoc}
      */
     public function isAvailable()
     {
         return $this->lastCall <= microtime(true);
+    }
+
+    /**
+     * @param string $key
+     *
+     * @return string
+     */
+    protected function getKey($key)
+    {
+        return ConfigurationLoader::get('client.async.redis.key') . '.' . $key;
     }
 
     /**
@@ -228,17 +236,7 @@ class LOLAsyncClient implements LOLClientInterface
     }
 
     /**
-     * @param string $key
-     *
-     * @return string
-     */
-    protected function getKey($key)
-    {
-        return ConfigurationLoader::get('client.async.redis.key') . '.' . $key;
-    }
-
-    /**
-     * @return string
+     * {@inheritdoc}
      */
     public function __toString()
     {

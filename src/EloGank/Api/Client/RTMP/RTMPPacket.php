@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the "EloGank League of Legends API" package.
+ *
+ * https://github.com/EloGank/lol-php-api
+ *
+ * For the full license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace EloGank\Api\Client\RTMP;
 
 /**
@@ -10,42 +19,42 @@ class RTMPPacket
     /**
      * @var string
      */
-    private $destination;
+    protected $destination;
 
     /**
      * @var string
      */
-    private $operation;
+    protected $operation;
 
     /**
      * @var array
      */
-    private $parameters;
+    protected $parameters;
 
     /**
      * @var array
      */
-    private $additionnalHeaders;
+    protected $additionnalHeaders;
 
     /**
      * @var \SabreAMF_TypedObject
      */
-    private $headers;
+    protected $headers;
 
     /**
      * @var array
      */
-    private $additionnalBody;
+    protected $additionnalBody;
 
     /**
      * @var \SabreAMF_TypedObject
      */
-    private $data;
+    protected $data;
 
     /**
      * @var string
      */
-    private $class;
+    protected $class;
 
 
     /**

@@ -2,7 +2,6 @@
 
 namespace EloGank\Api\Controller;
 
-use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Component\Controller\Controller;
 
 /**

@@ -48,7 +48,7 @@ class ConfigurationLoader
     /**
      * @param string $name
      *
-     * @return mixed
+     * @return string|array|int|bool
      *
      * @throws Exception\ConfigurationKeyNotFoundException
      */

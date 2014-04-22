@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the "EloGank League of Legends API" package.
+ *
+ * https://github.com/EloGank/lol-php-api
+ *
+ * For the full license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace EloGank\Api\Client\RTMP;
 
 use EloGank\Api\Client\Exception\AuthException;
@@ -52,17 +61,17 @@ class RTMPClient
     /**
      * @var int
      */
-    private $startTime;
+    protected $startTime;
 
     /**
      * @var int
      */
-    private $DSId;
+    protected $DSId;
 
     /**
      * @var int
      */
-    private $invokeId = 1;
+    protected $invokeId = 1;
 
     /**
      * @var RTMPSocket
@@ -127,7 +136,9 @@ class RTMPClient
     }
 
     /**
-     * @throws \EloGank\Api\Client\Exception\AuthException
+     * Do the handshake
+     *
+     * @throws AuthException
      */
     protected function doHandshake()
     {
@@ -256,7 +267,7 @@ class RTMPClient
     /**
      * @return array
      *
-     * @throws \EloGank\Api\Client\Exception\PacketException
+     * @throws PacketException
      */
     protected function parsePacket()
     {
@@ -384,8 +395,6 @@ class RTMPClient
             if ($invokeId == null || $invokeId == 0) {
                 throw new PacketException('Unknown invokeId: ' . $invokeId);
             }
-            // TODO callbacks
-            //elseif (isset($callbacks[$invokeId])) { }
 
             return $result;
         }
@@ -436,15 +445,7 @@ class RTMPClient
     }
 
     /**
-     * @param $destination
-     * @param $operation
-     * @param array $parameters
-     * @param callable $callback
-     * @param string $packetClass
-     * @param array $headers
-     * @param array $body
-     *
-     * @return int
+     * {@inheritdoc}
      */
     public function invoke($destination, $operation, $parameters = array(), \Closure $callback = null, $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
     {
@@ -478,6 +479,9 @@ class RTMPClient
     }
 
     /**
+     * Call the invoke and return the response, without calling getResults() method<br />
+     * Callbacks are not possible with this method
+     *
      * @param string $destionation
      * @param string $operation
      * @param array  $parameters
@@ -495,10 +499,7 @@ class RTMPClient
     }
 
     /**
-     * @param $invokeId
-     * @param int $timeout
-     *
-     * @return null
+     * {@inheritdoc}
      */
     public function getResults($invokeId, $timeout = 10)
     {

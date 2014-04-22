@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the "EloGank League of Legends API" package.
+ *
+ * https://github.com/EloGank/lol-php-api
+ *
+ * For the full license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace EloGank\Api\Client\RTMP;
 
 /**
@@ -15,7 +24,7 @@ class RTMPSocket
     /**
      * @var string
      */
-    private $errorMessage;
+    protected $errorMessage;
 
     /**
      * @param string $protocol

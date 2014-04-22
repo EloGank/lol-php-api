@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the "EloGank League of Legends API" package.
+ *
+ * https://github.com/EloGank/lol-php-api
+ *
+ * For the full license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace EloGank\Api\Client;
 
 use EloGank\Api\Client\Exception\AuthException;
@@ -7,7 +16,6 @@ use EloGank\Api\Client\Exception\BadCredentialsException;
 use EloGank\Api\Client\Exception\ClientException;
 use EloGank\Api\Client\Exception\ServerBusyException;
 use EloGank\Api\Client\RTMP\RTMPClient;
-use EloGank\Api\Logger\LoggerFactory;
 use EloGank\Api\Model\Region\RegionInterface;
 use Psr\Log\LoggerInterface;
 
@@ -100,7 +108,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     }
 
     /**
-     * Connect & auth to the login server
+     * {@inheritdoc}
      */
     public function authenticate()
     {
@@ -145,6 +153,8 @@ class LOLClient extends RTMPClient implements LOLClientInterface
             $body
         ));
 
+        // TODO handle login exception, like wrong version, see getAuthToken() if the error can be relocated here
+
         $data = $response['data']->getData();
         $body = $data->body->getAMFData();
         $token = $body['token'];
@@ -173,9 +183,6 @@ class LOLClient extends RTMPClient implements LOLClientInterface
         ), array(
             'clientId' => 'gn-' . $accountId
         ));
-
-        // TODO here, do some actions
-        var_dump($response);
     }
 
     /**
@@ -198,7 +205,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     }
 
     /**
-     * @return mixed
+     * @return string
      *
      * @throws \RuntimeException                 When a configuration error occured
      * @throws Exception\AuthException           When an unknown auth error occured
@@ -230,7 +237,6 @@ class LOLClient extends RTMPClient implements LOLClientInterface
             throw new ServerBusyException('The server is currently busy, please try again later');
         }
 
-        // FIXME need more tests
         // Login queue process
         if (!isset($response['token'])) {
             $response = $this->queueProcess($response);
@@ -312,8 +318,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
             throw new \RuntimeException('Failed to initialize cURL');
         }
 
-        // TODO implement other langs ?
-        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; ' . str_replace('_', '-', 'en_GB') . ' AppleWebKit/533.19.4 (KHTML, like Gecko) AdobeAIR/3.7');
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; ' . str_replace('_', '-', $this->locale) . ' AppleWebKit/533.19.4 (KHTML, like Gecko) AdobeAIR/3.7');
         curl_setopt($ch, CURLOPT_REFERER, 'app:/LolClient.swf/[[DYNAMIC]]/6');
 
         curl_setopt($ch, CURLOPT_URL, sprintf('%s%s', $this->region->getLoginQueue(), $url));
@@ -339,15 +344,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     }
 
     /**
-     * @param $destination
-     * @param $operation
-     * @param array $parameters
-     * @param callable $callback
-     * @param string $packetClass
-     * @param array $headers
-     * @param array $body
-     *
-     * @return int
+     * {@inheritdoc}
      */
     public function invoke($destination, $operation, $parameters = array(), \Closure $callback = null, $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
     {
@@ -357,7 +354,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     }
 
     /**
-     * @return int
+     * {@inheritdoc}
      */
     public function getId()
     {
@@ -365,7 +362,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
     public function getError()
     {
@@ -373,7 +370,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
     public function getRegion()
     {
@@ -381,7 +378,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     }
 
     /**
-     * @return bool
+     * {@inheritdoc}
      */
     public function isAuthenticated()
     {
@@ -389,15 +386,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     }
 
     /**
-     * @return LoggerInterface
-     */
-    protected function getLogger()
-    {
-        return LoggerFactory::create('LOLClient #' . $this->clientId);
-    }
-
-    /**
-     * @return int
+     * {@inheritdoc}
      */
     public function getPort()
     {
@@ -405,7 +394,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     }
 
     /**
-     * @return bool
+     * {@inheritdoc}
      */
     public function isAvailable()
     {
@@ -413,7 +402,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
     public function __toString()
     {
