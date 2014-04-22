@@ -11,7 +11,7 @@
 
 namespace EloGank\Api\Command;
 
-use EloGank\Api\Client\Async\ClientWorker;
+use EloGank\Api\Client\Worker\ClientWorker;
 use EloGank\Api\Client\Factory\ClientFactory;
 use EloGank\Api\Component\Command\Command;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;

@@ -9,9 +9,8 @@
  * file that was distributed with this source code.
  */
 
-namespace EloGank\Api\Client\Async;
+namespace EloGank\Api\Client;
 
-use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Model\Region\RegionInterface;
 use Predis\Client;
@@ -20,7 +19,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
  */
-class LOLAsyncClient implements LOLClientInterface
+class LOLClientAsync implements LOLClientInterface
 {
     /**
      * @var LoggerInterface
@@ -83,7 +82,7 @@ class LOLAsyncClient implements LOLClientInterface
      */
     public function __construct(LoggerInterface $logger, Client $redis, $accountKey, $clientId, RegionInterface $region, $port)
     {
-        $rootFolder     = __DIR__ . '/../../../../..';
+        $rootFolder     = __DIR__ . '/../../../..';
 
         $this->logger   = $logger;
         $this->pidPath  = $rootFolder . '/' . ConfigurationLoader::get('cache.path') . '/clientpids/client_' . $clientId . '.pid';

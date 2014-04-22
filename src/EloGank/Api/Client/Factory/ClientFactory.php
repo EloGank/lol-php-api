@@ -11,8 +11,8 @@
 
 namespace EloGank\Api\Client\Factory;
 
-use EloGank\Api\Client\Async\LOLAsyncClient;
 use EloGank\Api\Client\LOLClient;
+use EloGank\Api\Client\LOLClientAsync;
 use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Component\Configuration\Exception\ConfigurationKeyNotFoundException;
@@ -50,7 +50,7 @@ class ClientFactory
 
         // Async process
         if (!$forceSynchronous && true === ConfigurationLoader::get('client.async.enabled')) {
-            return new LOLAsyncClient(
+            return new LOLClientAsync(
                 $logger,
                 $redis,
                 $accountKey,

@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace EloGank\Api\Client\Async;
+namespace EloGank\Api\Client\Worker;
 
 use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
