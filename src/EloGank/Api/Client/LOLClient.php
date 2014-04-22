@@ -405,17 +405,6 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     }
 
     /**
-     * @param int $invokeId
-     * @param int $timeout
-     *
-     * @return array
-     */
-    public function getResults($invokeId, $timeout = 10)
-    {
-        return $this->parsePacket();
-    }
-
-    /**
      * @return bool
      */
     public function isAvailable()

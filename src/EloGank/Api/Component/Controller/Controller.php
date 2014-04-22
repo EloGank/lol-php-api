@@ -2,6 +2,7 @@
 
 namespace EloGank\Api\Component\Controller;
 
+use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Manager\ApiManager;
 
 /**
@@ -24,7 +25,7 @@ abstract class Controller
     }
 
     /**
-     * @return \EloGank\Api\Client\LOLClient
+     * @return LOLClientInterface
      */
     protected function getClient()
     {

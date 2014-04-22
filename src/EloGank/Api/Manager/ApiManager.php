@@ -89,6 +89,9 @@ class ApiManager
 
             $this->catchSignals();
         }
+        else {
+            $this->logger->warning('You use the slow mode (synchronous), you can use the fast mode (asynchronous) by setting the configuration "client.async.enabled" to "true"');
+        }
     }
 
     /**

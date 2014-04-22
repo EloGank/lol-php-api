@@ -55,6 +55,7 @@ class ClientWorker
             $request = $server->recv();
             $this->logger->debug('Client worker ' . $this->client . ' receiving request : ' . $request);
 
+            // Check if the input is valid, ignore if wrong
             $request = json_decode($request, true);
             if (!$this->isValidInput($request)) {
                 $this->logger->error('Client worker ' . $this->client . ' received an invalid input');
@@ -62,8 +63,12 @@ class ClientWorker
                 continue;
             }
 
+            // Call the right method in the client and push to redis the result
             $result = call_user_func_array(array($this->client, $request['command']), $request['parameters']);
-            $this->redis->rpush(ConfigurationLoader::get('client.async.redis.key') . '.client.commands.' . $request['invokeId'], serialize($result));
+            $key = ConfigurationLoader::get('client.async.redis.key') . '.client.commands.' . $request['invokeId'];
+
+            $this->redis->rpush($key, serialize($result));
+            $this->redis->expire($key, 60); // TODO config
         }
     }
 

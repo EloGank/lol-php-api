@@ -69,6 +69,11 @@ class RTMPClient
      */
     protected $socket;
 
+    /**
+     * @var array
+     */
+    protected $responses = [];
+
 
     /**
      * @param LoggerInterface $logger
@@ -450,11 +455,11 @@ class RTMPClient
         $amf    = new \SabreAMF_AMF0_Serializer($output);
         $amf3   = new \SabreAMF_AMF3_Serializer($output);
 
-        $nextInvokeId = ++$this->invokeId;
+        $invokeId = ++$this->invokeId;
 
         $output->writeByte(0x00);
         $output->writeByte(0x05);
-        $amf->writeAMFData($nextInvokeId);
+        $amf->writeAMFData($invokeId);
         $output->writeByte(0x05);
         $output->writeByte(0x11);
         $amf3->writeAMFData($packet->getData());
@@ -462,7 +467,14 @@ class RTMPClient
 
         $this->socket->write($ret);
 
-        return $nextInvokeId;
+        $result = $this->parsePacket();
+        if (null != $callback) {
+            $result = $callback($result);
+        }
+
+        $this->responses[$invokeId] = $result;
+
+        return $invokeId;
     }
 
     /**
@@ -477,8 +489,27 @@ class RTMPClient
      */
     public function syncInvoke($destionation, $operation, $parameters = array(), $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
     {
-        $this->invoke($destionation, $operation, $parameters, null, $packetClass, $headers, $body);
+        $invokeId = $this->invoke($destionation, $operation, $parameters, null, $packetClass, $headers, $body);
 
-        return $this->parsePacket();
+        return $this->getResults($invokeId);
+    }
+
+    /**
+     * @param $invokeId
+     * @param int $timeout
+     *
+     * @return null
+     */
+    public function getResults($invokeId, $timeout = 10)
+    {
+        if (!isset($this->responses[$invokeId])) {
+            // TODO handle exception
+            throw new \InvalidArgumentException('No result found for invokeId ' . $invokeId);
+        }
+
+        $result = $this->responses[$invokeId];
+        unset($this->responses[$invokeId]);
+
+        return $result;
     }
 }
