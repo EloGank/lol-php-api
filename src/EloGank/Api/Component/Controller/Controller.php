@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the "EloGank League of Legends API" package.
+ *
+ * https://github.com/EloGank/lol-php-api
+ *
+ * For the full license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace EloGank\Api\Component\Controller;
 
 use EloGank\Api\Client\LOLClientInterface;
@@ -11,7 +20,7 @@ use EloGank\Api\Manager\ApiManager;
 abstract class Controller
 {
     /**
-     * @var \EloGank\Api\Manager\ApiManager
+     * @var ApiManager
      */
     private $apiManager;
 
@@ -25,6 +34,8 @@ abstract class Controller
     }
 
     /**
+     * Get the next available client
+     *
      * @return LOLClientInterface
      */
     protected function getClient()
@@ -33,6 +44,8 @@ abstract class Controller
     }
 
     /**
+     * Call another controller method
+     *
      * @param string $route
      * @param array  $parameters
      *

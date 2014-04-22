@@ -1,13 +1,21 @@
 <?php
 
+/*
+ * This file is part of the "EloGank League of Legends API" package.
+ *
+ * https://github.com/EloGank/lol-php-api
+ *
+ * For the full license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace EloGank\Api\Manager;
 
 use EloGank\Api\Client\Factory\ClientFactory;
-use EloGank\Api\Client\LOLClient;
 use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Routing\Router;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
-use EloGank\Api\Logger\LoggerFactory;
+use EloGank\Api\Component\Logging\LoggerFactory;
 use Predis\Client;
 use Psr\Log\LoggerInterface;
 use React\EventLoop\Factory;
@@ -27,7 +35,7 @@ class ApiManager
     /**
      * @var LOLClientInterface[]
      */
-    protected $clients;
+    protected $clients = [];
 
     /**
      * @var int
@@ -63,8 +71,6 @@ class ApiManager
      */
     public function init()
     {
-        $this->clients = [];
-
         $this->loop = Factory::create();
 
         // Catch signals
@@ -79,11 +85,14 @@ class ApiManager
             });
         }
 
+        // Init router
         $this->router = new Router();
         $this->router->init();
 
+        // Init redis
         $this->redis = new Client(sprintf('tcp://%s:%d', ConfigurationLoader::get('client.async.redis.host'), ConfigurationLoader::get('client.async.redis.port')));
 
+        // Async processes
         if (true === ConfigurationLoader::get('client.async.enabled')) {
             $this->clean(true);
 
@@ -105,14 +114,14 @@ class ApiManager
 
         $tmpClients = [];
         foreach (ConfigurationLoader::get('client.accounts') as $accountKey => $account) {
-            $client = ClientFactory::create($this->logger, $this->redis, $accountKey, $this->getClientId());
+            $client = ClientFactory::create($this->logger, $this->redis, $accountKey, $this->getNextClientId());
             $client->authenticate();
 
             $tmpClients[] = $client;
         }
 
         $nbClients = count($tmpClients);
-        $isAsync = (bool) ConfigurationLoader::get('client.async.enabled');
+        $isAsync = true === ConfigurationLoader::get('client.async.enabled');
         $i = 0;
 
         /** @var LOLClientInterface $client */
@@ -123,7 +132,6 @@ class ApiManager
                 if (null !== $isAuthenticated) {
                     if (true === $isAuthenticated) {
                         $this->clients[] = $client;
-
                         $this->logger->info('Client ' . $client . ' is connected');
                     }
                     else {
@@ -246,6 +254,7 @@ class ApiManager
         // Test if process is still running
         $output = [];
         exec('ps ' . $pid, $output);
+
         if (!isset($output[1])) {
             if (null != $client) {
                 $this->logger->debug('Client ' . $client . ' (pid: #' . $pid . ') not running, deleting cache pid file');
@@ -259,6 +268,7 @@ class ApiManager
             return;
         }
 
+        // Kill
         if (posix_kill($pid, SIGKILL)) {
             if (null != $client) {
                 $this->logger->debug('Client ' . $client . ' (pid: #' . $pid . ') has been killed');
@@ -281,7 +291,7 @@ class ApiManager
     /**
      * @return int
      */
-    protected function getClientId()
+    protected function getNextClientId()
     {
         return $this->clientId++;
     }
@@ -295,7 +305,7 @@ class ApiManager
     }
 
     /**
-     * @return \EloGank\Api\Component\Routing\Router
+     * @return Router
      */
     public function getRouter()
     {
@@ -303,7 +313,10 @@ class ApiManager
     }
 
     /**
-     * @return LOLClient
+     * The RTMP LoL API will temporary ban you if you call too many times a service<br />
+     * To avoid this limitation, you must wait before making a new request
+     *
+     * @return LOLClientInterface
      */
     public function getClient()
     {
@@ -314,7 +327,7 @@ class ApiManager
                 }
             }
 
-            sleep(0.05);
+            sleep(0.05); // TODO switch to configs
         }
     }
 }

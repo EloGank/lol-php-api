@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the "EloGank League of Legends API" package.
+ *
+ * https://github.com/EloGank/lol-php-api
+ *
+ * For the full license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace EloGank\Api\Command;
 
 use EloGank\Api\Component\Command\Command;
@@ -21,7 +30,7 @@ class ApiStartCommand extends Command
     {
         $this
             ->setName('elogank:api:start')
-            ->setDescription('Start the EloGank League of Legends API')
+            ->setDescription('Start the EloGank League of Legends API server')
         ;
     }
 
@@ -44,6 +53,7 @@ class ApiStartCommand extends Command
             $apiManager->clean();
             $this->getApplication()->renderException($e, $output);
 
+            // Need to be killed manually
             posix_kill(getmypid(), SIGKILL);
         }
     }

@@ -1,6 +1,15 @@
 <?php
 
-namespace EloGank\Api\Logger\Handler;
+/*
+ * This file is part of the "EloGank League of Legends API" package.
+ *
+ * https://github.com/EloGank/lol-php-api
+ *
+ * For the full license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace EloGank\Api\Component\Logging\Handler;
 
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\AbstractProcessingHandler;
@@ -13,7 +22,7 @@ use Predis\Client;
 class RedisHandler extends AbstractProcessingHandler
 {
     /**
-     * @var \Predis\Client
+     * @var Client
      */
     private $redisClient;
 

@@ -1,9 +1,18 @@
 <?php
 
-namespace EloGank\Api\Logger;
+/*
+ * This file is part of the "EloGank League of Legends API" package.
+ *
+ * https://github.com/EloGank/lol-php-api
+ *
+ * For the full license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace EloGank\Api\Component\Logging;
 
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
-use EloGank\Api\Logger\Handler\RedisHandler;
+use EloGank\Api\Component\Logging\Handler\RedisHandler;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
 use Predis\Client;
@@ -20,12 +29,12 @@ class LoggerFactory
     /**
      * @var LoggerInterface
      */
-    private static $logger;
+    protected static $logger;
 
     /**
      * @var Client
      */
-    private static $redisClient;
+    protected static $redisClient;
 
 
     /**
@@ -37,8 +46,6 @@ class LoggerFactory
     public static function create($name = 'EloGankAPI', $saveOnRedis = false)
     {
         if (!isset(self::$logger)) {
-            self::$redisClient = new Client('tcp://127.0.0.1:6379');
-
             $verbosity = constant('Monolog\Logger::' . strtoupper(ConfigurationLoader::get('log.verbosity')));
             self::$logger = new Logger($name, array(
                     new ConsoleHandler(new ConsoleOutput(), true, array(
@@ -52,8 +59,12 @@ class LoggerFactory
             );
 
             // Allow the server to retrieve clients logs
-            if ($saveOnRedis && true === ConfigurationLoader::get('client.async.enabled')) {
-                self::$logger->pushHandler(new RedisHandler(self::$redisClient, ConfigurationLoader::get('client.async.redis.key') . '.client.logs', $verbosity));
+            if (true === ConfigurationLoader::get('client.async.enabled')) {
+                self::$redisClient = new Client(sprintf('tcp://%s:%s', ConfigurationLoader::get('client.async.redis.host'), ConfigurationLoader::get('client.async.redis.port')));
+
+                if ($saveOnRedis) {
+                    self::$logger->pushHandler(new RedisHandler(self::$redisClient, ConfigurationLoader::get('client.async.redis.key') . '.client.logs', $verbosity));
+                }
             }
         }
 
@@ -61,6 +72,8 @@ class LoggerFactory
     }
 
     /**
+     * Show the asynchronous client logs in the main process logger (console)
+     *
      * @return string|null
      *
      * @throws \RuntimeException

@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the "EloGank League of Legends API" package.
+ *
+ * https://github.com/EloGank/lol-php-api
+ *
+ * For the full license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace EloGank\Api\Component\Command;
 
 use Symfony\Component\Console\Command\Command as BaseCommand;
@@ -11,9 +20,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 abstract class Command extends BaseCommand
 {
     /**
-     * @param OutputInterface $output
+     * Write a section title
      *
-     * @param string|null $sectionTitle
+     * @param OutputInterface $output
+     * @param string|null     $sectionTitle
      */
     protected function writeSection(OutputInterface $output, $sectionTitle = null)
     {

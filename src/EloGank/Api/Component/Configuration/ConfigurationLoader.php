@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the "EloGank League of Legends API" package.
+ *
+ * https://github.com/EloGank/lol-php-api
+ *
+ * For the full license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace EloGank\Api\Component\Configuration;
 
 use EloGank\Api\Component\Configuration\Exception\ConfigurationFileNotFoundException;
@@ -16,12 +25,12 @@ class ConfigurationLoader
     /**
      * @var array
      */
-    private static $configs;
+    protected static $configs;
 
     /**
      * @var array
      */
-    private static $configsAsString;
+    protected static $configsAsString;
 
 
     /**
@@ -29,7 +38,7 @@ class ConfigurationLoader
      *
      * @throws Exception\ConfigurationFileNotFoundException
      */
-    private static function load()
+    protected static function load()
     {
         if (!isset(self::$configs)) {
             $path =  __DIR__ . '/../../../../../config/config.yml';

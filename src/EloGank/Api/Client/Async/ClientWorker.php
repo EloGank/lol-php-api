@@ -11,7 +11,7 @@
 
 namespace EloGank\Api\Client\Async;
 
-use EloGank\Api\Client\LOLClient;
+use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use Predis\Client;
 use Psr\Log\LoggerInterface;
@@ -27,7 +27,7 @@ class ClientWorker
     protected $logger;
 
     /**
-     * @var LOLClient
+     * @var LOLClientInterface
      */
     protected $client;
 
@@ -38,11 +38,11 @@ class ClientWorker
 
 
     /**
-     * @param LoggerInterface $logger
-     * @param LOLClient       $client
-     * @param Client          $redis
+     * @param LoggerInterface    $logger
+     * @param LOLClientInterface $client
+     * @param Client             $redis
      */
-    public function __construct(LoggerInterface $logger, LOLClient $client, $redis)
+    public function __construct(LoggerInterface $logger, LOLClientInterface $client, $redis)
     {
         $this->logger = $logger;
         $this->client = $client;
@@ -52,7 +52,7 @@ class ClientWorker
     /**
      * Start the worker and wait for requests
      */
-    public function worker()
+    public function listen()
     {
         $context = new \ZMQContext();
         $server = new \ZMQSocket($context, \ZMQ::SOCKET_PULL);

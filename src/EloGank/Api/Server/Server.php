@@ -1,14 +1,22 @@
 <?php
 
+/*
+ * This file is part of the "EloGank League of Legends API" package.
+ *
+ * https://github.com/EloGank/lol-php-api
+ *
+ * For the full license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace EloGank\Api\Server;
 
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
-use EloGank\Api\Logger\LoggerFactory;
+use EloGank\Api\Component\Logging\LoggerFactory;
 use EloGank\Api\Manager\ApiManager;
 use EloGank\Api\Server\Exception\MalformedClientInputException;
 use EloGank\Api\Server\Exception\ServerException;
 use Psr\Log\LoggerInterface;
-use React\EventLoop\Factory;
 use React\Socket\Connection;
 use React\Socket\Server as SocketServer;
 
@@ -34,11 +42,11 @@ class Server
     public function __construct(ApiManager $apiManager)
     {
         $this->apiManager = $apiManager;
-        $this->logger     = LoggerFactory::create('Server');
+        $this->logger     = LoggerFactory::create();
     }
 
     /**
-     *
+     * Start & init the API
      */
     public function listen()
     {
@@ -67,6 +75,8 @@ class Server
 
                     $response = $this->apiManager->getRouter()->process($this->apiManager, $data);
                     var_dump($response);
+
+                    // TODO do some action here, like write the response to the client
                 }
                 catch (ServerException $e) {
                     $this->logger->error($e->getMessage());
@@ -97,7 +107,7 @@ class Server
      *
      * @return bool
      */
-    private function isValidInput(array $data)
+    protected function isValidInput(array $data)
     {
         if (!isset($data['route']) || !isset($data['parameters'])) {
             return false;

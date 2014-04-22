@@ -1,12 +1,21 @@
 <?php
 
+/*
+ * This file is part of the "EloGank League of Legends API" package.
+ *
+ * https://github.com/EloGank/lol-php-api
+ *
+ * For the full license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace EloGank\Api\Command;
 
 use EloGank\Api\Client\Async\ClientWorker;
 use EloGank\Api\Client\Factory\ClientFactory;
 use EloGank\Api\Component\Command\Command;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
-use EloGank\Api\Logger\LoggerFactory;
+use EloGank\Api\Component\Logging\LoggerFactory;
 use Predis\Client;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -50,6 +59,6 @@ class ClientCreateCommand extends Command
         );
 
         $connector = new ClientWorker($logger, $client, $redis);
-        $connector->worker();
+        $connector->listen();
     }
 }
