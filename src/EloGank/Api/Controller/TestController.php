@@ -47,9 +47,8 @@ class TestController extends Controller
         ];
 
         $results = [];
-        $client = $this->getClient();
         foreach ($invokeIds as $invokeId) {
-            $results[] = $client->getResults($invokeId);
+            $results[] = $this->getResults($invokeId);
         }
 
         return microtime(true) - $time;

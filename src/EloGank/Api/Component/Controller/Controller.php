@@ -11,6 +11,7 @@
 
 namespace EloGank\Api\Component\Controller;
 
+use EloGank\Api\Client\Formatter\ResultFormatter;
 use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Manager\ApiManager;
 
@@ -41,6 +42,22 @@ abstract class Controller
     protected function getClient()
     {
         return $this->apiManager->getClient();
+    }
+
+    /**
+     * Transform the result into an array
+     *
+     * @param int $invokeId
+     * @param int $timeout
+     *
+     * @return array
+     */
+    protected function getResults($invokeId, $timeout = 10)
+    {
+        $results = $this->getClient()->getResults($invokeId, $timeout);
+        $formatter = new ResultFormatter();
+
+        return $formatter->format($results);
     }
 
     /**
