@@ -64,6 +64,10 @@ class Server
             /** @var Connection $conn */
             $this->logger->debug(sprintf('Client [%s] is connected to server', $conn->getRemoteAddress()));
 
+            $conn->getBuffer()->on('full-drain', function () use ($conn) {
+                $conn->close();
+            });
+
             $conn->on('data', function ($rawData) use ($conn) {
                 $this->logger->debug(sprintf('Client sent: %s', $rawData));
                 $data = json_decode($rawData, true);
@@ -74,7 +78,8 @@ class Server
                     }
 
                     $response = $this->apiManager->getRouter()->process($this->apiManager, $data);
-                    var_dump($response);
+
+                    $conn->write($response);
 
                     // TODO do some action here, like write the response to the client
                 }
@@ -83,13 +88,6 @@ class Server
 
                     $conn->write($e->toJson());
                 }
-                finally {
-                    $conn->close();
-                }
-
-                $conn->getBuffer()->on('full-drain', function () use ($conn) {
-                    $conn->close();
-                });
             });
         });
 

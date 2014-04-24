@@ -23,7 +23,7 @@ abstract class Controller
     /**
      * @var ApiManager
      */
-    private $apiManager;
+    protected $apiManager;
 
 
     /**
