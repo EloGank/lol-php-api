@@ -51,6 +51,8 @@ class TestController extends Controller
             $results[] = $this->getResults($invokeId);
         }
 
-        return microtime(true) - $time;
+        var_dump(microtime(true) - $time);
+
+        return $results;
     }
 } 

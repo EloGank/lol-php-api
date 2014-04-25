@@ -16,6 +16,11 @@ use EloGank\Api\Component\Logging\LoggerFactory;
 use EloGank\Api\Manager\ApiManager;
 use EloGank\Api\Server\Exception\MalformedClientInputException;
 use EloGank\Api\Server\Exception\ServerException;
+use EloGank\Api\Server\Exception\UnknownFormatException;
+use EloGank\Api\Server\Formatter\ClientFormatterInterface;
+use EloGank\Api\Server\Formatter\JsonClientFormatter;
+use EloGank\Api\Server\Formatter\NativeClientFormatter;
+use EloGank\Api\Server\Formatter\XmlClientFormatter;
 use Psr\Log\LoggerInterface;
 use React\Socket\Connection;
 use React\Socket\Server as SocketServer;
@@ -35,6 +40,11 @@ class Server
      */
     protected $apiManager;
 
+    /**
+     * @var ClientFormatterInterface[]
+     */
+    protected $formatters;
+
 
     /**
      * @param ApiManager $apiManager
@@ -43,6 +53,11 @@ class Server
     {
         $this->apiManager = $apiManager;
         $this->logger     = LoggerFactory::create();
+
+        $this->formatters = [
+            'native' => new NativeClientFormatter(),
+            'json'   => new JsonClientFormatter()
+        ];
     }
 
     /**
@@ -79,9 +94,7 @@ class Server
 
                     $response = $this->apiManager->getRouter()->process($this->apiManager, $data);
 
-                    $conn->write($response);
-
-                    // TODO do some action here, like write the response to the client
+                    $conn->write($this->format($data, $response));
                 }
                 catch (ServerException $e) {
                     $this->logger->error($e->getMessage());
@@ -98,6 +111,28 @@ class Server
         $socket->listen($port, $bind);
 
         $loop->run();
+    }
+
+    /**
+     * @param array $input
+     * @param array $results
+     *
+     * @return mixed
+     *
+     * @throws UnknownFormatException
+     */
+    protected function format(array $input, array $results)
+    {
+        $format = ConfigurationLoader::get('server.format');
+        if (isset($input['format'])) {
+            $format = $input['format'];
+
+            if (!isset($this->formatters[$format])) {
+                throw new UnknownFormatException('Unknown format for "' . $format . '". Did you mean : "' . join(', ', array_keys($this->formatters)) . '" ?');
+            }
+        }
+
+        return $this->formatters[$format]->format($results);
     }
 
     /**
