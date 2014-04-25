@@ -63,7 +63,14 @@ class ResultFormatter
             return $object->format('Y-m-d H:i:s');
         }
         elseif ($object instanceof \stdClass) {
-            return get_object_vars($object);
+            $array = get_object_vars($object);
+            foreach ($array as &$data) {
+                if (is_object($data)) {
+                    $data = $this->toArray($data);
+                }
+            }
+
+            return $array;
         }
 
         throw new \RuntimeException('Unknown object class "' . get_class($object) . '"');
