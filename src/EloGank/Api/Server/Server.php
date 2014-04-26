@@ -56,7 +56,8 @@ class Server
 
         $this->formatters = [
             'native' => new NativeClientFormatter(),
-            'json'   => new JsonClientFormatter()
+            'json'   => new JsonClientFormatter(),
+            'xml'    => new XmlClientFormatter()
         ];
     }
 
