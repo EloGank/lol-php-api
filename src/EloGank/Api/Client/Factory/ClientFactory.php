@@ -63,6 +63,7 @@ class ClientFactory
         // Sync process
         return new LOLClient(
             $logger,
+            $redis,
             $clientId,
             self::createRegion($configs['region']),
             $configs['username'],

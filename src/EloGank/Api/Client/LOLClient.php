@@ -16,7 +16,9 @@ use EloGank\Api\Client\Exception\BadCredentialsException;
 use EloGank\Api\Client\Exception\ClientException;
 use EloGank\Api\Client\Exception\ServerBusyException;
 use EloGank\Api\Client\RTMP\RTMPClient;
+use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Model\Region\RegionInterface;
+use Predis\Client;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,6 +29,11 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     const URL_AUTHENTICATE = '/login-queue/rest/queue/authenticate';
     const URL_TOKEN        = '/login-queue/rest/queue/authToken';
     const URL_TICKER       = '/login-queue/rest/queue/ticker';
+
+    /**
+     * @var Client
+     */
+    protected $redis;
 
     /**
      * @var int
@@ -85,6 +92,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
 
 
     /**
+     * @param Client          $redis
      * @param LoggerInterface $logger
      * @param int             $clientId
      * @param RegionInterface $region
@@ -94,8 +102,9 @@ class LOLClient extends RTMPClient implements LOLClientInterface
      * @param string          $locale
      * @param int             $port
      */
-    public function __construct(LoggerInterface $logger, $clientId, RegionInterface $region, $username, $password, $clientVersion, $locale, $port)
+    public function __construct(LoggerInterface $logger, Client $redis, $clientId, RegionInterface $region, $username, $password, $clientVersion, $locale, $port)
     {
+        $this->redis         = $redis;
         $this->clientId      = $clientId;
         $this->region        = $region;
         $this->username      = $username;
@@ -153,7 +162,28 @@ class LOLClient extends RTMPClient implements LOLClientInterface
             $body
         ));
 
-        // TODO handle login exception, like wrong version, see getAuthToken() if the error can be relocated here
+        // Checking errors
+        if ('_error' == $response['result']) {
+            $root = $response['data']->getData()->rootCause->getAMFData();
+            if ('com.riotgames.platform.login.impl.ClientVersionMismatchException' == $root['rootCauseClassname']) {
+                $newVersion = $root['substitutionArguments'][1];
+
+                // Avoid multiple warnings in async
+                if (true === ConfigurationLoader::get('client.async.enabled')) {
+                    $key = ConfigurationLoader::get('client.async.redis.key') . '.clients.errors.wrong_version';
+                    if (null === $this->redis->get($key)) {
+                        $this->logger->alert('Your client version configuration is outdated, please update your config file (key: client.version) with this version : ' . $newVersion);
+                        $this->logger->alert('Automatic restart with new client version...');
+
+                        $this->redis->set($key, true);
+                    }
+                }
+
+                $this->clientVersion = $newVersion;
+
+                return $this->authenticate();
+            }
+        }
 
         $data = $response['data']->getData();
         $body = $data->body->getAMFData();

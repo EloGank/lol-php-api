@@ -15,7 +15,7 @@ config:
           host:       127.0.0.1
           port:       6379
           key:        elogank.api
-      version:        4.5.x
+      version:        4.6.x
       locale:         en_US
       accounts:
         - region:     ~
