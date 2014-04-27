@@ -12,10 +12,10 @@
 namespace EloGank\Api\Server;
 
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
+use EloGank\Api\Component\Exception\ArrayException;
 use EloGank\Api\Component\Logging\LoggerFactory;
 use EloGank\Api\Manager\ApiManager;
 use EloGank\Api\Server\Exception\MalformedClientInputException;
-use EloGank\Api\Server\Exception\ServerException;
 use EloGank\Api\Server\Exception\UnknownFormatException;
 use EloGank\Api\Server\Formatter\ClientFormatterInterface;
 use EloGank\Api\Server\Formatter\JsonClientFormatter;
@@ -104,7 +104,7 @@ class Server
 
                     $conn->write($this->format($response, $format));
                 }
-                catch (ServerException $e) {
+                catch (ArrayException $e) {
                     $this->logger->error($e->getMessage());
 
                     $conn->write($this->format($e->toArray(), $format));

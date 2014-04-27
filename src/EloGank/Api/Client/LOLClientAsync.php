@@ -11,6 +11,7 @@
 
 namespace EloGank\Api\Client;
 
+use EloGank\Api\Client\Exception\RequestTimeoutException;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Model\Region\RegionInterface;
 use Predis\Client;
@@ -128,13 +129,11 @@ class LOLClientAsync implements LOLClientInterface
     /**
      * {@inheritdoc}
      */
-    public function getResults($invokeId, $timeout = 10)
+    public function getResults($invokeId, $timeout)
     {
         $message = $this->redis->brpop($this->getKey('client.commands.' . $invokeId), $timeout);
         if (null == $message) {
-            // TODO handle exception when timeout is reached
-
-            return null;
+            throw new RequestTimeoutException('Request timeout, LoL servers might be overloaded or the asynchronous client crashed');
         }
 
         // Callback process
@@ -224,7 +223,8 @@ class LOLClientAsync implements LOLClientInterface
             $invokeId = $this->redis->incr($this->getKey('invokeId'));
         }
 
-        $this->lastCall = microtime(true) + 0.03;
+        $nextAvailableTime = (float) ConfigurationLoader::get('client.request.overload.available');
+        $this->lastCall = microtime(true) + $nextAvailableTime;
         $this->con->send(json_encode([
             'invokeId'   => $invokeId,
             'command'    => $commandName,

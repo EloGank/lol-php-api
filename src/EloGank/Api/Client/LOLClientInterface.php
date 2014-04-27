@@ -86,7 +86,7 @@ interface LOLClientInterface
      *
      * @return array
      */
-    public function getResults($invokeId, $timeout = 10);
+    public function getResults($invokeId, $timeout);
 
     /**
      * @return string

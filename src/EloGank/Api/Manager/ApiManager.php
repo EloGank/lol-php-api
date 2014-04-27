@@ -323,6 +323,9 @@ class ApiManager
      */
     public function getClient()
     {
+        $nextAvailableTime = (float) ConfigurationLoader::get('client.request.overload.available');
+        $nextAvailableTime /= 2;
+
         while (true) {
             foreach ($this->clients as $client) {
                 if ($client->isAvailable()) {
@@ -330,7 +333,7 @@ class ApiManager
                 }
             }
 
-            sleep(0.05); // TODO switch to configs
+            sleep($nextAvailableTime);
         }
     }
 }

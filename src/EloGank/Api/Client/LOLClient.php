@@ -14,7 +14,6 @@ namespace EloGank\Api\Client;
 use EloGank\Api\Client\Exception\AuthException;
 use EloGank\Api\Client\Exception\BadCredentialsException;
 use EloGank\Api\Client\Exception\ClientException;
-use EloGank\Api\Client\Exception\ServerBusyException;
 use EloGank\Api\Client\RTMP\RTMPClient;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Model\Region\RegionInterface;
@@ -262,9 +261,11 @@ class LOLClient extends RTMPClient implements LOLClientInterface
             throw new AuthException('Error when logging : ' . $response['reason']);
         }
         elseif ('BUSY' == $response['status']) {
-            // TODO implement a scheduled retry
+            $waitTime = ConfigurationLoader::get('client.authentication.busy.wait');
+            $this->logger->alert('Client ' . $this . ': the server is currently busy. Restarting client in ' . $waitTime . ' seconds...');
+            sleep($waitTime);
 
-            throw new ServerBusyException('The server is currently busy, please try again later');
+            return $this->authenticate();
         }
 
         // Login queue process

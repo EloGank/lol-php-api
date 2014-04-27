@@ -36,17 +36,50 @@ class ClientWorker
      */
     protected $redis;
 
+    /**
+     * @var int
+     */
+    protected $expire;
+
+    /**
+     * @var string
+     */
+    protected $key;
+
+    /**
+     * @var int
+     */
+    protected $defaultPort;
+
 
     /**
      * @param LoggerInterface    $logger
      * @param LOLClientInterface $client
      * @param Client             $redis
+     *
+     * @throws \Exception
      */
     public function __construct(LoggerInterface $logger, LOLClientInterface $client, $redis)
     {
         $this->logger = $logger;
         $this->client = $client;
         $this->redis  = $redis;
+
+        // Init configuration to handle exception and log them
+        try {
+            $this->expire = (int) ConfigurationLoader::get('client.response.expire');
+            if ($this->expire < (int) ConfigurationLoader::get('client.request.timeout')) {
+                $this->expire = (int) ConfigurationLoader::get('client.request.timeout');
+            }
+
+            $this->key = ConfigurationLoader::get('client.async.redis.key');
+            $this->defaultPort = ConfigurationLoader::get('client.async.startPort');
+        }
+        catch (\Exception $e) {
+            $this->logger->critical($e->getMessage());
+
+            throw $e;
+        }
     }
 
     /**
@@ -56,7 +89,7 @@ class ClientWorker
     {
         $context = new \ZMQContext();
         $server = new \ZMQSocket($context, \ZMQ::SOCKET_PULL);
-        $server->bind('tcp://127.0.0.1:' . (ConfigurationLoader::get('client.async.startPort') + $this->client->getId() - 1));
+        $server->bind('tcp://127.0.0.1:' . ($this->defaultPort + $this->client->getId() - 1));
 
         $this->logger->info('Client worker ' . $this->client . ' is ready');
 
@@ -74,10 +107,10 @@ class ClientWorker
 
             // Call the right method in the client and push to redis the result
             $result = call_user_func_array(array($this->client, $request['command']), $request['parameters']);
-            $key = ConfigurationLoader::get('client.async.redis.key') . '.client.commands.' . $request['invokeId'];
+            $key = $this->key . '.client.commands.' . $request['invokeId'];
 
             $this->redis->rpush($key, serialize($result));
-            $this->redis->expire($key, 60); // TODO config
+            $this->redis->expire($key, $this->expire);
         }
     }
 

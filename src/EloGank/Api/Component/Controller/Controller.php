@@ -13,6 +13,7 @@ namespace EloGank\Api\Component\Controller;
 
 use EloGank\Api\Client\Formatter\ResultFormatter;
 use EloGank\Api\Client\LOLClientInterface;
+use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Manager\ApiManager;
 
 /**
@@ -52,8 +53,12 @@ abstract class Controller
      *
      * @return array
      */
-    protected function getResults($invokeId, $timeout = 10)
+    protected function getResults($invokeId, $timeout = null)
     {
+        if (null == $timeout) {
+            $timeout = ConfigurationLoader::get('client.request.timeout');
+        }
+
         $results = $this->getClient()->getResults($invokeId, $timeout);
         $formatter = new ResultFormatter();
 

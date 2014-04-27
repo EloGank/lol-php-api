@@ -73,6 +73,6 @@ class ResultFormatter
             return $array;
         }
 
-        throw new \RuntimeException('Unknown object class "' . get_class($object) . '"');
+        throw new \RuntimeException('Unknown object class "' . get_class($object) . '". The ResultFormatter don\'t known how to format this class');
     }
 }
