@@ -104,7 +104,7 @@ class LOLClientAsync implements LOLClientInterface
     {
         $this->con->connect('tcp://127.0.0.1:' . $this->port);
 
-        $this->send('authenticate', array(), 'authenticate');
+        $this->send('authenticate', array(), $this->clientId . '.authenticate');
     }
 
     /**
@@ -153,7 +153,7 @@ class LOLClientAsync implements LOLClientInterface
      */
     public function isAuthenticated()
     {
-        $message = $this->redis->rpop($this->getKey('client.commands.authenticate'));
+        $message = $this->redis->rpop($this->getKey('client.commands.' . $this->clientId . '.authenticate'));
         if (null == $message) {
             return null;
         }

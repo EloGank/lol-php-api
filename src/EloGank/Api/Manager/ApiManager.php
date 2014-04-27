@@ -135,7 +135,9 @@ class ApiManager
                         $this->logger->info('Client ' . $client . ' is connected');
                     }
                     else {
-                        $this->cleanAsyncClients(false, $client);
+                        if ($isAsync) {
+                            $this->cleanAsyncClients(false, $client);
+                        }
                     }
 
                     $i++;
@@ -229,14 +231,15 @@ class ApiManager
 
             $this->killClient($path, $throwException, $client);
         }
+        else {
+            $iterator = new \DirectoryIterator($cachePath);
+            foreach ($iterator as $pidFile) {
+                if ($pidFile->isDir()) {
+                    continue;
+                }
 
-        $iterator = new \DirectoryIterator($cachePath);
-        foreach ($iterator as $pidFile) {
-            if ($pidFile->isDir()) {
-                continue;
+                $this->killClient($pidFile->getRealPath(), $throwException);
             }
-
-            $this->killClient($pidFile->getRealPath(), $throwException);
         }
     }
 
