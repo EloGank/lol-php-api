@@ -14,19 +14,19 @@ namespace EloGank\Api\Component\Exception;
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
  */
-class JsonException extends \Exception
+class ArrayException extends \Exception
 {
     /**
-     * @return string
+     * @return array
      */
-    public function toJson()
+    public function toArray()
     {
-        return json_encode(array(
+        return [
             'success' => false,
-            'error'   => array(
+            'error'   => [
                 'caused_by' => get_called_class(),
                 'message'   => $this->getMessage()
-            )
-        ));
+            ]
+        ];
     }
 } 

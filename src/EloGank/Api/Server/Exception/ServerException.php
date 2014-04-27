@@ -11,9 +11,9 @@
 
 namespace EloGank\Api\Server\Exception;
 
-use EloGank\Api\Component\Exception\JsonException;
+use EloGank\Api\Component\Exception\ArrayException;
 
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
  */
-class ServerException extends JsonException { }
+class ServerException extends ArrayException { }

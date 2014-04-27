@@ -25,14 +25,14 @@ class XmlClientFormatter implements ClientFormatterInterface
 
         $this->toXml($results, $xml);
 
-        return trim(preg_replace('/\s+/', '', $xml->asXML()));
+        return trim(preg_replace('/\n/', '', $xml->asXML()));
     }
 
     /**
      * @param array             $results
      * @param \SimpleXMLElement $xml
      */
-    private function toXml($results, \SimpleXMLElement &$xml)
+    protected function toXml($results, \SimpleXMLElement &$xml)
     {
         foreach ($results as $key => $value) {
             if (is_array($value)) {
@@ -51,6 +51,10 @@ class XmlClientFormatter implements ClientFormatterInterface
                 }
             }
             else {
+                if (is_bool($value)) {
+                    $value = $value ? 'true' : 'false';
+                }
+
                 $xml->addChild($key, htmlspecialchars($value));
             }
         }

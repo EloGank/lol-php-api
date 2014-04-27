@@ -17,7 +17,8 @@ namespace EloGank\Api\Server\Formatter;
 interface ClientFormatterInterface
 {
     /**
-     * Format the result into another format
+     * Format the result into another format<br />
+     * It's important to return a one unique string, without carriage return (new line)
      *
      * @param array $results
      *

@@ -84,9 +84,16 @@ class Server
                 $conn->close();
             });
 
+            // On receive data
             $conn->on('data', function ($rawData) use ($conn) {
                 $this->logger->debug(sprintf('Client sent: %s', $rawData));
+
                 $data = json_decode($rawData, true);
+                $format = null;
+
+                if (isset($data['format'])) {
+                    $format = $data['format'];
+                }
 
                 try {
                     if (!$this->isValidInput($data)) {
@@ -95,12 +102,12 @@ class Server
 
                     $response = $this->apiManager->getRouter()->process($this->apiManager, $data);
 
-                    $conn->write($this->format($data, $response));
+                    $conn->write($this->format($response, $format));
                 }
                 catch (ServerException $e) {
                     $this->logger->error($e->getMessage());
 
-                    $conn->write($e->toJson());
+                    $conn->write($this->format($e->toArray(), $format));
                 }
             });
         });
@@ -115,19 +122,19 @@ class Server
     }
 
     /**
-     * @param array $input
-     * @param array $results
+     * @param array  $results
+     * @param string $format
      *
      * @return mixed
      *
      * @throws UnknownFormatException
      */
-    protected function format(array $input, array $results)
+    protected function format(array $results, $format = null)
     {
-        $format = ConfigurationLoader::get('server.format');
-        if (isset($input['format'])) {
-            $format = $input['format'];
-
+        if (null == $format) {
+            $format = ConfigurationLoader::get('server.format');
+        }
+        else {
             if (!isset($this->formatters[$format])) {
                 throw new UnknownFormatException('Unknown format for "' . $format . '". Did you mean : "' . join(', ', array_keys($this->formatters)) . '" ?');
             }
