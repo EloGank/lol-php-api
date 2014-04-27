@@ -13,6 +13,7 @@ namespace EloGank\Api\Component\Routing;
 
 use EloGank\Api\Component\Controller\Exception\UnknownControllerException;
 use EloGank\Api\Component\Routing\Exception\MalformedRouteException;
+use EloGank\Api\Component\Routing\Exception\MissingParametersException;
 use EloGank\Api\Component\Routing\Exception\UnknownRouteException;
 use EloGank\Api\Manager\ApiManager;
 
@@ -94,6 +95,7 @@ class Router
      *
      * @throws MalformedRouteException
      * @throws UnknownRouteException
+     * @throws MissingParametersException
      */
     public function process(ApiManager $apiManager, array $data)
     {
@@ -110,7 +112,12 @@ class Router
         $class = '\\EloGank\\Api\\Controller\\' . $this->routes[$controllerName]['class'];
         $controller = new $class($apiManager);
 
-        // TODO check if all parameters are available from the client
+        // Missing parameters check
+        if (count($data['parameters']) != count($this->routes[$controllerName]['methods'][$methodName]['parameters'])) {
+            throw new MissingParametersException(sprintf('There are missing parameters for the method "%s" (controller "%s"). Please provide these parameters : %s',
+                $methodName, $controllerName, join(', ', $this->routes[$controllerName]['methods'][$methodName]['parameters'])
+            ));
+        }
 
         return call_user_func_array(array($controller, $this->routes[$controllerName]['methods'][$methodName]['name']), $data['parameters']);
     }

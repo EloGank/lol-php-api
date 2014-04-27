@@ -105,7 +105,7 @@ class Server
                     $conn->write($this->format($response, $format));
                 }
                 catch (ArrayException $e) {
-                    $this->logger->error($e->getMessage());
+                    $this->logger->error('Client [' . $conn->getRemoteAddress() . ']: ' . $e->getMessage());
 
                     $conn->write($this->format($e->toArray(), $format));
                 }
