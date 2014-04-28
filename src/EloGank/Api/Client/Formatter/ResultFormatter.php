@@ -11,6 +11,8 @@
 
 namespace EloGank\Api\Client\Formatter;
 
+use EloGank\Api\Client\Exception\ClientOverloadException;
+
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
  */
@@ -20,13 +22,13 @@ class ResultFormatter
      * @param mixed $results
      *
      * @return array
+     *
+     * @throws ClientOverloadException
      */
     public function format($results)
     {
         if (null == $results) {
-            // TODO overload system
-
-            return [];
+            throw new ClientOverloadException('The client is overloaded');
         }
 
         return $this->toArray($results);

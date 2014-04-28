@@ -201,6 +201,14 @@ class LOLClientAsync implements LOLClientInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function setIsOverloaded()
+    {
+        $this->lastCall += (int) ConfigurationLoader::get('client.request.overload.wait');
+    }
+
+    /**
      * @param string $key
      *
      * @return string

@@ -114,7 +114,8 @@ class ApiManager
         $this->logger->info('Starting clients...');
 
         $tmpClients = [];
-        foreach (ConfigurationLoader::get('client.accounts') as $accountKey => $account) {
+        $accounts = ConfigurationLoader::get('client.accounts');
+        foreach ($accounts as $accountKey => $account) {
             $client = ClientFactory::create($this->logger, $this->redis, $accountKey, $this->getNextClientId());
             $client->authenticate();
 
@@ -158,8 +159,18 @@ class ApiManager
         }
 
         // No connected client, abort
-        if (0 == count($this->clients)) {
+        $clientCount = count($this->clients);
+        if (0 == $clientCount) {
             return false;
+        }
+
+        $totalClientCount = count($accounts);
+        $message = sprintf('%d/%d client%s successfully connected', $clientCount, $totalClientCount, $clientCount > 1 ? 's' : '');
+        if ($clientCount < $totalClientCount) {
+            $this->logger->alert('Only ' . $message);
+        }
+        else {
+            $this->logger->info($message);
         }
 
         return true;

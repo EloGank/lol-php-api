@@ -435,6 +435,14 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     /**
      * {@inheritdoc}
      */
+    public function setIsOverloaded()
+    {
+        $this->lastCall += (int) ConfigurationLoader::get('client.request.overload.wait');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function __toString()
     {
         return sprintf('#%d (%s)', $this->clientId, $this->getRegion());

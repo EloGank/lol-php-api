@@ -65,6 +65,11 @@ interface LOLClientInterface
     public function isAvailable();
 
     /**
+     * Flag the client as overloaded for a while
+     */
+    public function setIsOverloaded();
+
+    /**
      * Invoke a new RTMP service method
      *
      * @param string   $destination  The service manager name

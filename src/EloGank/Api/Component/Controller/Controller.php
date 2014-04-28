@@ -11,6 +11,7 @@
 
 namespace EloGank\Api\Component\Controller;
 
+use EloGank\Api\Client\Exception\ClientOverloadException;
 use EloGank\Api\Client\Formatter\ResultFormatter;
 use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
@@ -55,12 +56,14 @@ abstract class Controller
     /**
      * Transform the result into an array
      *
-     * @param int $invokeId
-     * @param int $timeout
+     * @param int  $invokeId
+     * @param int  $timeout
+     * @param bool $bypassOverload Some API return nothing on error, we need to bypass overload system to<br />
+     *                             avoid timeout issue.
      *
      * @return array
      */
-    protected function getResults($invokeId, $timeout = null)
+    protected function getResults($invokeId, $timeout = null, $bypassOverload = false)
     {
         if (null == $timeout) {
             $timeout = ConfigurationLoader::get('client.request.timeout');
@@ -70,25 +73,37 @@ abstract class Controller
         $response = $client->getResults($invokeId, $timeout);
         $formatter = new ResultFormatter();
 
-        // RTMP API return error
-        if ('_error' == $response['result']) {
-            $errorParams = $formatter->format($response['data']->getData()->rootCause);
+        try {
+            // RTMP API return error
+            if ('_error' == $response['result']) {
+                $errorParams = $formatter->format($response['data']->getData()->rootCause);
 
-            $results = [
-                'success'   => false,
-                'error' => [
-                    'caused_by' => $errorParams['rootCauseClassname'],
-                    'message'   => $errorParams['message']
-                ]
+                $results = [
+                    'success'   => false,
+                    'error' => [
+                        'caused_by' => $errorParams['rootCauseClassname'],
+                        'message'   => $errorParams['message']
+                    ]
+                ];
+
+                return $results;
+            }
+
+            return [
+                'success' => true,
+                'results' => $formatter->format($response['data']->getData()->body)
             ];
-
-            return $results;
         }
+        catch (ClientOverloadException $e) {
+            if ($bypassOverload) {
+                return [];
+            }
 
-        return [
-            'success' => true,
-            'results' => $formatter->format($response['data']->getData()->body)
-        ];
+            // Flag client as overloaded & retry
+            $client->setIsOverloaded();
+
+            return $this->getResults($invokeId, $timeout);
+        }
     }
 
     /**
