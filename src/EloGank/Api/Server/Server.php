@@ -150,7 +150,7 @@ class Server
      */
     protected function isValidInput(array $data)
     {
-        if (!isset($data['route']) || !isset($data['parameters'])) {
+        if (!isset($data['region']) || !isset($data['route']) || !isset($data['parameters'])) {
             return false;
         }
 

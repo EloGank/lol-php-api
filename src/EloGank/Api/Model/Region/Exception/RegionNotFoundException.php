@@ -11,7 +11,9 @@
 
 namespace EloGank\Api\Model\Region\Exception;
 
+use EloGank\Api\Server\Exception\ServerException;
+
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
  */
-class RegionNotFoundException extends \InvalidArgumentException { }
+class RegionNotFoundException extends ServerException { }

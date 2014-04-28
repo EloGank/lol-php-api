@@ -16,6 +16,7 @@ use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Routing\Router;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Component\Logging\LoggerFactory;
+use EloGank\Api\Model\Region\Exception\RegionNotFoundException;
 use Predis\Client;
 use Psr\Log\LoggerInterface;
 use React\EventLoop\Factory;
@@ -131,7 +132,7 @@ class ApiManager
                 $isAuthenticated = $client->isAuthenticated();
                 if (null !== $isAuthenticated) {
                     if (true === $isAuthenticated) {
-                        $this->clients[] = $client;
+                        $this->clients[$client->getRegion()][] = $client;
                         $this->logger->info('Client ' . $client . ' is connected');
                     }
                     else {
@@ -156,7 +157,8 @@ class ApiManager
             }
         }
 
-        if (!isset($this->clients[0])) {
+        // No connected client, abort
+        if (0 == count($this->clients)) {
             return false;
         }
 
@@ -319,15 +321,23 @@ class ApiManager
      * The RTMP LoL API will temporary ban you if you call too many times a service<br />
      * To avoid this limitation, you must wait before making a new request
      *
+     * @param string $regionUniqueName
+     *
      * @return LOLClientInterface
+     *
+     * @throws RegionNotFoundException When there is not client with the selected region unique name
      */
-    public function getClient()
+    public function getClient($regionUniqueName)
     {
+        if (!isset($this->clients[$regionUniqueName])) {
+            throw new RegionNotFoundException('There is no registered client with the region "' . $regionUniqueName . '"');
+        }
+
         $nextAvailableTime = (float) ConfigurationLoader::get('client.request.overload.available');
         $nextAvailableTime /= 2;
 
         while (true) {
-            foreach ($this->clients as $client) {
+            foreach ($this->clients[$regionUniqueName] as $client) {
                 if ($client->isAvailable()) {
                     return $client;
                 }

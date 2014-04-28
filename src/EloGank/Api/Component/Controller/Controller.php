@@ -26,13 +26,20 @@ abstract class Controller
      */
     protected $apiManager;
 
+    /**
+     * @var string
+     */
+    protected $region;
+
 
     /**
      * @param ApiManager $apiManager
+     * @param string     $region     The region unique name (like "EUW", "NA", ...)
      */
-    public function __construct(ApiManager $apiManager)
+    public function __construct(ApiManager $apiManager, $region)
     {
         $this->apiManager = $apiManager;
+        $this->region     = $region;
     }
 
     /**
@@ -42,7 +49,7 @@ abstract class Controller
      */
     protected function getClient()
     {
-        return $this->apiManager->getClient();
+        return $this->apiManager->getClient($this->region);
     }
 
     /**
@@ -60,26 +67,28 @@ abstract class Controller
         }
 
         $client = $this->getClient();
-        $results = $client->getResults($invokeId, $timeout);
+        $response = $client->getResults($invokeId, $timeout);
         $formatter = new ResultFormatter();
 
         // RTMP API return error
-        if ('_error' == $results['result']) {
-            $errorParams = $formatter->format($results['data']->getData()->rootCause);
+        if ('_error' == $response['result']) {
+            $errorParams = $formatter->format($response['data']->getData()->rootCause);
 
             $results = [
                 'success'   => false,
-                'caused_by' => $errorParams['rootCauseClassname'],
-                'message'   => $errorParams['message']
+                'error' => [
+                    'caused_by' => $errorParams['rootCauseClassname'],
+                    'message'   => $errorParams['message']
+                ]
             ];
 
             return $results;
         }
 
-        $results = $formatter->format($results['data']->getData()->body);
-        $results['success'] = true;
-
-        return $results;
+        return [
+            'success' => true,
+            'results' => $formatter->format($response['data']->getData()->body)
+        ];
     }
 
     /**

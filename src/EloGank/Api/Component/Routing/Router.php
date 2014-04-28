@@ -110,7 +110,7 @@ class Router
         }
 
         $class = '\\EloGank\\Api\\Controller\\' . $this->routes[$controllerName]['class'];
-        $controller = new $class($apiManager);
+        $controller = new $class($apiManager, $data['region']);
 
         // Missing parameters check
         if (count($data['parameters']) != count($this->routes[$controllerName]['methods'][$methodName]['parameters'])) {
