@@ -59,10 +59,27 @@ abstract class Controller
             $timeout = ConfigurationLoader::get('client.request.timeout');
         }
 
-        $results = $this->getClient()->getResults($invokeId, $timeout);
+        $client = $this->getClient();
+        $results = $client->getResults($invokeId, $timeout);
         $formatter = new ResultFormatter();
 
-        return $formatter->format($results);
+        // RTMP API return error
+        if ('_error' == $results['result']) {
+            $errorParams = $formatter->format($results['data']->getData()->rootCause);
+
+            $results = [
+                'success'   => false,
+                'caused_by' => $errorParams['rootCauseClassname'],
+                'message'   => $errorParams['message']
+            ];
+
+            return $results;
+        }
+
+        $results = $formatter->format($results['data']->getData()->body);
+        $results['success'] = true;
+
+        return $results;
     }
 
     /**

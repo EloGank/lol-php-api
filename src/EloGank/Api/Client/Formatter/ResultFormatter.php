@@ -17,13 +17,19 @@ namespace EloGank\Api\Client\Formatter;
 class ResultFormatter
 {
     /**
-     * @param array $results
+     * @param mixed $results
      *
      * @return array
      */
-    public function format(array $results)
+    public function format($results)
     {
-        return $this->toArray($results['data']->getData()->body);
+        if (null == $results) {
+            // TODO overload system
+
+            return [];
+        }
+
+        return $this->toArray($results);
     }
 
     /**
@@ -73,6 +79,10 @@ class ResultFormatter
             return $array;
         }
 
-        throw new \RuntimeException('Unknown object class "' . get_class($object) . '". The ResultFormatter don\'t known how to format this class');
+        if (!is_object($object)) {
+            return [$object];
+        }
+
+        throw new \RuntimeException('Unknown object class "' . get_class($object) . '". The ResultFormatter don\'t known how to format this class.');
     }
 }
