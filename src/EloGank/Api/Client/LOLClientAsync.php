@@ -129,7 +129,7 @@ class LOLClientAsync implements LOLClientInterface
     /**
      * {@inheritdoc}
      */
-    public function getResults($invokeId, $timeout)
+    public function getResult($invokeId, $timeout)
     {
         $message = $this->redis->brpop($this->getKey('client.commands.' . $invokeId), $timeout);
         if (null == $message) {
@@ -137,14 +137,13 @@ class LOLClientAsync implements LOLClientInterface
         }
 
         // Callback process
+        $callback = null;
         if (isset(self::$callbacks[$invokeId])) {
             $callback = self::$callbacks[$invokeId];
             unset(self::$callbacks[$invokeId]);
-
-            return $callback(unserialize($message[1]));
         }
 
-        return unserialize($message[1]);
+        return [unserialize($message[1]), $callback];
     }
 
     /**

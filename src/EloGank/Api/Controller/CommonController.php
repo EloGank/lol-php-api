@@ -29,6 +29,10 @@ class CommonController extends Controller
      */
     public function commonCall($destination, $service, $parameters)
     {
-        return $this->getResults($this->getClient()->invoke($destination, $service, $parameters));
+        return $this->view(
+            $this->getResult(
+                $this->getClient()->invoke($destination, $service, $parameters)
+            )
+        );
     }
 } 

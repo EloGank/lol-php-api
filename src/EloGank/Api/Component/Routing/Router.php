@@ -11,6 +11,7 @@
 
 namespace EloGank\Api\Component\Routing;
 
+use EloGank\Api\Component\Controller\Exception\ApiException;
 use EloGank\Api\Component\Controller\Exception\UnknownControllerException;
 use EloGank\Api\Component\Routing\Exception\MalformedRouteException;
 use EloGank\Api\Component\Routing\Exception\MissingApiRoutesFileException;
@@ -57,9 +58,12 @@ class Router
 
         foreach ($destinations as $destinationName => $services) {
             $formattedDestinationName = $this->underscore($destinationName);
-            // Delete "_service" suffix
+            // Delete "_service" or "_service_proxy" suffixes
             if ('service' == substr($formattedDestinationName, -7)) {
                 $formattedDestinationName = substr($formattedDestinationName, 0, -8);
+            }
+            elseif ('service_proxy' == substr($formattedDestinationName, -13)) {
+                $formattedDestinationName = substr($formattedDestinationName, 0, -14);
             }
 
             $this->commonRoutes[$formattedDestinationName] = [
@@ -166,11 +170,20 @@ class Router
 
             $controller = new CommonController($apiManager, $data['region']);
 
-            return call_user_func_array(array($controller, 'commonCall'), [
-                $this->commonRoutes[$controllerName]['name'],
-                $this->commonRoutes[$controllerName]['methods'][$methodName]['name'],
-                $data['parameters']
-            ]);
+            try {
+                return call_user_func_array(array($controller, 'commonCall'), [
+                    $this->commonRoutes[$controllerName]['name'],
+                    $this->commonRoutes[$controllerName]['methods'][$methodName]['name'],
+                    $data['parameters']
+                ]);
+            }
+            catch (ApiException $e)
+            {
+                return [
+                    'success' => false,
+                    'error'   => $e->getErrorBody()
+                ];
+            }
         }
 
         // Custom routes process
@@ -188,7 +201,16 @@ class Router
         $class = '\\EloGank\\Api\\Controller\\' . $this->customRoutes[$controllerName]['class'];
         $controller = new $class($apiManager, $data['region']);
 
-        return call_user_func_array(array($controller, $this->customRoutes[$controllerName]['methods'][$methodName]['name']), $data['parameters']);
+        try {
+            return call_user_func_array(array($controller, $this->customRoutes[$controllerName]['methods'][$methodName]['name']), $data['parameters']);
+        }
+        catch (ApiException $e)
+        {
+            return [
+                'success' => false,
+                'error'   => $e->getErrorBody()
+            ];
+        }
     }
 
     /**

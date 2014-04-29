@@ -468,18 +468,13 @@ class RTMPClient
 
         $this->socket->write($ret);
 
-        $result = $this->parsePacket();
-        if (null != $callback) {
-            $result = $callback($result);
-        }
-
-        $this->responses[$invokeId] = $result;
+        $this->responses[$invokeId] = [$this->parsePacket(), $callback];
 
         return $invokeId;
     }
 
     /**
-     * Call the invoke and return the response, without calling getResults() method<br />
+     * Call the invoke and return the response, without calling getResult() method<br />
      * Callbacks are not possible with this method
      *
      * @param string $destionation
@@ -495,21 +490,21 @@ class RTMPClient
     {
         $invokeId = $this->invoke($destionation, $operation, $parameters, null, $packetClass, $headers, $body);
 
-        return $this->getResults($invokeId, 0);
+        return $this->getResult($invokeId, 0)[0];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getResults($invokeId, $timeout)
+    public function getResult($invokeId, $timeout)
     {
         if (!isset($this->responses[$invokeId])) {
             throw new \InvalidArgumentException('No result found for invokeId ' . $invokeId);
         }
 
-        $result = $this->responses[$invokeId];
+        $resultParams = $this->responses[$invokeId];
         unset($this->responses[$invokeId]);
 
-        return $result;
+        return $resultParams;
     }
 }

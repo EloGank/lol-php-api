@@ -15,6 +15,7 @@ use EloGank\Api\Client\Exception\ClientOverloadException;
 use EloGank\Api\Client\Formatter\ResultFormatter;
 use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
+use EloGank\Api\Component\Controller\Exception\ApiException;
 use EloGank\Api\Manager\ApiManager;
 
 /**
@@ -62,15 +63,17 @@ abstract class Controller
      *                             avoid timeout issue.
      *
      * @return array
+     *
+     * @throws ApiException
      */
-    protected function getResults($invokeId, $timeout = null, $bypassOverload = false)
+    protected function getResult($invokeId, $timeout = null, $bypassOverload = false)
     {
         if (null == $timeout) {
             $timeout = ConfigurationLoader::get('client.request.timeout');
         }
 
         $client = $this->getClient();
-        $response = $client->getResults($invokeId, $timeout);
+        list($response, $callback) = $client->getResult($invokeId, $timeout);
         $formatter = new ResultFormatter();
 
         try {
@@ -78,21 +81,18 @@ abstract class Controller
             if ('_error' == $response['result']) {
                 $errorParams = $formatter->format($response['data']->getData()->rootCause);
 
-                $results = [
-                    'success'   => false,
-                    'error' => [
-                        'caused_by' => $errorParams['rootCauseClassname'],
-                        'message'   => $errorParams['message']
-                    ]
-                ];
-
-                return $results;
+                throw new ApiException([
+                    'caused_by' => $errorParams['rootCauseClassname'],
+                    'message'   => $errorParams['message']
+                ]);
             }
 
-            return [
-                'success' => true,
-                'results' => $formatter->format($response['data']->getData()->body)
-            ];
+            $result = $formatter->format($response['data']->getData()->body);
+            if (null != $callback) {
+                $result = $callback($result);
+            }
+
+            return $result;
         }
         catch (ClientOverloadException $e) {
             if ($bypassOverload) {
@@ -102,8 +102,21 @@ abstract class Controller
             // Flag client as overloaded & retry
             $client->setIsOverloaded();
 
-            return $this->getResults($invokeId, $timeout);
+            return $this->getResult($invokeId, $timeout);
         }
+    }
+
+    /**
+     * @param array|string $result
+     *
+     * @return array
+     */
+    protected function view($result)
+    {
+        return [
+            'success' => true,
+            'result'  => $result
+        ];
     }
 
     /**
