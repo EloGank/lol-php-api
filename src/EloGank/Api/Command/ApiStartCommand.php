@@ -35,10 +35,10 @@ class ApiStartCommand extends Command
     }
 
     /**
-     * @param InputInterface $input
+     * @param InputInterface  $input
      * @param OutputInterface $output
      *
-     * @throws \Exception
+     * @return int|null|void
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -50,8 +50,9 @@ class ApiStartCommand extends Command
             $server->listen();
         }
         catch (\Exception $e) {
-            $apiManager->clean();
             $this->getApplication()->renderException($e, $output);
+
+            $apiManager->clean();
 
             // Need to be killed manually
             posix_kill(getmypid(), SIGKILL);

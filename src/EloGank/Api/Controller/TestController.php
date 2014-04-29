@@ -55,4 +55,16 @@ class TestController extends Controller
 
         return $results;
     }
+
+    /**
+     * @param $destination
+     * @param $service
+     * @param $parameters
+     *
+     * @return array
+     */
+    public function getTestOtherMethodAction($destination, $service, $parameters)
+    {
+        return $this->getResults($this->getClient()->invoke($destination, $service, $parameters));
+    }
 }

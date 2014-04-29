@@ -13,9 +13,12 @@ namespace EloGank\Api\Component\Routing;
 
 use EloGank\Api\Component\Controller\Exception\UnknownControllerException;
 use EloGank\Api\Component\Routing\Exception\MalformedRouteException;
+use EloGank\Api\Component\Routing\Exception\MissingApiRoutesFileException;
 use EloGank\Api\Component\Routing\Exception\MissingParametersException;
 use EloGank\Api\Component\Routing\Exception\UnknownRouteException;
+use EloGank\Api\Controller\CommonController;
 use EloGank\Api\Manager\ApiManager;
+use Symfony\Component\Yaml\Parser;
 
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
@@ -23,16 +26,62 @@ use EloGank\Api\Manager\ApiManager;
 class Router
 {
     /**
+     * This is the common routes, listed in the config/api_routes.yml file
+     *
      * @var array
      */
-    protected $routes = [];
+    protected $commonRoutes = [];
+
+    /**
+     * @var array
+     */
+    protected $customRoutes = [];
 
 
     /**
-     * @throws \EloGank\Api\Component\Controller\Exception\UnknownControllerException
+     * Dump all routes in attributes
+     *
+     * @throws UnknownControllerException
+     * @throws MissingApiRoutesFileException
      */
     public function init()
     {
+        // First, register all common routes
+        $filePath = __DIR__ . '/../../../../../config/api_routes.yml';
+        if (!is_file($filePath)) {
+            throw new MissingApiRoutesFileException('The file "config/api_routes.yml" is missing');
+        }
+
+        $parser = new Parser();
+        $destinations = $parser->parse(file_get_contents($filePath))['routes'];
+
+        foreach ($destinations as $destinationName => $services) {
+            $formattedDestinationName = $this->underscore($destinationName);
+            // Delete "_service" suffix
+            if ('service' == substr($formattedDestinationName, -7)) {
+                $formattedDestinationName = substr($formattedDestinationName, 0, -8);
+            }
+
+            $this->commonRoutes[$formattedDestinationName] = [
+                'name'    => $destinationName,
+                'methods' => []
+            ];
+
+            foreach ($services as $serviceName => $parameters) {
+                $formattedServiceName = $this->underscore($serviceName);
+                // Delete "get_" prefix
+                if (0 === strpos($formattedServiceName, 'get_')) {
+                    $formattedServiceName = substr($formattedServiceName, 4);
+                }
+
+                $this->commonRoutes[$formattedDestinationName]['methods'][$formattedServiceName] = [
+                    'name'       => $serviceName,
+                    'parameters' => $parameters
+                ];
+            }
+        }
+
+        // Then, register the custom routes
         $iterator = new \DirectoryIterator(__DIR__ . '/../../Controller');
         /** @var \SplFileInfo $controller */
         foreach ($iterator as $controller) {
@@ -52,7 +101,7 @@ class Router
             }
 
             $routeName = $this->underscore($name);
-            $this->routes[$routeName] = [
+            $this->customRoutes[$routeName] = [
                 'class'   => $name . 'Controller',
                 'methods' => []
             ];
@@ -79,7 +128,7 @@ class Router
                     $methodName = substr($methodName, 4);
                 }
 
-                $this->routes[$routeName]['methods'][$methodName] = [
+                $this->customRoutes[$routeName]['methods'][$methodName] = [
                     'name'       => $method->getName(),
                     'parameters' => $paramsName
                 ];
@@ -105,21 +154,41 @@ class Router
         }
 
         list ($controllerName, $methodName) = explode('.', $route);
-        if (!isset($this->routes[$controllerName]['methods'][$methodName])) {
+
+        // Common routes process
+        if (isset($this->commonRoutes[$controllerName]['methods'][$methodName])) {
+            // Missing parameters check
+            if (count($data['parameters']) != count($this->commonRoutes[$controllerName]['methods'][$methodName]['parameters'])) {
+                throw new MissingParametersException(sprintf('There are missing parameters for the method "%s" (controller "%s"). Please provide these parameters : %s',
+                    $methodName, $controllerName, join(', ', $this->commonRoutes[$controllerName]['methods'][$methodName]['parameters'])
+                ));
+            }
+
+            $controller = new CommonController($apiManager, $data['region']);
+
+            return call_user_func_array(array($controller, 'commonCall'), [
+                $this->commonRoutes[$controllerName]['name'],
+                $this->commonRoutes[$controllerName]['methods'][$methodName]['name'],
+                $this->commonRoutes[$controllerName]['methods'][$methodName]['parameters']
+            ]);
+        }
+
+        // Custom routes process
+        if (!isset($this->customRoutes[$controllerName]['methods'][$methodName])) {
             throw new UnknownRouteException('The route "' . $route . '" is unknown. To known all available routes, use the command "elogank:router:dump"');
         }
 
-        $class = '\\EloGank\\Api\\Controller\\' . $this->routes[$controllerName]['class'];
-        $controller = new $class($apiManager, $data['region']);
-
         // Missing parameters check
-        if (count($data['parameters']) != count($this->routes[$controllerName]['methods'][$methodName]['parameters'])) {
+        if (count($data['parameters']) != count($this->customRoutes[$controllerName]['methods'][$methodName]['parameters'])) {
             throw new MissingParametersException(sprintf('There are missing parameters for the method "%s" (controller "%s"). Please provide these parameters : %s',
-                $methodName, $controllerName, join(', ', $this->routes[$controllerName]['methods'][$methodName]['parameters'])
+                $methodName, $controllerName, join(', ', $this->customRoutes[$controllerName]['methods'][$methodName]['parameters'])
             ));
         }
 
-        return call_user_func_array(array($controller, $this->routes[$controllerName]['methods'][$methodName]['name']), $data['parameters']);
+        $class = '\\EloGank\\Api\\Controller\\' . $this->customRoutes[$controllerName]['class'];
+        $controller = new $class($apiManager, $data['region']);
+
+        return call_user_func_array(array($controller, $this->customRoutes[$controllerName]['methods'][$methodName]['name']), $data['parameters']);
     }
 
     /**
@@ -128,7 +197,13 @@ class Router
     public function getRoutes()
     {
         $routes = [];
-        foreach ($this->routes as $controllerName => $route) {
+        foreach ($this->commonRoutes as $controllerName => $route) {
+            foreach ($route['methods'] as $methodName => $method) {
+                $routes[$controllerName][$methodName] = $method['parameters'];
+            }
+        }
+
+        foreach ($this->customRoutes as $controllerName => $route) {
             foreach ($route['methods'] as $methodName => $method) {
                 $routes[$controllerName][$methodName] = $method['parameters'];
             }

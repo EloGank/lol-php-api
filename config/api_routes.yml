@@ -1,0 +1,7 @@
+routes:
+  summonerService:
+    getSummonerByName: [summonerName]
+    getAllSummonerDataByAccount: [accountId]
+
+  playerStatsService:
+    getAggregatedStats: [accountId, queueName, seasonId]
