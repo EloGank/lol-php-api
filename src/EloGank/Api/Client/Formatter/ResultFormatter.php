@@ -80,6 +80,12 @@ class ResultFormatter
 
             return $array;
         }
+        elseif ($object instanceof \SabreAMF_AMF3_ErrorMessage) {
+            return [
+                'rootCauseClassname' => $object->faultCode,
+                'message'            => $object->faultString
+            ];
+        }
 
         if (!is_object($object)) {
             return [$object];

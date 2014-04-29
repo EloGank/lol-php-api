@@ -169,7 +169,7 @@ class Router
             return call_user_func_array(array($controller, 'commonCall'), [
                 $this->commonRoutes[$controllerName]['name'],
                 $this->commonRoutes[$controllerName]['methods'][$methodName]['name'],
-                $this->commonRoutes[$controllerName]['methods'][$methodName]['parameters']
+                $data['parameters']
             ]);
         }
 
