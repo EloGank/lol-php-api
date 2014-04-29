@@ -124,7 +124,7 @@ class ApiManager
 
         $nbClients = count($tmpClients);
         $isAsync = true === ConfigurationLoader::get('client.async.enabled');
-        $i = 0;
+        $i = 0; $connectedCount = 0;
 
         /** @var LOLClientInterface $client */
         while ($i < $nbClients) {
@@ -135,6 +135,7 @@ class ApiManager
                     if (true === $isAuthenticated) {
                         $this->clients[$client->getRegion()][] = $client;
                         $this->logger->info('Client ' . $client . ' is connected');
+                        $connectedCount++;
                     }
                     else {
                         if ($isAsync) {
@@ -159,14 +160,13 @@ class ApiManager
         }
 
         // No connected client, abort
-        $clientCount = count($this->clients);
-        if (0 == $clientCount) {
+        if (0 == $connectedCount) {
             return false;
         }
 
         $totalClientCount = count($accounts);
-        $message = sprintf('%d/%d client%s successfully connected', $clientCount, $totalClientCount, $clientCount > 1 ? 's' : '');
-        if ($clientCount < $totalClientCount) {
+        $message = sprintf('%d/%d client%s successfully connected', $connectedCount, $totalClientCount, $connectedCount > 1 ? 's' : '');
+        if ($connectedCount < $totalClientCount) {
             $this->logger->alert('Only ' . $message);
         }
         else {
