@@ -1,30 +1,36 @@
 routes:
   summonerService:
-    getSummonerByName:                 [summonerName]
-    getAllSummonerDataByAccount:       [accountId]
-    getAllPublicSummonerDataByAccount: [accountId]
-    getSummonerInternalNameByName:     [summonerName]
-    getSummonerNames:                  ["summonerIds[]"]
+    getSummonerByName:                   [summonerName]
+    getAllSummonerDataByAccount:         [accountId]
+    getAllPublicSummonerDataByAccount:   [accountId]
+    getSummonerInternalNameByName:       [summonerName]
+    getSummonerNames:                    ["summonerIds[]"]
 
   playerStatsService:
-    getAggregatedStats:                [accountId, queueName, seasonId]
-    getRecentGames:                    [accountId]
-    retrieveTopPlayedChampions:        [accountId, "gameMode (CLASSIC, ODIN, ARAM)"]
-    getTeamAggregatedStats:            [teamId]
-    getTeamEndOfGameStats:             [teamId, gameId]
-    retrievePlayerStatsByAccountId:    [accountId, seasonId]
+    getAggregatedStats:                  [accountId, queueName, seasonId]
+    getRecentGames:                      [accountId]
+    retrieveTopPlayedChampions:          [accountId, "gameMode (CLASSIC, ODIN, ARAM)"]
+    getTeamAggregatedStats:              [teamId]
+    getTeamEndOfGameStats:               [teamId, gameId]
+    retrievePlayerStatsByAccountId:      [accountId, seasonId]
 
   summonerRuneService:
-    getSummonerRuneInventory:          [summonerId]
+    getSummonerRuneInventory:            [summonerId]
 
   spellBookService:
-    getSpellBook:                      [summonerId]
+    getSpellBook:                        [summonerId]
 
   masteryBookService:
-    getMasteryBook:                    [summonerId]
+    getMasteryBook:                      [summonerId]
 
   inventoryService:
-    getAvailableChampions:             []
+    getAvailableChampions:               []
 
   summonerIconService:
-    getSummonerIconInventory:          [summonerId]
+    getSummonerIconInventory:            [summonerId]
+
+  gameService:
+    retrieveInProgressSpectatorGameInfo: [summonerName]
+
+  leaguesServiceProxy:
+    getAllLeaguesForPlayer:              [summonerId]
