@@ -86,6 +86,11 @@ interface LOLClientInterface
     public function invoke($destination, $operation, $parameters = array(), \Closure $callback = null, $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array());
 
     /**
+     * Do heartbeat to avoid being disconnected after being inactive
+     */
+    public function doHeartBeat();
+
+    /**
      * @param int $invokeId The invoke unique id
      * @param int $timeout  The timeout, after that the client will throw an exception
      *

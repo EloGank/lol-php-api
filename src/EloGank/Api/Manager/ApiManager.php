@@ -79,6 +79,16 @@ class ApiManager
             pcntl_signal_dispatch();
         });
 
+        // Heartbeat, 2 minutes officially, here 5
+        $this->loop->addPeriodicTimer(300, function () {
+            foreach ($this->clients as $clientsByRegion) {
+                /** @var LOLClientInterface $client */
+                foreach ($clientsByRegion as $client) {
+                    $client->doHeartBeat();
+                }
+            }
+        });
+
         // Clients logging
         if (true === ConfigurationLoader::get('client.async.enabled')) {
             $this->loop->addPeriodicTimer(0.5, function () {

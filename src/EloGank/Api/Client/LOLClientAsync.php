@@ -244,6 +244,14 @@ class LOLClientAsync implements LOLClientInterface
     /**
      * {@inheritdoc}
      */
+    public function doHeartBeat()
+    {
+        $this->send('doHeartBeat');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function __toString()
     {
         return sprintf('async #%d (%s)', $this->clientId, $this->getRegion());

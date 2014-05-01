@@ -89,6 +89,16 @@ class LOLClient extends RTMPClient implements LOLClientInterface
      */
     protected $lastCall = 0;
 
+    /**
+     * @var int The connected user account id, used by heartbeat call
+     */
+    protected $accountId;
+
+    /**
+     * @var int
+     */
+    protected $heartBeatCount = 0;
+
 
     /**
      * @param Client          $redis
@@ -187,8 +197,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
         $data = $response['data']->getData();
         $body = $data->body->getAMFData();
         $token = $body['token'];
-        $accountSummary = $body['accountSummary']->getAMFData();
-        $accountId = $accountSummary['accountId'];
+        $this->accountId = $body['accountSummary']->getAMFData()['accountId'];
 
         $authToken = strtolower($this->username) . ':' . $token;
         $authToken = base64_encode($authToken);
@@ -198,19 +207,19 @@ class LOLClient extends RTMPClient implements LOLClientInterface
         $this->syncInvoke('messagingDestination', 0, null, 'flex.messaging.messages.CommandMessage', array(
             'DSSubtopic' => 'bc'
         ), array(
-            'clientId' => 'bc-' . $accountId
+            'clientId' => 'bc-' . $this->accountId
         ));
 
         $this->syncInvoke("messagingDestination", 0, null, "flex.messaging.messages.CommandMessage", array(
-            'DSSubtopic' => 'cn-' . $accountId
+            'DSSubtopic' => 'cn-' . $this->accountId
         ), array(
-            'clientId' => 'cn-' . $accountId
+            'clientId' => 'cn-' . $this->accountId
         ));
 
         $this->syncInvoke("messagingDestination", 0, null, "flex.messaging.messages.CommandMessage", array(
-            'DSSubtopic' => 'gn-' . $accountId
+            'DSSubtopic' => 'gn-' . $this->accountId
         ), array(
-            'clientId' => 'gn-' . $accountId
+            'clientId' => 'gn-' . $this->accountId
         ));
     }
 
@@ -382,6 +391,19 @@ class LOLClient extends RTMPClient implements LOLClientInterface
         $this->lastCall = microtime(true) + 0.03;
 
         return parent::invoke($destination, $operation, $parameters, $callback, $packetClass, $headers, $body);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function doHeartBeat()
+    {
+        $this->syncInvoke('loginService', 'performLCDSHeartBeat', [
+            $this->accountId,
+            strtolower($this->DSId),
+            ++$this->heartBeatCount,
+            date('D M j Y H:i:s') . ' GMT' . date('O')
+        ]);
     }
 
     /**
