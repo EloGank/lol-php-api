@@ -131,6 +131,7 @@ abstract class Controller
     {
         return $this->apiManager->getRouter()->process($this->apiManager, array(
             'route'      => $route,
+            'region'     => $this->region,
             'parameters' => $parameters
         ));
     }

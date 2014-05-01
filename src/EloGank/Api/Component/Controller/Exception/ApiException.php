@@ -27,6 +27,8 @@ class ApiException extends \RuntimeException
     public function __construct(array $errorBody)
     {
         $this->errorBody = $errorBody;
+
+        parent::__construct($errorBody['message']);
     }
 
     /**
@@ -35,5 +37,13 @@ class ApiException extends \RuntimeException
     public function getErrorBody()
     {
         return $this->errorBody;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCause()
+    {
+        return $this->errorBody['caused_by'];
     }
 }
