@@ -53,7 +53,7 @@ add-apt-repository -y ppa:rwky/redis
 apt-get update
 apt-get install -y redis-server
 
-# Installating hiredis library dependency for the phpiredis
+# Installing hiredis library dependency for the phpiredis
 cd /tmp
 git clone https://github.com/redis/hiredis.git
 cd hiredis

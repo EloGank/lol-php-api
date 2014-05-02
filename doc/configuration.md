@@ -49,6 +49,19 @@ client:
         password: myNaPassword
 ```
 
+If you need a specific client worker port for asynchronous configuration, use this configuration : 
+
+``` yml
+# config/config.yml
+client:
+    accounts:
+      - region:   ~ # The region unique name, currently EUW or NA
+        username: ~ # Your test account username
+        password: ~ # Your test account password
+        async:
+          port:   ~ # The specific client worker port
+```
+
 ### Server configuration
 
 ``` yml
@@ -72,4 +85,4 @@ If you need another format, [ask for it](https://github.com/EloGank/lol-php-api/
 
 ### Next
 
-Now you can start the API, see the [how it works documentation](./how_it_works.md).
+Now you can start the API, see the [how to use documentation](./how_to_use.md).
