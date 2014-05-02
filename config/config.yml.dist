@@ -1,41 +1,60 @@
 config:
     cache:
+      # The cache directory path, from the project root directory
       path:           cache
 
     log:
+      # The log file path, from the project root directory, the directory must be created
       path:           logs/api.log
+      # The log verbosity : debug, info, warning, error
       verbosity:      debug
+      # The maximum number of files before the oldest one is deleted
       max_file:       5
 
     client:
       async:
+        # Enable or disable the asynchronous system
         enabled:      false
+        # The starting port used by asynchronous workers. If there is "n" clients, the port will be incremented
+        # by "n" (5000, 5001, ...)
         startPort:    5000
         redis:
+          # The Redis server host address
           host:       127.0.0.1
+          # The Redis server port
           port:       6379
+          # The Redis server key used by this API
           key:        elogank.api
       request:
+        # The time in second before a call is timed out
         timeout:      5
         overload:
+          # The minimum delay between two calls in a same client, in second (minimum 0.03)
           available:  0.03
+          # The minimum delay before a client is available after being overloaded (minimum 4)
           wait:       4
       response:
+        # If a response is not consumed by a client, it will expires, in second
         expire:       60
       authentication:
         busy:
+          # When the server is busy, retry to connect after delay, in second
           wait:       30
+      # The client version, can be retrieve by opening your LoL launcher, clicking on "Play" button and copy/paste
+      # the number in the top left corner
       version:        4.6.x
+      # Your locale
       locale:         en_US
+      # The accounts configuration, see the documentation (doc/configuration.md)
       accounts:
         - region:     ~
           username:   ~
           password:   ~
-          async:
-            port:     ~
 
     region:
+      # You can edit your Region class
       class:          EloGank\Api\Model\Region\Region
+      # The region configuration
       servers:
         NA:
           name:       North America
@@ -46,7 +65,11 @@ config:
           server:     prod.eu.lol.riotgames.com
           loginQueue: lq.eu.lol.riotgames.com
 
+    # The server configuration
     server:
+        # The server port
         port:         8080
-        bind:         127.0.0.1
+        # The server binding address, please see the documentation (doc/configuration.md)
+        bind:         ~
+        # The server output format : "json", "php" (using serialize function) or "xml"
         format:       json
