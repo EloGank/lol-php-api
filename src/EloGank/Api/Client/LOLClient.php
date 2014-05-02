@@ -190,7 +190,13 @@ class LOLClient extends RTMPClient implements LOLClientInterface
 
                 $this->clientVersion = $newVersion;
 
-                return $this->authenticate();
+                return $this->reconnect();
+            }
+            elseif ('com.riotgames.platform.login.LoginFailedException' == $root['rootCauseClassname']) {
+                $this->logger->warning('Client ' . $this . ': error on authentication (normal in case of busy server). Restarting client...');
+                sleep(1);
+
+                return $this->reconnect();
             }
         }
 
@@ -221,6 +227,24 @@ class LOLClient extends RTMPClient implements LOLClientInterface
         ), array(
             'clientId' => 'gn-' . $this->accountId
         ));
+    }
+
+    /**
+     * Clean all variables and reconnect
+     */
+    protected function reconnect()
+    {
+        stream_socket_shutdown($this->socket->getSocket(), STREAM_SHUT_RDWR);
+        $this->socket = null;
+        $this->token = null;
+        $this->DSId = null;
+        $this->accountId = null;
+        $this->invokeId = 1;
+        $this->heartBeatCount = 0;
+        $this->startTime = time();
+        $this->lastCall = 0;
+
+        $this->authenticate();
     }
 
     /**
@@ -274,7 +298,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
             $this->logger->alert('Client ' . $this . ': the server is currently busy. Restarting client in ' . $waitTime . ' seconds...');
             sleep($waitTime);
 
-            return $this->authenticate();
+            return $this->reconnect();
         }
 
         // Login queue process

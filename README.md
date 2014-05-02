@@ -3,6 +3,8 @@
 Unofficial RTMP API fully PHP and asynchronous for League of Legends.  
 With this API you can retrieve some data about summoners in real-time directly from Riot servers.
 
+**You can use the API client from this repository : https://github.com/EloGank/lol-php-api-client**
+
 ### Features
 
 * A ready-to-use API server
