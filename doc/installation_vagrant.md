@@ -16,6 +16,7 @@ This API has a ready-to-use Virtual Machine (VM) installation process. But befor
 
 #### Run
 
+Edit your environment parameters in the file `.vagrant_bootstrap/parameters.sh`.  
 Now, open the Command-Line Interface (CLI) window, and, in the project root directory run this command :
 
     vagrant up
