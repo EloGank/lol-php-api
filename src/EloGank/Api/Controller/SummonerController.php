@@ -20,7 +20,7 @@ use EloGank\Api\Component\Controller\Exception\ApiException;
 class SummonerController extends Controller
 {
     /**
-     * Check if player exists and return his information.<br />
+     * Check if summoner exists and return his information.<br />
      * This method exist because the route "summoner.summoner_by_name" return the same behavior of an overloaded<br />
      * client when the player does not exist. So we use a trick with the route<br />
      * "game.retrieve_in_progress_spectator_game" and errors which return the accountId when the player exists and<br />
@@ -33,7 +33,7 @@ class SummonerController extends Controller
      * @throws \EloGank\Api\Component\Controller\Exception\ApiException
      * @throws \Exception
      */
-    public function getPlayerExistenceAction($summonerName)
+    public function getSummonerExistenceAction($summonerName)
     {
         try {
             $this->getResult($this->getClient()->invoke('gameService', 'retrieveInProgressSpectatorGameInfo', [$summonerName]));

@@ -49,6 +49,52 @@ Example, for your first asynchronous client :
 
     php console elogank:client:create 0 1
     
+### Implement your own API route
+
+First, you need to choice what is the main object of the API request : summoner, league, player_stats, etc.  
+Then, create (if not already exists) the controller in the `src/EloGank/Api/Controller` directory, for example `SummonerController` :
+
+``` php
+// src/EloGank/Api/Controller/SummonerController.php
+
+<?php
+
+namespace EloGank\Api\Controller;
+
+use EloGank\Api\Component\Controller\Controller;
+
+class GameController extends Controller
+{
+    /* ... */
+}
+```
+
+Note that the controller must extends `EloGank\Api\Component\Controller\Controller` abstract class to be recognized as a route controller.
+
+Finally, implement your method. The method name must ending by `Action`, example :
+
+``` php
+// Method parameters are automaticly added as API route parameters in the "elogank:router:dump" command
+public function getSomeDataAction($myParameter, $mySecondParameter)
+{
+    // Invoke id is used to retrieve result later. A call can have an optionnal callback to format/process the call result
+    $invokeId = $this->getClient()->invoke('summonerService', 'getSomeData', [$myParameter, $mySecondParameter], function ($result) {
+        var_dump('my callback');
+
+        return $result;
+    });
+    
+    return $this->view($this->getResult($invokeId));
+}
+```
+
+Now, run the elogank:router:dump command to see your new API route.  
+If you want to know about the make asynchronous calls in a same controller method, see the [GameController::getAllSummonerDataCurrentGameAction()](../src/EloGank/Api/Controller/GameController.php) method.
+
+### Important note
+
+Please, **do not use the route** `summoner.summoner_by_name` **to check a summoner existence**, it causes timeout issue with the overloaded system when the sumomner is not found (because the response body is empty), **use** `summoner.player_existence` **instead**, which return the same information and, in general, **be sure of the existence of your summoner before calling another route**.
+    
 ### Next
 
 Now you know everything about this API, you have the opportunity to [contribute to this project](./contribute.md).
