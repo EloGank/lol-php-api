@@ -73,7 +73,7 @@ class ConfigurationLoader
         $config = $configs;
 
         foreach ($parts as $part) {
-            if (!isset($config[$part])) {
+            if (!array_key_exists($part, $config)) {
                 throw new ConfigurationKeyNotFoundException('The configuration key "' . $name . '" is not found');
             }
 

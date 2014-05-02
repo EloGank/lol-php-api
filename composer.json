@@ -13,9 +13,9 @@
         "symfony/console": "2.5.*@dev",
         "symfony/event-dispatcher": "2.5.*@dev",
         "symfony/monolog-bridge": "2.5.*@dev",
+        "symfony/yaml": "v2.4.2",
 
         "sabre/amf": "dev-master",
-        "symfony/yaml": "v2.4.2",
         "monolog/monolog": "1.8.0",
         "incenteev/composer-parameter-handler": "v2.1.0",
         "react/socket": "0.4.*@dev",
@@ -39,6 +39,9 @@
         "incenteev-parameters": {
             "file": "config/config.yml",
             "parameter-key": "config"
+        },
+        "branch-alias": {
+            "dev-master": "1.0-dev"
         }
     },
     "autoload": {

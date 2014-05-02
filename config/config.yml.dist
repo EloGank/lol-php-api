@@ -70,6 +70,6 @@ config:
         # The server port
         port:         8080
         # The server binding address, please see the documentation (doc/configuration.md)
-        bind:         ~
+        bind:         0.0.0.0
         # The server output format : "json", "php" (using serialize function) or "xml"
         format:       json

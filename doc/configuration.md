@@ -68,7 +68,7 @@ client:
 # config/config.yml
 server:
     port:   8080
-    bind:   ~
+    bind:   0.0.0.0
     format: json
 ```
 
@@ -77,7 +77,7 @@ You can allow only one IP address to connect to your fresh new API. Just add the
 ``` yml
 # config/config.yml
 server:
-    bind: 127.0.0.1 # access only to myself
+    bind: 127.0.0.1 # access only to myself, 0.0.0.0 for everybody
 ```
 
 You can change the output format, for these values : `json`, `php` (using `serialize` function) or `xml`. Simply edit the `format` key.  
