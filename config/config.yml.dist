@@ -64,6 +64,42 @@ config:
           name:       Europe West
           server:     prod.eu.lol.riotgames.com
           loginQueue: lq.eu.lol.riotgames.com
+        EUNE:
+          name:       Europe Nordic & East
+          server:     prod.eun1.lol.riotgames.com
+          loginQueue: lq.eun1.lol.riotgames.com
+        KR:
+          name:       Korea
+          server:     prod.kr.lol.riotgames.com
+          loginQueue: lq.kr.lol.riotgames.com
+        BR:
+          name:       Brazil
+          server:     prod.br.lol.riotgames.com
+          loginQueue: lq.br.lol.riotgames.com
+        TR:
+          name:       Turkey
+          server:     prod.tr.lol.riotgames.com
+          loginQueue: lq.tr.lol.riotgames.com
+        RU:
+          name:       Russia
+          server:     prod.ru.lol.riotgames.com
+          loginQueue: lq.ru.lol.riotgames.com
+        LAN:
+          name:       Latin America North
+          server:     prod.la1.lol.riotgames.com
+          loginQueue: lq.la1.lol.riotgames.com
+        LAS:
+          name:       Latin America South
+          server:     prod.la2.lol.riotgames.com
+          loginQueue: lq.la2.lol.riotgames.com
+        OCE:
+          name:       Oceania
+          server:     prod.oc1.lol.riotgames.com
+          loginQueue: lq.oc1.lol.riotgames.com
+        PBE:
+          name:       Public Beta Environment
+          server:     prod.pbe1.lol.riotgames.com
+          loginQueue: lq.pbe1.lol.riotgames.com
 
     # The server configuration
     server:
