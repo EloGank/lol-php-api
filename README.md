@@ -51,8 +51,8 @@ Please, **do not use the route** `summoner.summoner_by_name` **to check a summon
 
 * Add information about `supervisor`
 * Unit tests
-* Fix issue on SIGINT signal (ReactPHP issue)
-* Reconnect the client when the connection is broken
+* Fix issue on SIGINT signal (CTRL + C) (ReactPHP issue : https://github.com/reactphp/react/issues/296)
+* Need more tests when the client timed out and reconnect (when LoL servers are down)
 
 ## Reporting an issue or a feature request
 

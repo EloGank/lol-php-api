@@ -11,6 +11,7 @@
 
 namespace EloGank\Api\Server;
 
+use EloGank\Api\Client\Exception\RequestTimeoutException;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Component\Exception\ArrayException;
 use EloGank\Api\Component\Logging\LoggerFactory;
@@ -108,6 +109,10 @@ class Server
                     $this->logger->error('Client [' . $conn->getRemoteAddress() . ']: ' . $e->getMessage());
 
                     $conn->write($this->format($e->toArray(), $format));
+
+                    if ($e instanceof RequestTimeoutException) {
+                        $e->getClient()->reconnect();
+                    }
                 }
             });
         });

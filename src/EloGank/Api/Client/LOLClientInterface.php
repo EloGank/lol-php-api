@@ -30,6 +30,11 @@ interface LOLClientInterface
     public function isAuthenticated();
 
     /**
+     * Clean all variables and reconnect
+     */
+    public function reconnect();
+
+    /**
      * Return the client unique id
      *
      * @return int

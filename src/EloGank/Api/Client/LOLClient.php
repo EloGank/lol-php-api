@@ -14,6 +14,7 @@ namespace EloGank\Api\Client;
 use EloGank\Api\Client\Exception\AuthException;
 use EloGank\Api\Client\Exception\BadCredentialsException;
 use EloGank\Api\Client\Exception\ClientException;
+use EloGank\Api\Client\Exception\RequestTimeoutException;
 use EloGank\Api\Client\RTMP\RTMPClient;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Model\Region\RegionInterface;
@@ -230,9 +231,9 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     }
 
     /**
-     * Clean all variables and reconnect
+     * {@inheritdoc}
      */
-    protected function reconnect()
+    public function reconnect()
     {
         stream_socket_shutdown($this->socket->getSocket(), STREAM_SHUT_RDWR);
         $this->socket = null;
@@ -414,7 +415,14 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     {
         $this->lastCall = microtime(true) + 0.03;
 
-        return parent::invoke($destination, $operation, $parameters, $callback, $packetClass, $headers, $body);
+        try {
+            return parent::invoke($destination, $operation, $parameters, $callback, $packetClass, $headers, $body);
+        }
+        catch (RequestTimeoutException $e) {
+            $e->setClient($this);
+
+            throw $e;
+        }
     }
 
     /**

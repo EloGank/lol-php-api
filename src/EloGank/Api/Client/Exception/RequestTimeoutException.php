@@ -11,9 +11,44 @@
 
 namespace EloGank\Api\Client\Exception;
 
+use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Exception\ArrayException;
 
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
  */
-class RequestTimeoutException extends ArrayException { }
+class RequestTimeoutException extends ArrayException
+{
+    /**
+     * @var LOLClientInterface
+     */
+    protected $client;
+
+
+    /**
+     * @param string             $message
+     * @param LOLClientInterface $client
+     */
+    public function __construct($message, LOLClientInterface $client = null)
+    {
+        $this->client = $client;
+
+        parent::__construct($message);
+    }
+
+    /**
+     * @return LOLClientInterface
+     */
+    public function getClient()
+    {
+        return $this->client;
+    }
+
+    /**
+     * @param LOLClientInterface $client
+     */
+    public function setClient($client)
+    {
+        $this->client = $client;
+    }
+}

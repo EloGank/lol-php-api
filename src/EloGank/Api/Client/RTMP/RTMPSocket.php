@@ -11,6 +11,9 @@
 
 namespace EloGank\Api\Client\RTMP;
 
+use EloGank\Api\Client\Exception\RequestTimeoutException;
+use EloGank\Api\Component\Configuration\ConfigurationLoader;
+
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
  */
@@ -27,6 +30,11 @@ class RTMPSocket
     protected $errorMessage;
 
     /**
+     * @var int
+     */
+    protected $timeout;
+
+    /**
      * @param string $protocol
      * @param string $server
      * @param int    $port
@@ -36,6 +44,14 @@ class RTMPSocket
         $this->socket = stream_socket_client(sprintf('%s://%s:%d', $protocol, $server, $port), $errorCode, $errorMessage);
         if (0 != $errorCode) {
             $this->errorMessage = $errorMessage;
+        }
+        else {
+            $this->timeout = (int) ConfigurationLoader::get('client.request.timeout');
+            if (1 > $this->timeout) {
+                $this->timeout = 5;
+            }
+
+            stream_set_timeout($this->socket, $this->timeout);
         }
     }
 
@@ -92,10 +108,24 @@ class RTMPSocket
      * @param int $length
      *
      * @return mixed
+     *
+     * @throws RequestTimeoutException
      */
     public function read($length = 1)
     {
-        return fread($this->socket, $length);
+        $read   = [$this->socket];
+        $write  = null;
+        $except = null;
+
+        $n = stream_select($read, $write, $except, $this->timeout);
+        if (false === $n) {
+            return null;
+        }
+        elseif (0 < $n) {
+            return fread($this->socket, $length);
+        }
+
+        throw new RequestTimeoutException('Request timeout, the client will reconnect');
     }
 
     /**
