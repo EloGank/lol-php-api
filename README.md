@@ -50,7 +50,6 @@ Please, **do not use the route** `summoner.summoner_by_name` **to check a summon
 ## TODO
 
 * Add information about `supervisor`
-* Create & catch exception when a controller return a wrong view
 * Unit tests
 * Fix issue on SIGINT signal (ReactPHP issue)
 * Reconnect the client when the connection is broken
