@@ -6,6 +6,26 @@ League of Legends PHP API
 This API use the powerful [Symfony 2](http://symfony.com/) framework components, and the console system is a part of these.  
 So you have some commands to do different jobs. To use the console, you must being in the project root directory.
 
+### The Client
+
+**This API need a socket client to communicate with your application**. Fortunately, there is a repository for this : https://github.com/EloGank/lol-php-api-client
+
+Please, take a look on this client, **some examples are available**.
+Assuming you're using this client, you can make a call in a few lines :
+
+``` php
+// Declare your client and the configuration
+$client = new \EloGank\ApiClient\Client('127.0.0.1', 8080, 'json');
+
+// Do your API request
+try {
+    $response = $client->send('EUW', 'summoner.summoner_existence', ['Foobar']);
+} catch (\EloGank\ApiClient\Exception\ApiException $e) {
+    // error
+    var_dump($e->getCause(), $e->getMessage());
+}
+```
+
 ### Routes (API calls)
 
     php console elogank:router:dump
@@ -21,8 +41,8 @@ In this example, with your client, you must call the `controller_name.method_nam
 
 A route must be called with these three (+ one as optionnal) parameters :
 
-* `route` the API route, in short it's the "`controller_name`.`method_name`"
 * `region` it's the client region short name (EUW, NA, ...)
+* `route` the API route, in short it's the "`controller_name`.`method_name`"
 * `parameters` it's the route parameters, it's an array
 * `format` (optionnal) if you need a specific format for a specific route (see the configuration documentation for available formats)
 

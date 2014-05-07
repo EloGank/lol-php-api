@@ -22,6 +22,18 @@ With this API you can retrieve some data about summoners in real-time directly f
 * Allow to bind the server to a specific IP address (allow-only)
 * Easy to override
 
+## Installation
+
+[How to install this API](./doc/installation.md)
+
+## Configuration
+
+[How to configure this API](./doc/configuration.md)
+
+## How to use
+
+[How to use this API](./doc/how_to_use.md)
+
 ## Documentation
 
 The document is stored in the `doc` folder of this repository.
@@ -31,14 +43,6 @@ Here, the main titles :
 * [Configuration](./doc/configuration.md)
 * [How to use](./doc/how_to_use.md)
 * [Contribute](./doc/contribute.md)
-
-## Installation
-
-[How to install this API](./doc/installation.md)
-
-## Configuration
-
-[How to configure this API](./doc/configuration.md)
 
 ## Important notes
 
