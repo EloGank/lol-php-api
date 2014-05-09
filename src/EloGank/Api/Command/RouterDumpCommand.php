@@ -60,8 +60,29 @@ EOF
             $output->writeln(sprintf('<info>%s</info> : ', $controller));
 
             foreach ($methods as $method => $params) {
-                $output->writeln(sprintf("\t- <comment>%s</comment> : [%s]", $method, join(', ', $params)));
+                $this->formatParameters($method, $params);
+                $output->writeln(sprintf("\t- <comment>%s</comment> :%s", $method, $this->formatParameters($method, $params)));
             }
         }
+    }
+
+    /**
+     * @param string $methodName
+     * @param array  $parameters
+     *
+     * @return string
+     */
+    protected function formatParameters($methodName, array $parameters)
+    {
+        $length = 6 - (strlen($methodName) + 4) / 8;
+        $output = "";
+
+        for ($i = 0; $i < $length; $i++) {
+            $output .= "\t";
+        }
+
+        $output .= '[' . join(', ', $parameters) . ']';
+
+        return $output;
     }
 }
