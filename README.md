@@ -42,6 +42,7 @@ Here, the main titles :
 * [Installation](./doc/installation.md)
 * [Configuration](./doc/configuration.md)
 * [How to use](./doc/how_to_use.md)
+* [Routing](./doc/routing.md)
 * [Contribute](./doc/contribute.md)
 
 ## Important notes

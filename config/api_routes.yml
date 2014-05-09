@@ -7,15 +7,12 @@ routes:
     getSummonerNames:                    ["summonerIds[]"]
 
   playerStatsService:
-    getAggregatedStats:                  [accountId, queueName, seasonId]
+    getAggregatedStats:                  [accountId, "gameMode (CLASSIC, ODIN, ARAM)", "seasonId (1-4)"]
     getRecentGames:                      [accountId]
     retrieveTopPlayedChampions:          [accountId, "gameMode (CLASSIC, ODIN, ARAM)"]
     getTeamAggregatedStats:              [teamId]
     getTeamEndOfGameStats:               [teamId, gameId]
-    retrievePlayerStatsByAccountId:      [accountId, seasonId]
-
-  summonerRuneService:
-    getSummonerRuneInventory:            [summonerId]
+    retrievePlayerStatsByAccountId:      [accountId, "seasonId (1-4)"]
 
   spellBookService:
     getSpellBook:                        [summonerId]
@@ -34,3 +31,6 @@ routes:
 
   leaguesServiceProxy:
     getAllLeaguesForPlayer:              [summonerId]
+
+  loginService:
+    getStoreUrl:                         []

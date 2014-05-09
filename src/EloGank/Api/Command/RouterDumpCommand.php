@@ -60,7 +60,7 @@ EOF
             $output->writeln(sprintf('<info>%s</info> : ', $controller));
 
             foreach ($methods as $method => $params) {
-                $output->writeln(sprintf("\t- <comment>%s</comment> :%s", $method, $this->formatParameters($method, $params)));
+                $output->writeln(sprintf("  - <comment>%s</comment> :%s", $method, $this->formatParameters($method, $params)));
             }
         }
     }
@@ -76,7 +76,10 @@ EOF
         $isWinOS = strtoupper(substr(PHP_OS, 0, 3)) == 'WIN';
         $length = strlen($methodName);
         if ($isWinOS) {
-            $length += 4;
+            $length -= 2;
+        }
+        else {
+            $length -= 1;
         }
 
         $length /= 8;

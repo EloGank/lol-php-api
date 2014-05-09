@@ -46,6 +46,8 @@ A route must be called with these three (+ one as optionnal) parameters :
 * `parameters` it's the route parameters, it's an array
 * `format` (optionnal) if you need a specific format for a specific route (see the configuration documentation for available formats)
 
+You can see all available routes on the [routing documentation](./routing.md).
+
 ### The API
 
 You will be pleased to learn that the API is fully logged on console and on files (`/logs` directory). The log verbosity can be set in the configuration file (key: `log.verbosity`).
@@ -117,4 +119,4 @@ Please, **do not use the route** `summoner.summoner_by_name` **to check a summon
     
 ### Next
 
-Now you know everything about this API, you have the opportunity to [contribute to this project](./contribute.md).
+Before using this API, you must know how works the routing component through the [routing documentation](./routing.md).
