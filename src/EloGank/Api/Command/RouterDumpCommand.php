@@ -60,7 +60,6 @@ EOF
             $output->writeln(sprintf('<info>%s</info> : ', $controller));
 
             foreach ($methods as $method => $params) {
-                $this->formatParameters($method, $params);
                 $output->writeln(sprintf("\t- <comment>%s</comment> :%s", $method, $this->formatParameters($method, $params)));
             }
         }
@@ -74,10 +73,21 @@ EOF
      */
     protected function formatParameters($methodName, array $parameters)
     {
-        $length = 6 - (strlen($methodName) + 4) / 8;
+        $isWinOS = strtoupper(substr(PHP_OS, 0, 3)) == 'WIN';
+        $length = strlen($methodName);
+        if ($isWinOS) {
+            $length += 4;
+        }
+
+        $length /= 8;
+        if (!$isWinOS && is_float($length)) {
+            ++$length;
+        }
+
+        $tabs = 6 - $length;
         $output = "";
 
-        for ($i = 0; $i < $length; $i++) {
+        for ($i = 0; $i < $tabs; $i++) {
             $output .= "\t";
         }
 

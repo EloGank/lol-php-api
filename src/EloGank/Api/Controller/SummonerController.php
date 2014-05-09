@@ -53,14 +53,14 @@ class SummonerController extends Controller
     }
 
     /**
-     * Return all data needed to show information about a summoner current game
+     * Return all data needed to show information about a summoner
      *
      * @param int $accountId
      * @param int $summonerId
      *
      * @return array
      */
-    public function getAllSummonerDataCurrentGameAction($accountId, $summonerId)
+    public function getAllSummonerDataAction($accountId, $summonerId)
     {
         $invokeIds = [
             $this->getClient()->invoke('summonerService', 'getAllPublicSummonerDataByAccount', [$accountId], function ($result) {

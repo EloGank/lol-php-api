@@ -52,6 +52,7 @@ class RTMPSocket
             }
 
             stream_set_timeout($this->socket, $this->timeout);
+            stream_set_blocking($this->socket, false);
         }
     }
 
@@ -85,7 +86,12 @@ class RTMPSocket
             $data = substr($data, $start, $end);
         }
 
-        fwrite($this->socket, $data);
+        $n = 0;
+        $length = strlen($data);
+
+        while ($n < $length) {
+            $n += fwrite($this->socket, $data);
+        }
     }
 
     /**
@@ -113,19 +119,18 @@ class RTMPSocket
      */
     public function read($length = 1)
     {
-        $read   = [$this->socket];
-        $write  = null;
-        $except = null;
+        $timeout = time() + $this->timeout;
+        $output  = '';
 
-        $n = stream_select($read, $write, $except, $this->timeout);
-        if (false === $n) {
-            return null;
-        }
-        elseif (0 < $n) {
-            return fread($this->socket, $length);
+        while (strlen($output) < $length && time() < $timeout) {
+            $output .= fread($this->socket, $length);
         }
 
-        throw new RequestTimeoutException('Request timeout, the client will reconnect');
+        if (strlen($output) < $length) {
+            throw new RequestTimeoutException('Request timeout, the client will reconnect');
+        }
+
+        return $output;
     }
 
     /**
