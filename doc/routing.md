@@ -10,7 +10,8 @@ There is two different routes in this API.
 It's a route that is already provided by the RTMP LoL API (by the launcher, in short).
 This route return the raw LoL API result, without any process between the request and the response.
 
-All routes are requested by the `EloGank\Api\Controller\CommonController::commonCall()` controller's method.
+All routes are requested by the `EloGank\Api\Controller\CommonController::commonCall()` controller's method.  
+You can easilly add a common route by editing the `config/api_routes.yml` file : just provide the destination name, the service name & the parameters.
 
 #### Custom Route
 
