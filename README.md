@@ -34,6 +34,10 @@ With this API you can retrieve some data about summoners in real-time directly f
 
 [How to use this API](./doc/how_to_use.md)
 
+## Route list
+
+[Routing component](./doc/routing.md)
+
 ## Documentation
 
 The document is stored in the `doc` folder of this repository.
@@ -43,6 +47,7 @@ Here, the main titles :
 * [Configuration](./doc/configuration.md)
 * [How to use](./doc/how_to_use.md)
 * [Routing](./doc/routing.md)
+* [Caching](./doc/caching.md)
 * [Contribute](./doc/contribute.md)
 
 ## Important notes

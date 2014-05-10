@@ -121,4 +121,4 @@ Please, refer to the [caching documentation](./caching.md) to learn how to cache
 
 ### Next
 
-Now you know everything about this API, you have the opportunity to [contribute to this project](./contribute.md).
+Last but not least, see the [caching documentation](./caching.md) to avoid useless calls.
