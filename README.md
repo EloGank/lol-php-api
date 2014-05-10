@@ -12,7 +12,7 @@ With this API you can retrieve some data about summoners in real-time directly f
 * Use the powerful Symfony 2 framework components
 * Allow multi client to improve the response speed
 * Fully aynschronous (with ZeroMQ & mutli process)
-* Multi region (EUW, NA)
+* Multi region (EUW, NA, EUNE, BR, TR, RU, KR, LAN, LAS, OCE & PBE)
 * Anti-overload system (avoid temporary client ban when you make too many request)
 * Allow to use native RTMP API or custom API with our controllers
 * Fully logged in file, redis, and console (usefull for developpers)
