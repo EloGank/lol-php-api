@@ -85,4 +85,12 @@ class ConfigurationLoader
 
         return $config;
     }
+
+    /**
+     * @return array
+     */
+    public static function getAll()
+    {
+        return self::$configs;
+    }
 }

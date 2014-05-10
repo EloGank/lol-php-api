@@ -20,6 +20,7 @@ use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Model\Region\RegionInterface;
 use Predis\Client;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Yaml\Dumper;
 
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
@@ -178,15 +179,30 @@ class LOLClient extends RTMPClient implements LOLClientInterface
             if ('com.riotgames.platform.login.impl.ClientVersionMismatchException' == $root['rootCauseClassname']) {
                 $newVersion = $root['substitutionArguments'][1];
 
+                $updateVersion = function () use ($newVersion) {
+                    $this->logger->alert('Your client version configuration is outdated, it will be automatically updated with this version : ' . $newVersion . ' (configuration key: client.version)');
+                    $this->logger->alert('Automatic restart with the new client version...');
+
+                    // Save the new version into the config.yml file
+                    $filePath = __DIR__ . '/../../../../config/config.yml';
+                    $configs = ConfigurationLoader::getAll();
+                    $configs['config']['client']['version'] = $newVersion;
+
+                    $dumper = new Dumper();
+                    file_put_contents($filePath, $dumper->dump($configs, 99));
+                };
+
                 // Avoid multiple warnings in async
                 if (true === ConfigurationLoader::get('client.async.enabled')) {
                     $key = ConfigurationLoader::get('client.async.redis.key') . '.clients.errors.wrong_version';
                     if (null === $this->redis->get($key)) {
-                        $this->logger->alert('Your client version configuration is outdated, please update your config file (key: client.version) with this version : ' . $newVersion);
-                        $this->logger->alert('Automatic restart with new client version...');
+                        $updateVersion();
 
                         $this->redis->set($key, true);
                     }
+                }
+                else {
+                    $updateVersion();
                 }
 
                 $this->clientVersion = $newVersion;

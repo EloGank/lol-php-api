@@ -36,7 +36,7 @@ With this API you can retrieve some data about summoners in real-time directly f
 
 ## Route list
 
-[Routing component](./doc/routing.md)
+[The routing component](./doc/routing.md#route-list)
 
 ## Documentation
 
