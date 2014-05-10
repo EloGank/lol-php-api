@@ -39,12 +39,12 @@ The output looks like :
         
 In this example, with your client, you must call the `controller_name.method_name` route, with two parameters to be able to execute the API.
 
-A route must be called with these three (+ one as optionnal) parameters :
+A route must be called with these three (+ one as optional) parameters :
 
 * `region` it's the client region short name (EUW, NA, ...)
 * `route` the API route, in short it's the "`controller_name`.`method_name`"
 * `parameters` it's the route parameters, it's an array
-* `format` (optionnal) if you need a specific format for a specific route (see the configuration documentation for available formats)
+* `format` (optional) if you need a specific format for a specific route (see the configuration documentation for available formats)
 
 You can see all available routes on the [routing documentation](./routing.md).
 
@@ -99,7 +99,7 @@ Finally, implement your method. The method name must ending by `Action`, example
 // Method parameters are automaticly added as API route parameters in the "elogank:router:dump" command
 public function getSomeDataAction($myParameter, $mySecondParameter)
 {
-    // Invoke id is used to retrieve result later. A call can have an optionnal callback to format/process the call result
+    // Invoke id is used to retrieve result later. A call can have an optional callback to format/process the call result
     $invokeId = $this->getClient()->invoke('summonerService', 'getSomeData', [$myParameter, $mySecondParameter], function ($result) {
         var_dump('my callback');
 

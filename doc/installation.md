@@ -14,10 +14,10 @@ It will take you only two minutes.
 
 **Note:** these packages are needed to compile these dependencies : `build-essential git-core curl php5-dev pkg-config`
 
-#### ZeroMQ (optionnal)
+#### ZeroMQ (optional)
 
 ZeroMQ is the technology used to allow the asynchronous client system in the API.  
-This dependency is optionnal if you don't use the asynchronous system.
+This dependency is optional if you don't use the asynchronous system.
 
 Here, for **Linux or OSX**, a CLI script to install this dependency :
 
@@ -40,10 +40,10 @@ echo "extension=zmq.so" > /etc/php5/cli/conf.d/20-zmq.ini
     
 For **Windows**, please follow this official instructions : http://zeromq.org/docs:windows-installations and for the extension, install `PECL` and run `pecl install zmq-beta` in a CLI window.
     
-#### Redis (optionnal)
+#### Redis (optional)
 
 Redis is a cache system. It allow, in this API, to communicate between all asynchronous client and with the main process logger.  
-This dependency is optionnal if you don't use the asynchronous system.
+This dependency is optional if you don't use the asynchronous system.
 
 Here, for **Linux or OSX**, a CLI script to install this dependency :
 
