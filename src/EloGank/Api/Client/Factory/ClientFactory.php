@@ -69,7 +69,7 @@ class ClientFactory
             $configs['username'],
             $configs['password'],
             ConfigurationLoader::get('client.version'),
-            ConfigurationLoader::get('client.locale'),
+            'en_US',
             $port
         );
     }
