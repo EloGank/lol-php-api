@@ -13,6 +13,7 @@ namespace EloGank\Api\Manager;
 
 use EloGank\Api\Client\Factory\ClientFactory;
 use EloGank\Api\Client\LOLClientInterface;
+use EloGank\Api\Component\Controller\Exception\ApiException;
 use EloGank\Api\Component\Routing\Router;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Component\Logging\LoggerFactory;
@@ -336,6 +337,14 @@ class ApiManager
     public function getRouter()
     {
         return $this->router;
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    public function getLogger()
+    {
+        return $this->logger;
     }
 
     /**

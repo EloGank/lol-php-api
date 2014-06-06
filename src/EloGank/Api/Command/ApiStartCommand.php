@@ -51,6 +51,7 @@ class ApiStartCommand extends Command
         }
         catch (\Exception $e) {
             $this->getApplication()->renderException($e, $output);
+            $apiManager->getLogger()->critical($e);
 
             $apiManager->clean();
 
