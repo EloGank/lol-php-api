@@ -67,6 +67,7 @@ phpize && ./configure --enable-phpiredis
 make && make install
 echo "extension=phpiredis.so" > /etc/php5/cli/conf.d/20-phpiredis.ini
 
+
 # ZERO MQ
 # -------
 cd /tmp
@@ -77,7 +78,15 @@ cd zeromq-4.0.4/
 make
 make install
 
+
 # PHP ZMQ Extension
 # -----------------
 yes '' | pecl install zmq-beta
 echo "extension=zmq.so" > /etc/php5/cli/conf.d/20-zmq.ini
+
+
+# Composer
+# --------
+cd /vagrant
+curl -sS https://getcomposer.org/installer | php
+php composer.phar install
