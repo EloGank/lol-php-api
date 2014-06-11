@@ -60,8 +60,8 @@ config:
           loginQueue: lq.na1.lol.riotgames.com
         EUW:
           name:       Europe West
-          server:     prod.eu.lol.riotgames.com
-          loginQueue: lq.eu.lol.riotgames.com
+          server:     prod.euw1.lol.riotgames.com
+          loginQueue: lq.euw1.lol.riotgames.com
         EUNE:
           name:       Europe Nordic & East
           server:     prod.eun1.lol.riotgames.com
