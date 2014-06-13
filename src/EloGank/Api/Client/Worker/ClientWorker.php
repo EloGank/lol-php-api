@@ -51,6 +51,11 @@ class ClientWorker
      */
     protected $defaultPort;
 
+    /**
+     * @var int
+     */
+    protected $lastInvokeId = 0;
+
 
     /**
      * @param LoggerInterface    $logger
@@ -104,6 +109,15 @@ class ClientWorker
 
                 continue;
             }
+
+            // Receive an old message or a wrong invoke id, ignoring
+            if (is_numeric($request['invokeId']) && ($request['invokeId'] < $this->lastInvokeId || $request['invokeId'] - 1 > $this->lastInvokeId)) {
+                $this->logger->debug('Client worker ' . $this->client . ' ignoring invoke id ' . $request['invokeId'] . ', last invoke id : ' . $this->lastInvokeId);
+
+                continue;
+            }
+
+            $this->lastInvokeId = $request['invokeId'];
 
             // Call the right method in the client and push to redis the result
             $result = call_user_func_array(array($this->client, $request['command']), $request['parameters']);

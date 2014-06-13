@@ -14,6 +14,7 @@ namespace EloGank\Api\Client;
 use EloGank\Api\Client\Exception\RequestTimeoutException;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Model\Region\RegionInterface;
+use EloGank\Api\Process\Process;
 use Predis\Client;
 use Psr\Log\LoggerInterface;
 
@@ -30,7 +31,17 @@ class LOLClientAsync implements LOLClientInterface
     /**
      * @var string
      */
+    protected $rootFolder;
+
+    /**
+     * @var string
+     */
     protected $pidPath;
+
+    /**
+     * @var int
+     */
+    protected $accountKey;
 
     /**
      * @var int
@@ -83,19 +94,28 @@ class LOLClientAsync implements LOLClientInterface
      */
     public function __construct(LoggerInterface $logger, Client $redis, $accountKey, $clientId, RegionInterface $region, $port)
     {
-        $rootFolder     = __DIR__ . '/../../../..';
+        $rootFolder       = __DIR__ . '/../../../..';
 
-        $this->logger   = $logger;
-        $this->pidPath  = $rootFolder . '/' . ConfigurationLoader::get('cache.path') . '/clientpids/client_' . $clientId . '.pid';
-        $this->redis    = $redis;
-        $this->clientId = $clientId;
-        $this->region   = $region;
-        $this->port     = $port;
+        $this->logger     = $logger;
+        $this->rootFolder = $rootFolder;
+        $this->pidPath    = $rootFolder . '/' . ConfigurationLoader::get('cache.path') . '/clientpids/client_' . $clientId . '.pid';
+        $this->redis      = $redis;
+        $this->accountKey = $accountKey;
+        $this->clientId   = $clientId;
+        $this->region     = $region;
+        $this->port       = $port;
+        $this->con        = new \ZMQSocket(new \ZMQContext(), \ZMQ::SOCKET_PUSH);
 
-        $this->con      = new \ZMQSocket(new \ZMQContext(), \ZMQ::SOCKET_PUSH);
+        $this->connect();
+    }
 
+    /**
+     * Create the LOLClient instance and connect it with the worker
+     */
+    private function connect()
+    {
         // Create process
-        popen(sprintf('php %s/console elogank:client:create %d %d > /dev/null 2>&1 & echo $! > %s', $rootFolder, $accountKey, $clientId, $this->pidPath), 'r');
+        popen(sprintf('php %s/console elogank:client:create %d %d > /dev/null 2>&1 & echo $! > %s', $this->rootFolder, $this->accountKey, $this->clientId, $this->pidPath), 'r');
     }
 
     /**
@@ -236,7 +256,7 @@ class LOLClientAsync implements LOLClientInterface
             'invokeId'   => $invokeId,
             'command'    => $commandName,
             'parameters' => $parameters
-        ]));
+        ]), \ZMQ::MODE_DONTWAIT);
 
         return $invokeId;
     }
@@ -254,7 +274,12 @@ class LOLClientAsync implements LOLClientInterface
      */
     public function reconnect()
     {
-        $this->send('reconnect');
+        $this->logger->debug('Reconnect process has been requested, kill the old process and create a new one');
+
+        Process::killProcess($this->pidPath, true, $this->logger, $this);
+        $this->redis->del($this->getKey('invokeId'));
+        $this->connect();
+        $this->authenticate();
     }
 
     /**

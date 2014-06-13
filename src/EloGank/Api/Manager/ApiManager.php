@@ -13,11 +13,11 @@ namespace EloGank\Api\Manager;
 
 use EloGank\Api\Client\Factory\ClientFactory;
 use EloGank\Api\Client\LOLClientInterface;
-use EloGank\Api\Component\Controller\Exception\ApiException;
 use EloGank\Api\Component\Routing\Router;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Component\Logging\LoggerFactory;
 use EloGank\Api\Model\Region\Exception\RegionNotFoundException;
+use EloGank\Api\Process\Process;
 use Predis\Client;
 use Psr\Log\LoggerInterface;
 use React\EventLoop\Factory;
@@ -256,7 +256,7 @@ class ApiManager
                 return;
             }
 
-            $this->killClient($path, $throwException, $client);
+            Process::killProcess($path, $throwException, $this->logger, $client);
         }
         else {
             $iterator = new \DirectoryIterator($cachePath);
@@ -265,56 +265,8 @@ class ApiManager
                     continue;
                 }
 
-                $this->killClient($pidFile->getRealPath(), $throwException);
+                Process::killProcess($pidFile->getRealPath(), $throwException, $this->logger);
             }
-        }
-    }
-
-    /**
-     * @param string                  $path
-     * @param bool                    $throwException
-     * @param null|LOLClientInterface $client
-     *
-     * @throws \RuntimeException
-     */
-    protected function killClient($path, $throwException, $client = null)
-    {
-        $pid = (int) file_get_contents($path);
-
-        // Test if process is still running
-        $output = [];
-        exec('ps ' . $pid, $output);
-
-        if (!isset($output[1])) {
-            if (null != $client) {
-                $this->logger->debug('Client ' . $client . ' (pid: #' . $pid . ') not running, deleting cache pid file');
-            }
-            else {
-                $this->logger->debug('Process #' . $pid . ' not running, deleting cache pid file');
-            }
-
-            unlink($path);
-
-            return;
-        }
-
-        // Kill
-        if (posix_kill($pid, SIGKILL)) {
-            if (null != $client) {
-                $this->logger->debug('Client ' . $client . ' (pid: #' . $pid . ') has been killed');
-            }
-            else {
-                $this->logger->debug('Process #' . $pid . ' has been killed');
-            }
-
-            unlink($path);
-        }
-        else {
-            if ($throwException) {
-                throw new \RuntimeException('Cannot kill the process #' . $pid . ', please kill this process manually');
-            }
-
-            $this->logger->critical('Cannot kill the process #' . $pid . ', please kill this process manually');
         }
     }
 
