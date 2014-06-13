@@ -14,6 +14,7 @@ namespace EloGank\Api\Client;
 use EloGank\Api\Client\Exception\AuthException;
 use EloGank\Api\Client\Exception\BadCredentialsException;
 use EloGank\Api\Client\Exception\ClientException;
+use EloGank\Api\Client\Exception\ClientKickedException;
 use EloGank\Api\Client\Exception\RequestTimeoutException;
 use EloGank\Api\Client\RTMP\RTMPClient;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
@@ -251,7 +252,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
      */
     public function reconnect()
     {
-        stream_socket_shutdown($this->socket->getSocket(), STREAM_SHUT_RDWR);
+        $this->socket->shutdown();
         $this->socket = null;
         $this->token = null;
         $this->DSId = null;
@@ -262,6 +263,8 @@ class LOLClient extends RTMPClient implements LOLClientInterface
         $this->lastCall = 0;
 
         $this->authenticate();
+
+        return true;
     }
 
     /**
@@ -433,6 +436,13 @@ class LOLClient extends RTMPClient implements LOLClientInterface
 
         try {
             return parent::invoke($destination, $operation, $parameters, $callback, $packetClass, $headers, $body);
+        }
+        catch (ClientKickedException $e) {
+            $this->logger->warning($e->getMessage());
+            $this->reconnect();
+            sleep(1);
+
+            return $this->invoke($destination, $operation, $parameters, $callback, $packetClass, $headers, $body);
         }
         catch (RequestTimeoutException $e) {
             $e->setClient($this);

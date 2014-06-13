@@ -144,6 +144,14 @@ class RTMPSocket
     }
 
     /**
+     * Shutdown the socket
+     */
+    public function shutdown()
+    {
+        stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
+    }
+
+    /**
      * @return resource
      */
     public function getSocket()

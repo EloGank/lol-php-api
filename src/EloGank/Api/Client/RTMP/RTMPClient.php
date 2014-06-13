@@ -12,6 +12,7 @@
 namespace EloGank\Api\Client\RTMP;
 
 use EloGank\Api\Client\Exception\AuthException;
+use EloGank\Api\Client\Exception\ClientKickedException;
 use EloGank\Api\Client\Exception\PacketException;
 use Psr\Log\LoggerInterface;
 
@@ -268,6 +269,7 @@ class RTMPClient
      * @return array
      *
      * @throws PacketException
+     * @throws ClientKickedException
      */
     protected function parsePacket()
     {
@@ -387,6 +389,11 @@ class RTMPClient
             }
 
             if (!isset($result['invokeId'])) {
+                // The client has been kicked, someone connect to the same account with another API instance or from the desktop launcher
+                if ('receive' == $result['result'] && 'com.riotgames.platform.messaging.ClientLoginKickNotification' == $result['data']->getData()->getAMFData()['body']->getAMFClassName()) {
+                    throw new ClientKickedException('Someone is connected with the same account, only one instance can running. Restarting client...');
+                }
+
                 throw new PacketException("Error after decoding packet");
             }
 
