@@ -55,7 +55,7 @@ class ApiStartCommand extends Command
 
             $apiManager->clean();
 
-            // Need to be killed manually
+            // Need to be killed manually, see ReactPHP issue: https://github.com/reactphp/react/issues/296
             posix_kill(getmypid(), SIGKILL);
         }
     }

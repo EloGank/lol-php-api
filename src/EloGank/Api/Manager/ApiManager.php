@@ -195,7 +195,10 @@ class ApiManager
         $killClients = function () {
             $this->clean();
 
-            exit(0);
+            // Need to be killed manually, see ReactPHP issue: https://github.com/reactphp/react/issues/296
+            posix_kill(getmypid(), SIGKILL);
+
+            // exit(0);
         };
 
         pcntl_signal(SIGINT, $killClients);
