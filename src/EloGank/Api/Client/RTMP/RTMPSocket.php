@@ -41,16 +41,16 @@ class RTMPSocket
      */
     public function __construct($protocol, $server, $port)
     {
-        $this->socket = stream_socket_client(sprintf('%s://%s:%d', $protocol, $server, $port), $errorCode, $errorMessage);
+        $this->timeout = (int) ConfigurationLoader::get('client.request.timeout');
+        if (1 > $this->timeout) {
+            $this->timeout = 5;
+        }
+
+        $this->socket = stream_socket_client(sprintf('%s://%s:%d', $protocol, $server, $port), $errorCode, $errorMessage, $this->timeout);
         if (0 != $errorCode) {
             $this->errorMessage = $errorMessage;
         }
         else {
-            $this->timeout = (int) ConfigurationLoader::get('client.request.timeout');
-            if (1 > $this->timeout) {
-                $this->timeout = 5;
-            }
-
             stream_set_timeout($this->socket, $this->timeout);
             stream_set_blocking($this->socket, false);
         }
