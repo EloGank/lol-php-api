@@ -92,6 +92,8 @@ interface LOLClientInterface
 
     /**
      * Do heartbeat to avoid being disconnected after being inactive
+     *
+     * @return int|array If int: the invoke id, otherwise it's the result array, depending if it's an async client or not
      */
     public function doHeartBeat();
 

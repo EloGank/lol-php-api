@@ -461,7 +461,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
      */
     public function doHeartBeat()
     {
-        $this->syncInvoke('loginService', 'performLCDSHeartBeat', [
+        return $this->syncInvoke('loginService', 'performLCDSHeartBeat', [
             $this->accountId,
             strtolower($this->DSId),
             ++$this->heartBeatCount,

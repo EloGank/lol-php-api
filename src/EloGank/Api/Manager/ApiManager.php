@@ -11,6 +11,7 @@
 
 namespace EloGank\Api\Manager;
 
+use EloGank\Api\Client\Exception\RequestTimeoutException;
 use EloGank\Api\Client\Factory\ClientFactory;
 use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Routing\Router;
@@ -81,14 +82,7 @@ class ApiManager
         });
 
         // Heartbeat, 2 minutes officially, here 5
-        $this->loop->addPeriodicTimer(300, function () {
-            foreach ($this->clients as $clientsByRegion) {
-                /** @var LOLClientInterface $client */
-                foreach ($clientsByRegion as $client) {
-                    $client->doHeartBeat();
-                }
-            }
-        });
+        $this->loop->addPeriodicTimer(300, [$this, 'doHeartbeats']);
 
         // Clients logging
         if (true === ConfigurationLoader::get('client.async.enabled')) {
@@ -300,6 +294,32 @@ class ApiManager
     public function getLogger()
     {
         return $this->logger;
+    }
+
+    /**
+     * Do heartbeat on all clients, then check if there is a timeout
+     */
+    public function doHeartbeats()
+    {
+        $clientTimeout = ConfigurationLoader::get('client.request.timeout');
+        foreach ($this->clients as $clientsByRegion) {
+            /** @var LOLClientInterface $client */
+            foreach ($clientsByRegion as $client) {
+                $invokeId = $client->doHeartBeat();
+
+                try {
+                    $result = $client->getResult($invokeId, $clientTimeout);
+                    if (!isset($result[0]['result']) || '_result' !== $result[0]['result']) {
+                        $this->logger->warning('Client ' . $client . ' return a wrong heartbeat response, restarting client...');
+                        $client->reconnect();
+                    }
+                }
+                catch (RequestTimeoutException $e) {
+                    $this->logger->error('Client ' . $client . ': ' . $e->getMessage());
+                    $client->reconnect();
+                }
+            }
+        }
     }
 
     /**

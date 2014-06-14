@@ -112,6 +112,9 @@ class Server
 
                     if ($e instanceof RequestTimeoutException) {
                         $e->getClient()->reconnect();
+
+                        // Force doing heartbeats to check if another client is timed out
+                        $this->apiManager->doHeartbeats();
                     }
                 }
             });

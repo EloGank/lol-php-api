@@ -266,7 +266,7 @@ class LOLClientAsync implements LOLClientInterface
      */
     public function doHeartBeat()
     {
-        $this->send('doHeartBeat');
+        return $this->send('doHeartBeat');
     }
 
     /**
