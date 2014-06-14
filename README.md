@@ -16,7 +16,9 @@ With this API you can retrieve some data about summoners in real-time directly f
 * Anti-overload system (avoid temporary client ban when you make too many request)
 * Allow to use native RTMP API or custom API with our controllers
 * Fully logged in file, redis, and console (usefull for developpers)
-* Automatic restart when server is busy
+* Automatic restart when a server is busy
+* Periodic verification for client timeout
+* Automatic restart when a client timeout (due to network/server connection error for example)
 * Automatic update when client version is outdated
 * Allow mutliple output format (JSON, PHP native (serialized) and XML)
 * Allow to bind the server to a specific IP address (allow-only)
