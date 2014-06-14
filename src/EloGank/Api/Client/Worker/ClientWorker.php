@@ -11,6 +11,7 @@
 
 namespace EloGank\Api\Client\Worker;
 
+use EloGank\Api\Client\Exception\ClientNotReadyException;
 use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use Predis\Client;
@@ -50,11 +51,6 @@ class ClientWorker
      * @var int
      */
     protected $defaultPort;
-
-    /**
-     * @var int
-     */
-    protected $lastInvokeId = 0;
 
 
     /**
@@ -110,17 +106,16 @@ class ClientWorker
                 continue;
             }
 
-            // Receive an old message or a wrong invoke id, ignoring
-            if (is_numeric($request['invokeId']) && ($request['invokeId'] < $this->lastInvokeId || $request['invokeId'] - 1 > $this->lastInvokeId)) {
-                $this->logger->debug('Client worker ' . $this->client . ' ignoring invoke id ' . $request['invokeId'] . ', last invoke id : ' . $this->lastInvokeId);
+            try {
+                // Call the right method in the client and push to redis the result
+                $result = call_user_func_array(array($this->client, $request['command']), $request['parameters']);
+            }
+            catch (ClientNotReadyException $e) {
+                $this->logger->warning('Client worker ' . $this->client . ' received a request (#' . $request['invokeId'] . ') whereas the client is not ready. This is normal in case of client reconnection process. Ignoring.');
 
                 continue;
             }
 
-            $this->lastInvokeId = $request['invokeId'];
-
-            // Call the right method in the client and push to redis the result
-            $result = call_user_func_array(array($this->client, $request['command']), $request['parameters']);
             $key = $this->key . '.client.commands.' . $request['invokeId'];
 
             $this->redis->rpush($key, serialize($result));

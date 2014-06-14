@@ -15,6 +15,7 @@ use EloGank\Api\Client\Exception\AuthException;
 use EloGank\Api\Client\Exception\BadCredentialsException;
 use EloGank\Api\Client\Exception\ClientException;
 use EloGank\Api\Client\Exception\ClientKickedException;
+use EloGank\Api\Client\Exception\ClientNotReadyException;
 use EloGank\Api\Client\Exception\RequestTimeoutException;
 use EloGank\Api\Client\RTMP\RTMPClient;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
@@ -432,6 +433,10 @@ class LOLClient extends RTMPClient implements LOLClientInterface
      */
     public function invoke($destination, $operation, $parameters = array(), \Closure $callback = null, $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
     {
+        if (null === $this->socket) {
+            throw new ClientNotReadyException('The client is not ready, please authenticate it before sending a request');
+        }
+
         $this->lastCall = microtime(true) + 0.03;
 
         try {
