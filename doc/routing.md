@@ -47,6 +47,7 @@ mastery_book :
   - mastery_book :                              [summonerId]
 inventory :
   - available_champions :                       []
+  - available_free_champions :                  []
 summoner_icon :
   - summoner_icon_inventory :                   [summonerId]
 game :
@@ -105,7 +106,8 @@ Please, refer to the [caching documentation](./caching.md) to learn how to cache
 * `mastery_book` : returns **full** information about the summoner masteries.
 
 #### Inventory
-* `available_champions` : returns all information about the available champions & skins *(usefull to know the free champions rotation week)*.
+* `available_champions` : returns all information about the available champions & skins.
+* `available_free_champions` : returns all information about the available **free** champions *(usefull to know the free champions rotation week)*.
 
 #### Summoner Icon
 * `summoner_icon_inventory` : returns all information about the available summoner icons for a selected summoner.
