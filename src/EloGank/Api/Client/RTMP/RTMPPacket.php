@@ -34,7 +34,7 @@ class RTMPPacket
     /**
      * @var array
      */
-    protected $additionnalHeaders;
+    protected $additionalHeaders;
 
     /**
      * @var \SabreAMF_TypedObject
@@ -44,7 +44,7 @@ class RTMPPacket
     /**
      * @var array
      */
-    protected $additionnalBody;
+    protected $additionalBody;
 
     /**
      * @var \SabreAMF_TypedObject
@@ -71,8 +71,8 @@ class RTMPPacket
         $this->operation          = $operation;
         $this->parameters         = $parameters;
         $this->class              = $packetClass;
-        $this->additionnalHeaders = $headers;
-        $this->additionnalBody    = $body;
+        $this->additionalHeaders = $headers;
+        $this->additionalBody    = $body;
     }
 
     /**
@@ -86,7 +86,7 @@ class RTMPPacket
             'DSRequestTimeout' => 60,
             'DSId'             => $destinationId,
             'DSEndpoint'       => 'my-rtmps'
-        ), $this->additionnalHeaders));
+        ), $this->additionalHeaders));
     }
 
     /**
@@ -105,7 +105,7 @@ class RTMPPacket
             'clientId'    => null,
             'headers'     => $this->headers,
             'body'        => $this->parameters
-        ), $this->additionnalBody));
+        ), $this->additionalBody));
     }
 
     /**

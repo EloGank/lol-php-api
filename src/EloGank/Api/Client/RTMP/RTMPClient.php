@@ -484,7 +484,7 @@ class RTMPClient
      * Call the invoke and return the response, without calling getResult() method<br />
      * Callbacks are not possible with this method
      *
-     * @param string $destionation
+     * @param string $destination
      * @param string $operation
      * @param array  $parameters
      * @param string $packetClass
@@ -493,9 +493,9 @@ class RTMPClient
      *
      * @return array
      */
-    public function syncInvoke($destionation, $operation, $parameters = array(), $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
+    public function syncInvoke($destination, $operation, $parameters = array(), $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
     {
-        $invokeId = $this->invoke($destionation, $operation, $parameters, null, $packetClass, $headers, $body);
+        $invokeId = $this->invoke($destination, $operation, $parameters, null, $packetClass, $headers, $body);
 
         return $this->getResult($invokeId, 0)[0];
     }

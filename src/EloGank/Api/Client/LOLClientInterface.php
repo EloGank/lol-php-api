@@ -49,7 +49,7 @@ interface LOLClientInterface
     public function getRegion();
 
     /**
-     * When an error has occured, you can retrieve it with this method
+     * When an error has occurred, you can retrieve it with this method
      *
      * @return string
      */
@@ -83,8 +83,8 @@ interface LOLClientInterface
      * @param callable $callback     The callback will be called after parsing the packet,
      *                               and retrieving the result.<br /> It must return the final result
      * @param string   $packetClass  The packet class for the body
-     * @param array    $headers      The additionnal headers
-     * @param array    $body         The additionnal body
+     * @param array    $headers      The additional headers
+     * @param array    $body         The additional body
      *
      * @return int The invoke unique id
      */

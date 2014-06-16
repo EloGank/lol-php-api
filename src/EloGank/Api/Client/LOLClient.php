@@ -290,8 +290,8 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     /**
      * @return string
      *
-     * @throws \RuntimeException                 When a configuration error occured
-     * @throws Exception\AuthException           When an unknown auth error occured
+     * @throws \RuntimeException                 When a configuration error occurred
+     * @throws Exception\AuthException           When an unknown auth error occurred
      * @throws Exception\ServerBusyException     When server is too busy
      * @throws Exception\BadCredentialsException When credentials are wrong
      */
@@ -393,8 +393,8 @@ class LOLClient extends RTMPClient implements LOLClientInterface
      *
      * @return array
      *
-     * @throws \RuntimeException       When a configuration error occured
-     * @throws Exception\AuthException When an unknown auth error occured
+     * @throws \RuntimeException       When a configuration error occurred
+     * @throws Exception\AuthException When an unknown auth error occurred
      */
     protected function readURL($url, array $parameters = null)
     {

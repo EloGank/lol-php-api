@@ -23,7 +23,6 @@ use Predis\Client;
 use Psr\Log\LoggerInterface;
 use React\EventLoop\Factory;
 use React\EventLoop\LoopInterface;
-use Symfony\Component\Yaml\Parser;
 
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
@@ -225,7 +224,7 @@ class ApiManager
     }
 
     /**
-     * Cleaning all asynchronous client processes registed by cache files
+     * Cleaning all asynchronous client processes registered by cache files
      *
      * @param bool                    $throwException
      * @param null|LOLClientInterface $client
