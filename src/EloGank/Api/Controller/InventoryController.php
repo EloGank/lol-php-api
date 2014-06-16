@@ -19,7 +19,7 @@ use EloGank\Api\Component\Controller\Controller;
 class InventoryController extends Controller
 {
     /**
-     * Return the id of free rotation week champions indexed by the key "free_champions"
+     * Return the id of free rotation week champions indexed by the key "freeChampions"
      *
      * @return array
      */
@@ -33,7 +33,7 @@ class InventoryController extends Controller
                 }
             }
 
-            return ['free_champions' => $freeChampions];
+            return ['freeChampions' => $freeChampions];
         });
 
         return $this->view($this->getResult($invokeId));
