@@ -96,6 +96,8 @@ Note that the controller must extends `EloGank\Api\Component\Controller\Controll
 Finally, implement your method. The method name must ending by `Action`, example :
 
 ``` php
+// Controller/MyCustomController.php
+
 // Method parameters are automaticly added as API route parameters in the "elogank:router:dump" command
 public function getSomeDataAction($myParameter, $mySecondParameter)
 {
@@ -109,6 +111,62 @@ public function getSomeDataAction($myParameter, $mySecondParameter)
     return $this->view($this->getResult($invokeId));
 }
 ```
+
+You can create a callback class in `Callback` folder to replace the callback to avoid duplicate code. Your class must extends `EloGank\Api\Component\Callback\Callback`.
+
+``` php
+// Callback/MyCustomCallback.php
+
+class SummonerActiveMasteriesCallback extends Callback
+{
+    /**
+     * Parse the API result and return the new content
+     *
+     * @param array|string $result
+     *
+     * @return mixed
+     */
+    public function getResult($result)
+    {
+        foreach ($result['property'] as $data) {
+            if (true === $data['foo']) {
+                return ['custom' => $data];
+            }
+        }
+
+
+        return ['custom' => []];
+    }
+    
+    /**
+     * Set your required options here, if one or more options are missing, an exception will be thrown
+     *
+     * @return array
+     */
+    protected function getRequiredOptions()
+    {
+        return [
+            'my_option'
+        ];
+    }
+}
+```
+
+
+``` php
+// Controller/MyCustomController.php
+
+public function getSomeDataAction($myParameter, $mySecondParameter)
+{
+    // Invoke id is used to retrieve result later. A call can have an optional callback to format/process the call result
+    $invokeId = $this->getClient()->invoke('summonerService', 'getSomeData', [$myParameter, $mySecondParameter], new MyClassCallback([
+    'my_option' => 'foo bar'    
+]));
+    
+    return $this->view($this->getResult($invokeId));
+}
+```
+
 
 Now, run the elogank:router:dump command to see your new API route.  
 If you want to know about the make asynchronous calls in a same controller method, see the [GameController::getAllSummonerDataCurrentGameAction()](../src/EloGank/Api/Controller/GameController.php) method.

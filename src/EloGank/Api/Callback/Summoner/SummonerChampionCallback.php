@@ -48,6 +48,9 @@ class SummonerChampionCallback extends Callback
         return $data;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function getRequiredOptions()
     {
         return [
