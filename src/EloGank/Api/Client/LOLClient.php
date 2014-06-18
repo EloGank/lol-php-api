@@ -431,7 +431,7 @@ class LOLClient extends RTMPClient implements LOLClientInterface
     /**
      * {@inheritdoc}
      */
-    public function invoke($destination, $operation, $parameters = array(), \Closure $callback = null, $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
+    public function invoke($destination, $operation, $parameters = array(), $callback = null, $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
     {
         if (null === $this->socket) {
             throw new ClientNotReadyException('The client is not ready, please authenticate it before sending a request');

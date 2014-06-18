@@ -14,6 +14,7 @@ namespace EloGank\Api\Component\Controller;
 use EloGank\Api\Client\Exception\ClientOverloadException;
 use EloGank\Api\Client\Formatter\ResultFormatter;
 use EloGank\Api\Client\LOLClientInterface;
+use EloGank\Api\Component\Callback\Callback;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Component\Controller\Exception\ApiException;
 use EloGank\Api\Manager\ApiManager;
@@ -89,7 +90,12 @@ abstract class Controller
 
             $result = $formatter->format($response['data']->getData()->body);
             if (null != $callback) {
-                $result = $callback($result);
+                if ($callback instanceof Callback) {
+                    $result = $callback->getResult($result);
+                }
+                else {
+                    $result = $callback($result);
+                }
             }
 
             return $result;

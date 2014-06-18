@@ -11,6 +11,8 @@
 
 namespace EloGank\Api\Client;
 
+use EloGank\Api\Component\Callback\Callback;
+
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
  */
@@ -77,18 +79,18 @@ interface LOLClientInterface
     /**
      * Invoke a new RTMP service method
      *
-     * @param string   $destination  The service manager name
-     * @param string   $operation    The service method name
-     * @param array    $parameters   The service method parameters
-     * @param callable $callback     The callback will be called after parsing the packet,
-     *                               and retrieving the result.<br /> It must return the final result
-     * @param string   $packetClass  The packet class for the body
-     * @param array    $headers      The additional headers
-     * @param array    $body         The additional body
+     * @param string                 $destination  The service manager name
+     * @param string                 $operation    The service method name
+     * @param array                  $parameters   The service method parameters
+     * @param callable|Callback|null $callback     The callback will be called after parsing the packet,
+     *                                             and retrieving the result.<br /> It must return the final result
+     * @param string                 $packetClass  The packet class for the body
+     * @param array                  $headers      The additional headers
+     * @param array                  $body         The additional body
      *
      * @return int The invoke unique id
      */
-    public function invoke($destination, $operation, $parameters = array(), \Closure $callback = null, $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array());
+    public function invoke($destination, $operation, $parameters = array(), $callback = null, $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array());
 
     /**
      * Do heartbeat to avoid being disconnected after being inactive

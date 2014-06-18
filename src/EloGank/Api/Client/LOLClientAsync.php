@@ -131,7 +131,7 @@ class LOLClientAsync implements LOLClientInterface
     /**
      * {@inheritdoc}
      */
-    public function invoke($destination, $operation, $parameters = array(), \Closure $callback = null, $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
+    public function invoke($destination, $operation, $parameters = array(), $callback = null, $packetClass = 'flex.messaging.messages.RemotingMessage', $headers = array(), $body = array())
     {
         $invokeId = $this->send('syncInvoke', [
             $destination,
