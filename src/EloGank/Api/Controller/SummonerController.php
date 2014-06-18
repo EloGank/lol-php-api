@@ -11,6 +11,11 @@
 
 namespace EloGank\Api\Controller;
 
+use EloGank\Api\Callback\Summoner\SummonerActiveMasteriesCallback;
+use EloGank\Api\Callback\Summoner\SummonerActiveSpellBookCallback;
+use EloGank\Api\Callback\Summoner\SummonerChampionCallback;
+use EloGank\Api\Callback\Summoner\SummonerInformationCallback;
+use EloGank\Api\Callback\Summoner\SummonerLeagueSolo5x5Callback;
 use EloGank\Api\Component\Controller\Controller;
 use EloGank\Api\Component\Controller\Exception\ApiException;
 
@@ -55,72 +60,66 @@ class SummonerController extends Controller
     /**
      * Return all data needed to show information about a summoner
      *
-     * @param int $accountId
-     * @param int $summonerId
+     * @param array $summonerData Summoner data, index by "accountId", "summonerId" and "summonerName"
+     * @param array $filters      Fetch only data passed in filters
+     *   - INFORMATION: fetch the main summoner information like the level
+     *   - ACTIVE_SPELLBOOK: fetch the active spell book
+     *   - ACTIVE_MASTERIES: fetch the active masteries book
+     *   - LEAGUE_SOLO_5x5: fetch the league solo 5x5 data, only for the summoner, not the entire league
+     *   - MAIN_CHAMPION: fetch the main champion id
+     *   - CHAMPIONS_DATA: fetch the ranked champions data
      *
      * @return array
      */
-    public function getAllSummonerDataAction($accountId, $summonerId)
+    public function getAllSummonerDataAction(array $summonerData, array $filters = [
+        'INFORMATION', 'ACTIVE_SPELLBOOK', 'ACTIVE_MASTERIES', 'LEAGUE_SOLO_5x5', 'MAIN_CHAMPION', 'CHAMPIONS_DATA'
+    ])
     {
-        $invokeIds = [
-            $this->getClient()->invoke('summonerService', 'getAllPublicSummonerDataByAccount', [$accountId], function ($result) {
-                foreach ($result['spellBook']['bookPages'] as $bookPage) {
-                    if (true === $bookPage['current']) {
-                        return ['spellBook' => $bookPage];
-                    }
-                }
+        $invokeIds = [];
+        $filtersByKey = array_flip($filters);
 
-                return ['spellBook' => []];
-            }),
-            $this->getClient()->invoke('masteryBookService', 'getMasteryBook', [$summonerId], function ($result) {
-                foreach ($result['bookPages'] as $bookPage) {
-                    if (true === $bookPage['current']) {
-                        return ['masteryBook' => $bookPage];
-                    }
-                }
+        foreach ($summonerData as $data) {
+            $accountId = $data['accountId'];
+            $summonerId = $data['summonerId'];
+            $summonerName = $data['summonerName'];
 
-                return ['masteryBook' => []];
-            }),
-            $this->getClient()->invoke('playerStatsService', 'getRecentGames', [$summonerId], function ($result) {
-                return ['recentGames' => $result['gameStatistics']];
-            }),
-            $this->getClient()->invoke('leaguesServiceProxy', 'getAllLeaguesForPlayer', [$summonerId], function ($result) use ($summonerId) {
-                foreach ($result['summonerLeagues'] as $summonerLeague) {
-                    if ('RANKED_SOLO_5x5' != $summonerLeague['queue']) {
-                        continue;
-                    }
+            if (isset($filtersByKey['INFORMATION'])) {
+                $invokeIds[$summonerId][] = $this->getClient()->invoke('summonerService', 'getSummonerByName', [$summonerName], new SummonerInformationCallback());
+            }
 
-                    foreach ($summonerLeague['entries'] as $entry) {
-                        if ($summonerId == $entry['playerOrTeamId']) {
-                            return ['league' => [
-                                'name'  => $summonerLeague['name'],
-                                'queue' => $summonerLeague['queue'],
-                                'data'  => $entry
-                            ]];
-                        }
-                    }
-                }
+            if (isset($filtersByKey['ACTIVE_SPELLBOOK'])) {
+                $invokeIds[$summonerId][] = $this->getClient()->invoke('summonerService', 'getAllPublicSummonerDataByAccount', [$accountId], new SummonerActiveSpellBookCallback());
+            }
 
-                return ['league' => []];
-            }),
-            $this->getClient()->invoke('playerStatsService', 'retrieveTopPlayedChampions', [$accountId, 'CLASSIC'], function ($result) {
-                if (!isset($result[0])) {
-                    return ['mainChampion' => null];
-                }
+            if (isset($filtersByKey['ACTIVE_MASTERIES'])) {
+                $invokeIds[$summonerId][] = $this->getClient()->invoke('masteryBookService', 'getMasteryBook', [$summonerId], new SummonerActiveMasteriesCallback());
+            }
 
-                return ['mainChampion' => $result[1]['championId']];
-            }),
-        ];
+            if (isset($filtersByKey['LEAGUE_SOLO_5x5'])) {
+                $invokeIds[$summonerId][] = $this->getClient()->invoke('leaguesServiceProxy', 'getAllLeaguesForPlayer', [$summonerId], new SummonerLeagueSolo5x5Callback([
+                    'summonerId' => $summonerId
+                ]));
+            }
 
-        $results = [];
-        foreach ($invokeIds as $invokeId) {
-            $result = $this->getResult($invokeId);
-            reset($result);
-            $key = key($result);
-
-            $results[$key] = $result[$key];
+            if (isset($filtersByKey['MAIN_CHAMPION']) || isset($filtersByKey['CHAMPIONS_DATA'])) {
+                $invokeIds[$summonerId][] = $this->getClient()->invoke('playerStatsService', 'retrieveTopPlayedChampions', [$accountId, 'CLASSIC'], new SummonerChampionCallback([
+                    'main_champion'  => isset($filtersByKey['MAIN_CHAMPION']),
+                    'champions_data' => isset($filtersByKey['CHAMPIONS_DATA'])
+                ]));
+            }
         }
 
-        return $this->view($results);
+        $results = [];
+        foreach ($invokeIds as $summonerId => $invokeIdsBySummoner) {
+            foreach ($invokeIdsBySummoner as $invokeId) {
+                $result = $this->getResult($invokeId);
+
+                foreach ($result as $key => $value) {
+                    $results[$summonerId][$key] = $value;
+                }
+            }
+        }
+
+        return $this->view(['data' => $results]);
     }
 }
