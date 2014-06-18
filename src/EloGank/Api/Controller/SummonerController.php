@@ -60,7 +60,16 @@ class SummonerController extends Controller
     /**
      * Return all data needed to show information about a summoner
      *
-     * @param array $summonerData Summoner data, index by "accountId", "summonerId" and "summonerName"
+     * Example of parameters :
+     * $parameters = [
+     *     [
+     *         ['accountId' => 11111, 'summonerId' => 2222222, 'summonerName' => 'Foo Bar'],
+     *         ['accountId' => 44444, 'summonerId' => 3333333, 'summonerName' => 'Bar Foo']
+     *     ],
+     *     ['INFORMATION', 'MAIN_CHAMPION'] // filters
+     * ];
+     *
+     * @param array $summonerData Summoner data, index by "accountId", "summonerId" and "summonerName". Example :
      * @param array $filters      Fetch only data passed in filters
      *   - INFORMATION: fetch the main summoner information like the level
      *   - ACTIVE_SPELLBOOK: fetch the active spell book

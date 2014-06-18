@@ -89,25 +89,7 @@ Please, refer to the [caching documentation](./caching.md) to learn how to cache
 * `summoner_names` : returns all summoner names for the selected summoner IDs.
 * `summoner_existence` : *(custom route)* returns if the player exists or not. If the player doesn't exist, an error is returned.
     * Error `com.riotgames.platform.game.GameNotFoundException` : when the summoner is not found.
-* `all_summoner_data` : *(custom route)* returns all the main data about a summoner *(spellbooks, masteries, main champion & ranked 5x5 solo league)*.
-All data are filtered by filters named :
- * `INFORMATION` fetch the main summoner information like the level
- * `ACTIVE_SPELLBOOK` fetch the active spell book
- * `ACTIVE_MASTERIES` fetch the active masteries book
- * `LEAGUE_SOLO_5x5` fetch the league solo 5x5 data, only for the summoner, not the entire league
- * `MAIN_CHAMPION` fetch the main champion id
- * `CHAMPIONS_DATA` fetch the ranked champions data
-
-You must pass an array of `accountId`, `summonerId` & `summonerName` as parameter, with the filters. For example, for two players :
-``` php
-$parameters = [
-    [
-        ['accountId' => 11111, 'summonerId' => 2222222, 'summonerName' => 'Foo Bar'],
-        ['accountId' => 44444, 'summonerId' => 3333333, 'summonerName' => 'Bar Foo']
-    ],
-    ['INFORMATION', 'MAIN_CHAMPION'] // filters
-];
-```
+* `all_summoner_data` : *(custom route)* returns all the main data about a summoner *(spellbooks, masteries, main champion & ranked 5x5 solo league)*. See method documentation in [SummonerController.php](/src/EloGank/Api/Controller/SummonerController.php) for more information.
 
 #### Player Stats
 * `aggregated_stats` : returns all information about a **ranked** game mode.
