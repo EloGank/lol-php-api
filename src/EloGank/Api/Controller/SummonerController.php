@@ -111,7 +111,7 @@ class SummonerController extends Controller
             }
 
             if (isset($filtersByKey['MAIN_CHAMPION']) || isset($filtersByKey['CHAMPIONS_DATA'])) {
-                $invokeIds[$summonerId][] = $this->getClient()->invoke('playerStatsService', 'retrieveTopPlayedChampions', [$accountId, 'CLASSIC'], new SummonerChampionCallback([
+                $invokeIds[$summonerId][] = $this->getClient()->invoke('playerStatsService', 'getAggregatedStats', [$accountId, 'CLASSIC', 4], new SummonerChampionCallback([
                     'main_champion'  => isset($filtersByKey['MAIN_CHAMPION']),
                     'champions_data' => isset($filtersByKey['CHAMPIONS_DATA'])
                 ]));
