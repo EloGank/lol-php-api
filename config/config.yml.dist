@@ -42,7 +42,7 @@ config:
           wait:       30
       # The client version, can be retrieve by opening your LoL launcher, clicking on "Play" button and copy/paste
       # the number in the top left corner
-      version:        4.7.x
+      version:        4.12.x
       # The accounts configuration, see the documentation (doc/configuration.md)
       accounts:
         - region:     ~
