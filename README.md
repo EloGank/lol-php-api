@@ -26,7 +26,8 @@ With this API you can retrieve some data about summoners in real-time directly f
 
 ## Installation
 
-[How to install this API](./doc/installation.md)
+[How to install this API](./doc/installation.md)  
+[Additional installation instructions for the production environment](./doc/installation-production.md)
 
 ## Configuration
 
@@ -46,6 +47,7 @@ The document is stored in the `doc` folder of this repository.
 Here, the main titles :
 
 * [Installation](./doc/installation.md)
+* [Installation (production environment)](./doc/installation-production.md)
 * [Configuration](./doc/configuration.md)
 * [How to use](./doc/how_to_use.md)
 * [Routing](./doc/routing.md)
