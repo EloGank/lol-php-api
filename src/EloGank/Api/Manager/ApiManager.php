@@ -218,8 +218,10 @@ class ApiManager
         $this->logger->info('Clearing cache...');
 
         $keys = $this->redis->keys('elogank.api.*');
-        foreach ($keys as $key) {
-            $this->redis->del($key);
+        if (null != $keys) {
+            foreach ($keys as $key) {
+                $this->redis->del($key);
+            }
         }
     }
 
