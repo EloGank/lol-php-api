@@ -115,7 +115,7 @@ class LOLClientAsync implements LOLClientInterface
     private function connect()
     {
         // Create process
-        popen(sprintf('php %s/console elogank:client:create %d %d > /dev/null 2>&1 & echo $! > %s', $this->rootFolder, $this->accountKey, $this->clientId, $this->pidPath), 'r');
+        popen(sprintf('%s %s/console elogank:client:create %d %d > /dev/null 2>&1 & echo $! > %s', ConfigurationLoader::get('php.executable'), $this->rootFolder, $this->accountKey, $this->clientId, $this->pidPath), 'r');
     }
 
     /**

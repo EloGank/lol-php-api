@@ -48,6 +48,13 @@ mkdir /etc/php5-api/conf.d
 sed 's#;date.timezone\([[:space:]]*\)=\([[:space:]]*\)*#date.timezone\1=\2\"'"UTC"'\"#g' /etc/php5-api/php.ini > /etc/php5-api/php.ini.tmp
 mv /etc/php5-api/php.ini.tmp /etc/php5-api/php.ini
 ```
+In your `config.yml` file, edit the PHP executable path :
+
+``` yml
+# config/config.yml
+php:
+    executable: /etc/php5-api/bin/php
+```
 
 **Only if you want to install this dedicated PHP version on a DEVELOPMENT environment, you can show errors :**
 

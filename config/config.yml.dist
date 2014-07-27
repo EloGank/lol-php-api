@@ -107,3 +107,7 @@ config:
         bind:         0.0.0.0
         # The server output format : "json", "php" (using serialize function) or "xml"
         format:       json
+
+    php:
+        # The PHP executable path
+        executable: php
