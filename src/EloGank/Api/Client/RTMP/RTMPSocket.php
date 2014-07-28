@@ -122,11 +122,17 @@ class RTMPSocket
         $timeout = time() + $this->timeout;
         $output  = '';
 
-        while (strlen($output) < $length && time() < $timeout) {
+        while (time() < $timeout) {
             $output .= fread($this->socket, $length);
+
+            if (isset($output[$length - 1])) {
+                break;
+            }
+
+            usleep(10);
         }
 
-        if (strlen($output) < $length) {
+        if (!isset($output[$length - 1])) {
             throw new RequestTimeoutException('Request timeout, the client will reconnect');
         }
 
