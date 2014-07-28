@@ -202,6 +202,11 @@ abstract class Controller
             }
 
             if (0 < $this->invokeCount && $this->invokeCount == $this->responseCount) {
+                // Convert indexed array to associative if count = 1
+                if (isset($this->results[0]) && !isset($this->results[1])) {
+                    $this->results = $this->results[0];
+                }
+
                 $this->conn->emit('api-response', [[
                         'success' => true,
                         'result'  => null != $callback ? $callback($this->results) : $this->results
