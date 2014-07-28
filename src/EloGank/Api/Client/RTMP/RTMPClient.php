@@ -501,9 +501,13 @@ class RTMPClient
     }
 
     /**
-     * {@inheritdoc}
+     * @param int $invokeId
+     *
+     * @return array
+     *
+     * @throws \InvalidArgumentException
      */
-    public function getResult($invokeId, $timeout = null)
+    public function getResult($invokeId)
     {
         if (!isset($this->responses[$invokeId])) {
             throw new \InvalidArgumentException('No result found for invokeId ' . $invokeId);

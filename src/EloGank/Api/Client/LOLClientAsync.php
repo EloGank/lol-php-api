@@ -11,7 +11,6 @@
 
 namespace EloGank\Api\Client;
 
-use EloGank\Api\Client\Exception\RequestTimeoutException;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Model\Region\RegionInterface;
 use EloGank\Api\Process\Process;
@@ -149,15 +148,11 @@ class LOLClientAsync implements LOLClientInterface
     /**
      * {@inheritdoc}
      */
-    public function getResult($invokeId, $timeout = null)
+    public function getResult($invokeId)
     {
-        if (null == $timeout) {
-            $timeout = ConfigurationLoader::get('client.request.timeout');
-        }
-
-        $message = $this->redis->brpop($this->getKey('client.commands.' . $invokeId), $timeout);
+        $message = $this->redis->rpop($this->getKey('client.commands.' . $invokeId));
         if (null == $message) {
-            throw new RequestTimeoutException('Request timed out, the client will reconnect', $this);
+            return null;
         }
 
         // Callback process
@@ -167,7 +162,7 @@ class LOLClientAsync implements LOLClientInterface
             unset(self::$callbacks[$invokeId]);
         }
 
-        return [unserialize($message[1]), $callback];
+        return [unserialize($message), $callback];
     }
 
     /**
@@ -278,7 +273,7 @@ class LOLClientAsync implements LOLClientInterface
      */
     public function reconnect()
     {
-        $this->logger->debug('Reconnect process has been requested, kill the old process and create a new one');
+        $this->logger->debug('Client ' . $this . ': reconnect process has been requested, kill the old process and create a new one');
 
         Process::killProcess($this->pidPath, true, $this->logger, $this);
         $this->redis->del($this->getKey('invokeId'));

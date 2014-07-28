@@ -13,10 +13,10 @@ namespace EloGank\Api\Server;
 
 use EloGank\Api\Client\Exception\RequestTimeoutException;
 use EloGank\Api\Component\Configuration\ConfigurationLoader;
-use EloGank\Api\Component\Exception\ArrayException;
 use EloGank\Api\Component\Logging\LoggerFactory;
 use EloGank\Api\Manager\ApiManager;
 use EloGank\Api\Server\Exception\MalformedClientInputException;
+use EloGank\Api\Server\Exception\ServerException;
 use EloGank\Api\Server\Exception\UnknownFormatException;
 use EloGank\Api\Server\Formatter\ClientFormatterInterface;
 use EloGank\Api\Server\Formatter\JsonClientFormatter;
@@ -81,10 +81,6 @@ class Server
             /** @var Connection $conn */
             $this->logger->debug(sprintf('Client [%s] is connected to server', $conn->getRemoteAddress()));
 
-            $conn->getBuffer()->on('full-drain', function () use ($conn) {
-                $conn->close();
-            });
-
             // On receive data
             $conn->on('data', function ($rawData) use ($conn) {
                 $this->logger->debug(sprintf('Client sent: %s', $rawData));
@@ -101,21 +97,27 @@ class Server
                         throw new MalformedClientInputException('The input sent to the server is maformed');
                     }
 
-                    $response = $this->apiManager->getRouter()->process($this->apiManager, $data);
+                    $conn->on('api-response', function ($response) use ($conn, $format) {
+                        $conn->end($this->format($response, $format));
+                    });
 
-                    $conn->write($this->format($response, $format));
+                    $conn->on('api-error', function (ServerException $e) use ($conn, $format) {
+                        $conn->end($this->format($e->toArray(), $format));
+
+                        if ($e instanceof RequestTimeoutException) {
+                            $e->getClient()->reconnect();
+
+                            // Force doing heartbeats to check if another client is timed out
+                            $this->apiManager->doHeartbeats();
+                        }
+                    });
+
+                    $this->apiManager->getRouter()->process($this->apiManager, $conn, $data);
                 }
-                catch (ArrayException $e) {
+                catch (ServerException $e) {
                     $this->logger->error('Client [' . $conn->getRemoteAddress() . ']: ' . $e->getMessage());
 
-                    $conn->write($this->format($e->toArray(), $format));
-
-                    if ($e instanceof RequestTimeoutException) {
-                        $e->getClient()->reconnect();
-
-                        // Force doing heartbeats to check if another client is timed out
-                        $this->apiManager->doHeartbeats();
-                    }
+                    $conn->end($this->format($e->toArray(), $format));
                 }
             });
         });
@@ -158,7 +160,7 @@ class Server
      */
     protected function isValidInput(array $data)
     {
-        if (!isset($data['region']) || !isset($data['route']) || !isset($data['parameters'])) {
+        if (!isset($data['region']) || !isset($data['route']) || !isset($data['parameters']) || !is_array($data['parameters'])) {
             return false;
         }
 

@@ -17,6 +17,14 @@ namespace EloGank\Api\Component\Exception;
 class ArrayException extends \Exception
 {
     /**
+     * @return string
+     */
+    public function getCause()
+    {
+        return get_called_class();
+    }
+
+    /**
      * @return array
      */
     public function toArray()
@@ -24,7 +32,7 @@ class ArrayException extends \Exception
         return [
             'success' => false,
             'error'   => [
-                'caused_by' => get_called_class(),
+                'caused_by' => $this->getCause(),
                 'message'   => $this->getMessage()
             ]
         ];

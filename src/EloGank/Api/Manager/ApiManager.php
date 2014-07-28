@@ -11,7 +11,6 @@
 
 namespace EloGank\Api\Manager;
 
-use EloGank\Api\Client\Exception\RequestTimeoutException;
 use EloGank\Api\Client\Factory\ClientFactory;
 use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Routing\Router;
@@ -19,10 +18,12 @@ use EloGank\Api\Component\Configuration\ConfigurationLoader;
 use EloGank\Api\Component\Logging\LoggerFactory;
 use EloGank\Api\Model\Region\Exception\RegionNotFoundException;
 use EloGank\Api\Process\Process;
+use EloGank\Api\Server\Exception\ServerException;
 use Predis\Client;
 use Psr\Log\LoggerInterface;
 use React\EventLoop\Factory;
 use React\EventLoop\LoopInterface;
+use React\EventLoop\Timer\TimerInterface;
 
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
@@ -112,6 +113,8 @@ class ApiManager
      * Create client instances & auth
      *
      * @return bool True if one or more clients are connected, false otherwise
+     *
+     * @throws ServerException
      */
     public function connect()
     {
@@ -137,6 +140,10 @@ class ApiManager
                 $isAuthenticated = $client->isAuthenticated();
                 if (null !== $isAuthenticated) {
                     if (true === $isAuthenticated) {
+                        if (!$isAsync && isset($this->clients[$client->getRegion()])) {
+                            throw new ServerException('Multiple account for the same region in synchronous mode is not allowed. Please enable the asynchronous mode in the configuration file');
+                        }
+
                         $this->clients[$client->getRegion()][] = $client;
                         $this->logger->info('Client ' . $client . ' is connected');
                         $connectedCount++;
@@ -303,22 +310,34 @@ class ApiManager
     public function doHeartbeats()
     {
         $clientTimeout = ConfigurationLoader::get('client.request.timeout');
+        $timedOut = time() + $clientTimeout;
+
         foreach ($this->clients as $clientsByRegion) {
             /** @var LOLClientInterface $client */
             foreach ($clientsByRegion as $client) {
                 $invokeId = $client->doHeartBeat();
 
-                try {
-                    $result = $client->getResult($invokeId, $clientTimeout);
+                $this->loop->addPeriodicTimer(0.001, function (TimerInterface $timer) use ($client, &$invokeId, &$timedOut, $clientTimeout) {
+                    if (time() > $timedOut) {
+                        $client->reconnect();
+                        $invokeId = $client->doHeartBeat();
+
+                        $timedOut = time() + $clientTimeout;
+                        return;
+                    }
+
+                    $result = $client->getResult($invokeId);
+                    if (null == $result) {
+                        return;
+                    }
+
                     if (!isset($result[0]['result']) || '_result' !== $result[0]['result']) {
                         $this->logger->warning('Client ' . $client . ' return a wrong heartbeat response, restarting client...');
                         $client->reconnect();
                     }
-                }
-                catch (RequestTimeoutException $e) {
-                    $this->logger->error('Client ' . $client . ': ' . $e->getMessage());
-                    $client->reconnect();
-                }
+
+                    $timer->cancel();
+                });
             }
         }
     }
@@ -327,13 +346,14 @@ class ApiManager
      * The RTMP LoL API will temporary ban you if you call too many times a service<br />
      * To avoid this limitation, you must wait before making a new request
      *
-     * @param string $regionUniqueName
+     * @param string   $regionUniqueName
+     * @param callable $callback
      *
      * @return LOLClientInterface
      *
      * @throws RegionNotFoundException When there is not client with the selected region unique name
      */
-    public function getClient($regionUniqueName)
+    public function getClient($regionUniqueName, \Closure $callback)
     {
         if (!isset($this->clients[$regionUniqueName])) {
             throw new RegionNotFoundException('There is no registered client with the region "' . $regionUniqueName . '"');
@@ -342,14 +362,20 @@ class ApiManager
         $nextAvailableTime = (float) ConfigurationLoader::get('client.request.overload.available');
         $nextAvailableTime /= 2;
 
-        while (true) {
+        foreach ($this->clients[$regionUniqueName] as $client) {
+            if ($client->isAvailable()) {
+                return $callback($client);
+            }
+        }
+
+        $this->loop->addPeriodicTimer($nextAvailableTime, function (TimerInterface $timer) use($regionUniqueName, $callback) {
             foreach ($this->clients[$regionUniqueName] as $client) {
                 if ($client->isAvailable()) {
-                    return $client;
+                    $timer->cancel();
+
+                    return $callback($client);
                 }
             }
-
-            sleep($nextAvailableTime);
-        }
+        });
     }
 }

@@ -12,12 +12,12 @@
 namespace EloGank\Api\Client\Exception;
 
 use EloGank\Api\Client\LOLClientInterface;
-use EloGank\Api\Component\Exception\ArrayException;
+use EloGank\Api\Server\Exception\ServerException;
 
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
  */
-class RequestTimeoutException extends ArrayException
+class RequestTimeoutException extends ServerException
 {
     /**
      * @var LOLClientInterface

@@ -11,6 +11,7 @@
 
 namespace EloGank\Api\Controller;
 
+use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Controller\Controller;
 
 /**
@@ -25,17 +26,20 @@ class InventoryController extends Controller
      */
     public function getAvailableFreeChampionsAction()
     {
-        $invokeId = $this->getClient()->invoke('inventoryService', 'getAvailableChampions', [], function ($result) {
-            $freeChampions = [];
-            foreach ($result as $champion) {
-                if (true === $champion['freeToPlay']) {
-                    $freeChampions[] = $champion['championId'];
+        $this->onClientReady(function (LOLClientInterface $client) {
+            $invokeId = $client->invoke('inventoryService', 'getAvailableChampions', [], function ($result) {
+                $freeChampions = [];
+                foreach ($result as $champion) {
+                    if (true === $champion['freeToPlay']) {
+                        $freeChampions[] = $champion['championId'];
+                    }
                 }
-            }
 
-            return ['freeChampions' => $freeChampions];
+                return ['freeChampions' => $freeChampions];
+            });
+            $this->fetchResult($invokeId);
         });
 
-        return $this->view($this->getResult($invokeId));
+        $this->sendResponse();
     }
 } 

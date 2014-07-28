@@ -100,12 +100,11 @@ interface LOLClientInterface
     public function doHeartBeat();
 
     /**
-     * @param int      $invokeId The invoke unique id
-     * @param int|null $timeout  The timeout, after that the client will throw an exception
+     * @param int $invokeId The invoke unique id
      *
      * @return array The index 0 is the result himself, and the index 1 is the callback, if provided
      */
-    public function getResult($invokeId, $timeout = null);
+    public function getResult($invokeId);
 
     /**
      * @return string

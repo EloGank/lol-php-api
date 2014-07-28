@@ -11,32 +11,27 @@
 
 namespace EloGank\Api\Component\Controller\Exception;
 
+use EloGank\Api\Server\Exception\ServerException;
+
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
  */
-class ApiException extends \RuntimeException
+class ApiException extends ServerException
 {
     /**
-     * @var array
+     * @var string
      */
-    protected $errorBody;
+    protected $cause;
 
     /**
-     * @param array $errorBody
+     * @param string $cause
+     * @param string $message
      */
-    public function __construct(array $errorBody)
+    public function __construct($cause, $message)
     {
-        $this->errorBody = $errorBody;
+        $this->cause = $cause;
 
-        parent::__construct($errorBody['message']);
-    }
-
-    /**
-     * @return array
-     */
-    public function getErrorBody()
-    {
-        return $this->errorBody;
+        parent::__construct($message);
     }
 
     /**
@@ -44,6 +39,6 @@ class ApiException extends \RuntimeException
      */
     public function getCause()
     {
-        return $this->errorBody['caused_by'];
+        return $this->cause;
     }
 }

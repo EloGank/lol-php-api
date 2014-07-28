@@ -11,7 +11,6 @@
 
 namespace EloGank\Api\Component\Routing;
 
-use EloGank\Api\Component\Controller\Exception\ApiException;
 use EloGank\Api\Component\Controller\Exception\UnknownControllerException;
 use EloGank\Api\Component\Routing\Exception\MalformedRouteException;
 use EloGank\Api\Component\Routing\Exception\MissingApiRoutesFileException;
@@ -20,6 +19,7 @@ use EloGank\Api\Component\Routing\Exception\UnknownResponseException;
 use EloGank\Api\Component\Routing\Exception\UnknownRouteException;
 use EloGank\Api\Controller\CommonController;
 use EloGank\Api\Manager\ApiManager;
+use React\Socket\Connection;
 use Symfony\Component\Yaml\Parser;
 
 /**
@@ -142,17 +142,16 @@ class Router
     }
 
     /**
-     * @param ApiManager $apiManager
-     * @param array      $data
-     *
-     * @return array
+     * @param ApiManager $apiManager The API manager
+     * @param Connection $conn       The client connection
+     * @param array      $data       The data sent by the client
      *
      * @throws MissingParametersException
      * @throws MalformedRouteException
      * @throws UnknownRouteException
      * @throws UnknownResponseException
      */
-    public function process(ApiManager $apiManager, array $data)
+    public function process(ApiManager $apiManager, Connection $conn, array $data)
     {
         $route = $data['route'];
         if (!preg_match('/^[a-zA-Z_]+\.[a-zA-Z_]+$/', $route)) {
@@ -170,28 +169,15 @@ class Router
                 ));
             }
 
-            $controller = new CommonController($apiManager, $data['region']);
+            $controller = new CommonController($apiManager, $conn, $data['region']);
 
-            try {
-                $response = call_user_func_array(array($controller, 'commonCall'), [
-                    $this->commonRoutes[$controllerName]['name'],
-                    $this->commonRoutes[$controllerName]['methods'][$methodName]['name'],
-                    $data['parameters']
-                ]);
+            call_user_func_array(array($controller, 'commonCall'), [
+                $this->commonRoutes[$controllerName]['name'],
+                $this->commonRoutes[$controllerName]['methods'][$methodName]['name'],
+                $data['parameters']
+            ]);
 
-                if (!$this->isValidResponse($response)) {
-                    throw new UnknownResponseException('Please use Controller::view() method to return a response');
-                }
-
-                return $response;
-            }
-            catch (ApiException $e)
-            {
-                return [
-                    'success' => false,
-                    'error'   => $e->getErrorBody()
-                ];
-            }
+            return;
         }
 
         // Custom routes process
@@ -207,23 +193,9 @@ class Router
         }
 
         $class = '\\EloGank\\Api\\Controller\\' . $this->customRoutes[$controllerName]['class'];
-        $controller = new $class($apiManager, $data['region']);
+        $controller = new $class($apiManager, $conn, $data['region']);
 
-        try {
-            $response = call_user_func_array(array($controller, $this->customRoutes[$controllerName]['methods'][$methodName]['name']), $data['parameters']);
-            if (!$this->isValidResponse($response)) {
-                throw new UnknownResponseException('Please use Controller::view() method to return a response');
-            }
-
-            return $response;
-        }
-        catch (ApiException $e)
-        {
-            return [
-                'success' => false,
-                'error'   => $e->getErrorBody()
-            ];
-        }
+        call_user_func_array(array($controller, $this->customRoutes[$controllerName]['methods'][$methodName]['name']), $data['parameters']);
     }
 
     /**

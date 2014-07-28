@@ -16,6 +16,7 @@ use EloGank\Api\Callback\Summoner\SummonerActiveSpellBookCallback;
 use EloGank\Api\Callback\Summoner\SummonerChampionCallback;
 use EloGank\Api\Callback\Summoner\SummonerInformationCallback;
 use EloGank\Api\Callback\Summoner\SummonerLeagueSolo5x5Callback;
+use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Controller\Controller;
 use EloGank\Api\Component\Controller\Exception\ApiException;
 
@@ -33,28 +34,49 @@ class SummonerController extends Controller
      *
      * @param string $summonerName
      *
-     * @return array
-     *
      * @throws \EloGank\Api\Component\Controller\Exception\ApiException
      * @throws \Exception
      */
     public function getSummonerExistenceAction($summonerName)
     {
-        try {
-            $this->getResult($this->getClient()->invoke('gameService', 'retrieveInProgressSpectatorGameInfo', [$summonerName]));
-        }
-        catch (ApiException $e) {
+        // Revoke all listeners to handle the case of error/success
+        $this->revokeListeners();
+
+        $this->onClientReady(function (LOLClientInterface $client) use ($summonerName) {
+            $this->fetchResult($client->invoke('gameService', 'retrieveInProgressSpectatorGameInfo', [$summonerName]));
+        });
+
+        // The player is not in game
+        $this->conn->once('api-error', function (ApiException $e) use ($summonerName) {
+            // Remove the listener when the player is in game
+            $this->conn->removeAllListeners('api-response');
+
+            // Apply revoked listener to set to send the response to the client
+            $this->applyListeners();
+
             if ('com.riotgames.platform.game.GameNotFoundException' == $e->getCause()) {
-                // Summoner found, but not currently in game, return his information
+                // Summoner exists, but not currently in game, return his information
                 if (preg_match('/No Game for player [0-9]+ was found in the system!/', $e->getMessage())) {
-                    return $this->call('summoner.summoner_by_name', [$summonerName]);
+                    $this->call('summoner.summoner_by_name', [$summonerName]);
+
+                    return;
                 }
-
-                throw $e;
             }
-        }
 
-        return $this->call('summoner.summoner_by_name', [$summonerName]);
+            // Player is not found or other error
+            $this->conn->emit('api-error', [$e]);
+        });
+
+        // The player is in game, so he has been found
+        $this->conn->once('api-response', function () use($summonerName) {
+            // Remove the listener when the player is NOT in game
+            $this->conn->removeAllListeners('api-error');
+
+            // Apply revoked listener to set to send the response to the client
+            $this->applyListeners();
+
+            $this->call('summoner.summoner_by_name', [$summonerName]);
+        });
     }
 
     /**
@@ -84,7 +106,6 @@ class SummonerController extends Controller
         'INFORMATION', 'ACTIVE_SPELLBOOK', 'ACTIVE_MASTERIES', 'LEAGUE_SOLO_5x5', 'MAIN_CHAMPION', 'CHAMPIONS_DATA'
     ])
     {
-        $invokeIds = [];
         $filtersByKey = array_flip($filters);
 
         foreach ($summonerData as $data) {
@@ -92,43 +113,57 @@ class SummonerController extends Controller
             $summonerId = $data['summonerId'];
             $summonerName = $data['summonerName'];
 
+            $formatResult = function ($result, $response) use ($summonerId) {
+                foreach ($result as $key => $value) {
+                    $response[$summonerId][$key] = $value;
+                }
+
+                return $response;
+            };
+
             if (isset($filtersByKey['INFORMATION'])) {
-                $invokeIds[$summonerId][] = $this->getClient()->invoke('summonerService', 'getSummonerByName', [$summonerName], new SummonerInformationCallback());
+                $this->onClientReady(function (LOLClientInterface $client) use ($formatResult, $summonerId, $summonerName) {
+                    $invokeId = $client->invoke('summonerService', 'getSummonerByName', [$summonerName], new SummonerInformationCallback());
+                    $this->fetchResult($invokeId, $formatResult);
+                });
             }
 
             if (isset($filtersByKey['ACTIVE_SPELLBOOK'])) {
-                $invokeIds[$summonerId][] = $this->getClient()->invoke('summonerService', 'getAllPublicSummonerDataByAccount', [$accountId], new SummonerActiveSpellBookCallback());
+                $this->onClientReady(function (LOLClientInterface $client) use ($formatResult, $summonerId, $accountId) {
+                    $invokeId = $client->invoke('summonerService', 'getAllPublicSummonerDataByAccount', [$accountId], new SummonerActiveSpellBookCallback());
+                    $this->fetchResult($invokeId, $formatResult);
+                });
             }
 
             if (isset($filtersByKey['ACTIVE_MASTERIES'])) {
-                $invokeIds[$summonerId][] = $this->getClient()->invoke('masteryBookService', 'getMasteryBook', [$summonerId], new SummonerActiveMasteriesCallback());
+                $this->onClientReady(function (LOLClientInterface $client) use ($formatResult, $summonerId) {
+                    $invokeId = $client->invoke('masteryBookService', 'getMasteryBook', [$summonerId], new SummonerActiveMasteriesCallback());
+                    $this->fetchResult($invokeId, $formatResult);
+                });
             }
 
             if (isset($filtersByKey['LEAGUE_SOLO_5x5'])) {
-                $invokeIds[$summonerId][] = $this->getClient()->invoke('leaguesServiceProxy', 'getAllLeaguesForPlayer', [$summonerId], new SummonerLeagueSolo5x5Callback([
-                    'summonerId' => $summonerId
-                ]));
+                $this->onClientReady(function (LOLClientInterface $client) use ($formatResult, $summonerId) {
+                    $invokeId = $client->invoke('leaguesServiceProxy', 'getAllLeaguesForPlayer', [$summonerId], new SummonerLeagueSolo5x5Callback([
+                        'summonerId' => $summonerId
+                    ]));
+                    $this->fetchResult($invokeId, $formatResult);
+                });
             }
 
             if (isset($filtersByKey['MAIN_CHAMPION']) || isset($filtersByKey['CHAMPIONS_DATA'])) {
-                $invokeIds[$summonerId][] = $this->getClient()->invoke('playerStatsService', 'getAggregatedStats', [$accountId, 'CLASSIC', 4], new SummonerChampionCallback([
-                    'main_champion'  => isset($filtersByKey['MAIN_CHAMPION']),
-                    'champions_data' => isset($filtersByKey['CHAMPIONS_DATA'])
-                ]));
+                $this->onClientReady(function (LOLClientInterface $client) use ($formatResult, $summonerId, $accountId, $filtersByKey) {
+                    $invokeId = $client->invoke('playerStatsService', 'getAggregatedStats', [$accountId, 'CLASSIC', 4], new SummonerChampionCallback([
+                        'main_champion'  => isset($filtersByKey['MAIN_CHAMPION']),
+                        'champions_data' => isset($filtersByKey['CHAMPIONS_DATA'])
+                    ]));
+                    $this->fetchResult($invokeId, $formatResult);
+                });
             }
         }
 
-        $results = [];
-        foreach ($invokeIds as $summonerId => $invokeIdsBySummoner) {
-            foreach ($invokeIdsBySummoner as $invokeId) {
-                $result = $this->getResult($invokeId);
-
-                foreach ($result as $key => $value) {
-                    $results[$summonerId][$key] = $value;
-                }
-            }
-        }
-
-        return $this->view(['data' => $results]);
+        $this->sendResponse(function ($response) {
+            return ['data' => $response];
+        });
     }
 }

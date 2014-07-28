@@ -11,6 +11,7 @@
 
 namespace EloGank\Api\Controller;
 
+use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Controller\Controller;
 
 /**
@@ -24,15 +25,17 @@ class CommonController extends Controller
      * @param string       $destination
      * @param string       $service
      * @param string|array $parameters
-     *
-     * @return array
      */
     public function commonCall($destination, $service, $parameters)
     {
-        return $this->view(
-            $this->getResult(
-                $this->getClient()->invoke($destination, $service, $parameters)
-            )
-        );
+        $this->onClientReady(function (LOLClientInterface $client) use ($destination, $service, $parameters) {
+            $this->fetchResult(
+                $client->invoke($destination, $service, $parameters)
+            );
+        });
+
+        $this->sendResponse(function ($response) {
+            return $response;
+        });
     }
 } 
