@@ -1,5 +1,9 @@
 # League of Legends PHP API
 
+----------
+### This version is not maintained anymore and doesn't contain the concurrent connection implementation, please switch to the "master" branch.
+----------
+
 Unofficial RTMP API fully PHP and asynchronous for League of Legends.  
 With this API you can retrieve some data about summoners in real-time directly from Riot servers.
 
