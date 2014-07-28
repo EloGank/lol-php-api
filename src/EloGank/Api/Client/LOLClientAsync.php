@@ -149,8 +149,12 @@ class LOLClientAsync implements LOLClientInterface
     /**
      * {@inheritdoc}
      */
-    public function getResult($invokeId, $timeout)
+    public function getResult($invokeId, $timeout = null)
     {
+        if (null == $timeout) {
+            $timeout = ConfigurationLoader::get('client.request.timeout');
+        }
+
         $message = $this->redis->brpop($this->getKey('client.commands.' . $invokeId), $timeout);
         if (null == $message) {
             throw new RequestTimeoutException('Request timed out, the client will reconnect', $this);
@@ -266,7 +270,7 @@ class LOLClientAsync implements LOLClientInterface
      */
     public function doHeartBeat()
     {
-        return $this->send('doHeartBeat');
+        return $this->send('getHeartBeat');
     }
 
     /**

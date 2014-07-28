@@ -497,13 +497,13 @@ class RTMPClient
     {
         $invokeId = $this->invoke($destination, $operation, $parameters, null, $packetClass, $headers, $body);
 
-        return $this->getResult($invokeId, 0)[0];
+        return $this->getResult($invokeId)[0];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getResult($invokeId, $timeout)
+    public function getResult($invokeId, $timeout = null)
     {
         if (!isset($this->responses[$invokeId])) {
             throw new \InvalidArgumentException('No result found for invokeId ' . $invokeId);
