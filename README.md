@@ -8,20 +8,20 @@ With this API you can retrieve some data about summoners in real-time directly f
 ### Features
 
 * A ready-to-use API server
-* A ready-to-use Virtual Machine
+* **A ready-to-use Virtual Machine (no manual installation)**
 * Use the powerful Symfony 2 framework components
-* Allow multi client to improve the response speed
-* Fully aynschronous (with ZeroMQ & mutli process)
+* **Allow multi LoL account to improve the response speed**
+* **Fully aynschronous (with ZeroMQ & mutli process)**
 * Multi region (EUW, NA, EUNE, BR, TR, RU, KR, LAN, LAS, OCE & PBE)
 * Anti-overload system (avoid temporary client ban when you make too many request)
 * Allow to use native RTMP API or custom API with our controllers
 * Fully logged in file, redis, and console (usefull for developpers)
 * Automatic restart when a server is busy
 * Periodic verification for client timeout
-* Automatic restart when a client timeout (due to network/server connection error for example)
-* Automatic update when client version is outdated
-* Allow mutliple output format (JSON, PHP native (serialized) and XML)
-* Allow concurrent connections (multiple connections at the same time)
+* **Automatic restart when a client timeout (due to network/server connection error for example)**
+* **Automatic update when client version is outdated**
+* **Allow mutliple output format (JSON, PHP native (serialized) and XML)**
+* **Allow concurrent connections (multiple connections at the same time, using ReactPHP)**
 * Allow to bind the server to a specific IP address (allow-only)
 * Easy to override
 
