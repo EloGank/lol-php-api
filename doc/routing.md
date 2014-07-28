@@ -33,7 +33,7 @@ summoner :
   - summoner_internal_name_by_name :            [summonerName]
   - summoner_names :                            [summonerIds[]]
   - summoner_existence :                        [summonerName]
-  - all_summoner_data :                         [accountId, summonerId]
+  - all_summoner_data :                         [summonerData[], fetchers[]]
 player_stats :
   - aggregated_stats :                          [accountId, gameMode (CLASSIC, ODIN, ARAM), seasonId (1-4)]
   - recent_games :                              [accountId]

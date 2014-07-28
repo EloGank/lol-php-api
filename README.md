@@ -21,6 +21,7 @@ With this API you can retrieve some data about summoners in real-time directly f
 * Automatic restart when a client timeout (due to network/server connection error for example)
 * Automatic update when client version is outdated
 * Allow mutliple output format (JSON, PHP native (serialized) and XML)
+* Allow concurrent connections (multiple connections at the same time)
 * Allow to bind the server to a specific IP address (allow-only)
 * Easy to override
 

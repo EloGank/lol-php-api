@@ -73,6 +73,18 @@ Example, for your first asynchronous client :
     
 ### Implement your own API route
 
+#### The workflow
+
+Before starting, you need to understand that the API works with an event-driven workflow. There is no blocking statement, only [ReactPHP](https://github.com/reactphp/react) loop. This loop provides some methods to create periodic timed callbacks.  
+For more information, take a look on the official [ReactPHP Github](https://github.com/reactphp/react) or directly in the [src/EloGank/Api/Component/Controller/Controller.php](../src/EloGank/Api/Component/Controller/Controller.php).
+
+**There are two main events :**
+
+* `api-response` : when the API response is emitted to the client
+* `api-error` : when an API exception is emitted to the client and processed by the server
+
+#### The code
+
 First, you need to choice what is the main object of the API request : summoner, league, player_stats, etc.  
 Then, create (if not already exists) the controller in the `src/EloGank/Api/Controller` directory, for example `SummonerController` :
 
@@ -101,14 +113,23 @@ Finally, implement your method. The method name must ending by `Action`, example
 // Method parameters are automaticly added as API route parameters in the "elogank:router:dump" command
 public function getSomeDataAction($myParameter, $mySecondParameter)
 {
-    // Invoke id is used to retrieve result later. A call can have an optional callback to format/process the call result
-    $invokeId = $this->getClient()->invoke('summonerService', 'getSomeData', [$myParameter, $mySecondParameter], function ($result) {
-        var_dump('my callback');
-
-        return $result;
+    // Invoke id is used to retrieve result later. A call can have an optional callback to format/process the result
+    $this->onClientReady(function (LOLClientInterface $client) use ($myParameter, $mySecondParameter) {
+        // Note that $myParameter & $mySecondParameter are added to the "use" statement above
+        // Without that, we can't use them in this callback
+        $this->fetchResult($client->invoke('summonerService', 'getSomeData', [$myParameter, $mySecondParameter], function ($result) {
+            var_dump('my callback');
+            
+            return $myInvokeResult;
+        }));
     });
     
-    return $this->view($this->getResult($invokeId));
+    // sendResponse() has only one optional parameter, a callback to format the response
+    $this->sendResponse(function ($myControllerResponse) {
+        // In the case where we have more than one invoke, "$myControllerResponse" will be an indexed array of invoke results.
+        // If we have only one invoke (like in this example), it will be the invoke result (an associative array of data)
+        var_dump($myControllerResponse);
+    });
 }
 ```
 
@@ -158,12 +179,14 @@ class SummonerActiveMasteriesCallback extends Callback
 
 public function getSomeDataAction($myParameter, $mySecondParameter)
 {
-    // Invoke id is used to retrieve result later. A call can have an optional callback to format/process the call result
-    $invokeId = $this->getClient()->invoke('summonerService', 'getSomeData', [$myParameter, $mySecondParameter], new MyClassCallback([
-    'my_option' => 'foo bar'    
-]));
+    // MyClassCallback::getResult() will be automatically called by the Controller class
+    $this->onClientReady(function (LOLClientInterface $client) use ($myParameter) {
+        $this->fetchResult($client->invoke('summonerService', 'getSomeData', [$myParameter], new MyClassCallback([
+            'my_option' => 'foo bar'
+        ])));
+    });
     
-    return $this->view($this->getResult($invokeId));
+    $this->sendResponse();
 }
 ```
 
