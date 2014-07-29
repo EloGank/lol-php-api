@@ -317,12 +317,11 @@ class ApiManager
             foreach ($clientsByRegion as $client) {
                 $invokeId = $client->doHeartBeat();
 
-                $this->loop->addPeriodicTimer(0.001, function (TimerInterface $timer) use ($client, &$invokeId, &$timedOut, $clientTimeout) {
+                $this->loop->addPeriodicTimer(0.01, function (TimerInterface $timer) use ($client, $invokeId, $timedOut, $clientTimeout) {
                     if (time() > $timedOut) {
                         $client->reconnect();
-                        $invokeId = $client->doHeartBeat();
-
-                        $timedOut = time() + $clientTimeout;
+                        $timer->cancel();
+                        
                         return;
                     }
 
