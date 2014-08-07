@@ -38,6 +38,18 @@ make
 make install
 ```
 
+If you have uBuntu 14.04 TLS or an error `WARNING: bison versions supported for regeneration of the Zend/PHP parsers: 2.4 2.4.1 2.4.2 2.4.3 2.5 2.5.1 2.6 2.6.1 2.6.2 2.6.3 2.6.4 2.6.5 2.7 (found: 3.0).`, just download the last package from links below and install them with dpkg (see below).
+
+ * libbison-dev : http://packages.ubuntu.com/saucy/libbison-dev
+ * bison : http://packages.ubuntu.com/saucy/bison
+
+``` bash
+wget http://launchpadlibrarian.net/140087283/libbison-dev_2.7.1.dfsg-1_amd64.deb
+wget http://launchpadlibrarian.net/140087282/bison_2.7.1.dfsg-1_amd64.deb
+dpkg -i libbison-dev_2.7.1.dfsg-1_amd64.deb
+dpkg -i bison_2.7.1.dfsg-1_amd64.deb
+```
+
 #### Settings
 
 You can change your timezone by editing the second line : replace `UTC` by your current timezone, like `Europe/Paris`.
