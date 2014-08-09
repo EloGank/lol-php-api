@@ -46,6 +46,8 @@ class SummonerController extends Controller
             $this->fetchResult($client->invoke('gameService', 'retrieveInProgressSpectatorGameInfo', [$summonerName]));
         });
 
+        $this->sendResponse();
+
         // The player is not in game
         $this->conn->once('api-error', function (ApiException $e) use ($summonerName) {
             // Remove the listener when the player is in game
@@ -68,7 +70,7 @@ class SummonerController extends Controller
         });
 
         // The player is in game, so he has been found
-        $this->conn->once('api-response', function () use($summonerName) {
+        $this->conn->once('api-response', function () use ($summonerName) {
             // Remove the listener when the player is NOT in game
             $this->conn->removeAllListeners('api-error');
 
