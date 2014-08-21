@@ -42,7 +42,8 @@ class SummonerChampionCallback extends Callback
             $mainChampionId = null;
 
             foreach ($result['lifetimeStatistics'] as $championData) {
-                if ('TOTAL_SESSIONS_PLAYED' == $championData['statType'] && $championData['value'] > $totalPlayedSession) {
+                if (0 != $championData['championId'] && 'TOTAL_SESSIONS_PLAYED' == $championData['statType'] && $championData['value'] > $totalPlayedSession) {
+                    $totalPlayedSession = $championData['value'];
                     $mainChampionId = $championData['championId'];
                 }
             }
