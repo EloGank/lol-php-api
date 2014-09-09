@@ -54,6 +54,7 @@ game :
   - retrieve_in_progress_spectator_game_info :  [summonerName]
 leagues :
   - all_leagues_for_player :                    [summonerId]
+  - challenger_league :                         [queueName (RANKED_SOLO_5x5, RANKED_TEAM_5x5, RANKED_TEAM_3x3)]
 login :
   - store_url :                                 []
 ```
@@ -118,6 +119,7 @@ Please, refer to the [caching documentation](./caching.md) to learn how to cache
 
 #### Leagues
 * `all_leagues_for_player` : returns all information about the summoner leagues.
+* `challenger_league` : returns all information about the summoner leagues in challenger tier for the given queue name (RANKED_SOLO_5x5, RANKED_TEAM_5x5 or RANKED_TEAM3x3).
 
 #### Login
 * `store_url` : returns the full store URL with the authentication token.
