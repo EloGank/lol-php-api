@@ -1,3 +1,5 @@
+# Since the October 1st 2014, a custom API is not allowed by the League of Legend's Terms of Use (and maybe don't work anymore). Use the official API instead : https://developer.riotgames.com
+
 # League of Legends PHP API
 
 Unofficial RTMP API fully PHP and asynchronous for League of Legends.  
