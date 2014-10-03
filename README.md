@@ -1,6 +1,6 @@
 ## Since the October 1st 2014, a custom API is not allowed by the League of Legend's Terms of Use. Use the official API instead : https://developer.riotgames.com
 
-### This repository may doesn't work (cannot connect to Riot servers), but it still exists for teaching purpose (Asynchronous PHP implementation for example).
+### This repository may doesn't work (cannot connect to Riot servers), but it still exists for teaching purpose (asynchronous PHP implementation for example).
 
 ------------------------------
 
