@@ -66,6 +66,10 @@ Be aware that only one API/person can be connected at the same time with the sam
 
 Please, **do not use the route** `summoner.summoner_by_name` **to check a summoner existence**, it causes timeout issue with the overloaded system when the sumomner is not found (because the response body is empty), **use** `summoner.player_existence` **instead**, which return the same information and, in general, **be sure of the existence of your summoner before calling another route**.
 
+## Related projects
+
+* [LoL Replay Downloader](https://github.com/EloGank/lol-replay-downloader)
+
 ## TODO
 
 * Add information about `supervisor`
