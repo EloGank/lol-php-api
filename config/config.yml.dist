@@ -56,8 +56,8 @@ config:
       servers:
         NA:
           name:       North America
-          server:     prod.na1.lol.riotgames.com
-          loginQueue: lq.na1.lol.riotgames.com
+          server:     prod.na2.lol.riotgames.com
+          loginQueue: lq.na2.lol.riotgames.com
         EUW:
           name:       Europe West
           server:     prod.euw1.lol.riotgames.com
