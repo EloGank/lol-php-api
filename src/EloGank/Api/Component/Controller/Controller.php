@@ -176,14 +176,16 @@ abstract class Controller
                 catch (ClientOverloadException $e) {
                     if ($bypassOverload) {
                         $this->results[] = []; // empty response
+
+                        $this->responseCount++;
                         $timer->cancel();
+                    } else {
+                        // Flag client as overloaded & retry
+                        $client->setIsOverloaded();
+                        $timer->cancel();
+
+                        $this->fetchResult($invokeId, $resultsCallback, $timeout, $bypassOverload);
                     }
-
-                    // Flag client as overloaded & retry
-                    $client->setIsOverloaded();
-                    $timer->cancel();
-
-                    $this->fetchResult($invokeId, $resultsCallback, $timeout, $bypassOverload);
                 }
             });
         });
