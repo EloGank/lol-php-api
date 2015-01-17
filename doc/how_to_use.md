@@ -194,10 +194,6 @@ public function getSomeDataAction($myParameter, $mySecondParameter)
 Now, run the elogank:router:dump command to see your new API route.  
 If you want to know about the make asynchronous calls in a same controller method, see the [GameController::getAllSummonerDataCurrentGameAction()](../src/EloGank/Api/Controller/GameController.php) method.
 
-### Important note
-
-Please, **do not use the route** `summoner.summoner_by_name` **to check a summoner existence**, it causes timeout issue with the overloaded system when the sumomner is not found (because the response body is empty), **use** `summoner.player_existence` **instead**, which return the same information and, in general, **be sure of the existence of your summoner before calling another route**.
-    
 ### Next
 
 Before using this API, you must know how works the routing component through the [routing documentation](./routing.md).

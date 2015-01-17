@@ -32,7 +32,6 @@ summoner :
   - all_public_summoner_data_by_account :       [accountId]
   - summoner_internal_name_by_name :            [summonerName]
   - summoner_names :                            [summonerIds[]]
-  - summoner_existence :                        [summonerName]
   - all_summoner_data :                         [summonerData[], fetchers[]]
 player_stats :
   - aggregated_stats :                          [accountId, gameMode (CLASSIC, ODIN, ARAM), seasonId (1-4)]
@@ -83,13 +82,11 @@ Please, refer to the [caching documentation](./caching.md) to learn how to cache
 **Note :** there might be some missing errors declaration in this documentation. By the way, all routes might return an error : **you must handle this case**.
 
 #### Summoner
-* `summoner_by_name` : **must be avoided**, please use `summoner.summoner_existence` instead, with return the same information, but without possible error.
+* `summoner_by_name` : returns if the player exists or not. **If the player doesn't exist, a `NULL` response is returned**.
 * `all_summoner_data_by_account` : returns only spellbooks & masteries **main** information.
 * `all_public_summoner_data_by_account` : returns spellbooks **full** information AND all summoner spells used in all game modes.
 * `summoner_internal_name_by_name` : returns the summoner internal name. Maybe a formatted summoner name, used by Riot.
 * `summoner_names` : returns all summoner names for the selected summoner IDs.
-* `summoner_existence` : *(custom route)* returns if the player exists or not. If the player doesn't exist, an error is returned.
-    * Error `com.riotgames.platform.game.GameNotFoundException` : when the summoner is not found.
 * `all_summoner_data` : *(custom route)* returns all the main data about a summoner *(spellbooks, masteries, main champion & ranked 5x5 solo league)*. See method documentation in [SummonerController.php](/src/EloGank/Api/Controller/SummonerController.php) for more information.
 
 #### Player Stats
@@ -114,8 +111,7 @@ Please, refer to the [caching documentation](./caching.md) to learn how to cache
 * `summoner_icon_inventory` : returns all information about the available summoner icons for a selected summoner.
 
 #### Game
-* `retrieve_in_progress_spectator_game_info` : returns all information about the current game for a selected summoner.
-    * Error `com.riotgames.platform.game.GameNotFoundException` the selected summoner is not in game **OR** the selected summoner is not found.
+* `retrieve_in_progress_spectator_game_info` : returns all information about the current game for a selected summoner. **If the player doesn't exist or isn't in a game, a `NULL` response is returned**.
 
 #### Leagues
 * `all_leagues_for_player` : returns all information about the summoner leagues.

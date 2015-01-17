@@ -18,7 +18,6 @@ use EloGank\Api\Callback\Summoner\SummonerInformationCallback;
 use EloGank\Api\Callback\Summoner\SummonerLeagueSolo5x5Callback;
 use EloGank\Api\Client\LOLClientInterface;
 use EloGank\Api\Component\Controller\Controller;
-use EloGank\Api\Component\Controller\Exception\ApiException;
 
 /**
  * @author Sylvain Lorinet <sylvain.lorinet@gmail.com>
@@ -32,53 +31,21 @@ class SummonerController extends Controller
      * "game.retrieve_in_progress_spectator_game" and errors which return the accountId when the player exists and<br />
      * a specific error when the player is not found.
      *
+     * NOTE: in the patch 5.1, the "game.retrieve_in_progress_spectator_game" route doesn't throw exception anymore but
+     * a "NULL" response body.
+     *
      * @param string $summonerName
+     *
+     * @return array
      *
      * @throws \EloGank\Api\Component\Controller\Exception\ApiException
      * @throws \Exception
+     *
+     * @deprecated Use "summoner.summoner_by_name" route instead
      */
     public function getSummonerExistenceAction($summonerName)
     {
-        // Revoke all listeners to handle the case of error/success
-        $this->revokeListeners();
-
-        $this->onClientReady(function (LOLClientInterface $client) use ($summonerName) {
-            $this->fetchResult($client->invoke('gameService', 'retrieveInProgressSpectatorGameInfo', [$summonerName]));
-        });
-
-        $this->sendResponse();
-
-        // The player is not in game
-        $this->conn->once('api-error', function (ApiException $e) use ($summonerName) {
-            // Remove the listener when the player is in game
-            $this->conn->removeAllListeners('api-response');
-
-            // Apply revoked listener to set to send the response to the client
-            $this->applyListeners();
-
-            if ('com.riotgames.platform.game.GameNotFoundException' == $e->getCause()) {
-                // Summoner exists, but not currently in game, return his information
-                if (preg_match('/No Game for player [0-9]+ was found in the system!/', $e->getMessage())) {
-                    $this->call('summoner.summoner_by_name', [$summonerName]);
-
-                    return;
-                }
-            }
-
-            // Player is not found or other error
-            $this->conn->emit('api-error', [$e]);
-        });
-
-        // The player is in game, so he has been found
-        $this->conn->once('api-response', function () use ($summonerName) {
-            // Remove the listener when the player is NOT in game
-            $this->conn->removeAllListeners('api-error');
-
-            // Apply revoked listener to set to send the response to the client
-            $this->applyListeners();
-
-            $this->call('summoner.summoner_by_name', [$summonerName]);
-        });
+        return $this->call('summoner.summoner_by_name', [$summonerName]);
     }
 
     /**

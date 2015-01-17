@@ -64,16 +64,13 @@ Here, the main titles :
 Use a **development account** for your tests, and **not your real live game account**.  
 Be aware that only one API/person can be connected at the same time with the same account. If you have production server and development server, use two distinct accounts.
 
-Please, **do not use the route** `summoner.summoner_by_name` **to check a summoner existence**, it causes timeout issue with the overloaded system when the sumomner is not found (because the response body is empty), **use** `summoner.player_existence` **instead**, which return the same information and, in general, **be sure of the existence of your summoner before calling another route**.
-
 ## Related projects
 
 * [LoL Replay Downloader](https://github.com/EloGank/lol-replay-downloader)
 
-## TODO
 
-* Add information about `supervisor`
-* Unit tests
+## Known issues
+
 * Fix issue on SIGINT signal (CTRL + C) (ReactPHP issue : https://github.com/reactphp/react/issues/296)
 
 ## Reporting an issue or a feature request
